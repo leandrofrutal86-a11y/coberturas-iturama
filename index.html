@@ -684,6 +684,70 @@ main{max-width:920px;margin:auto;padding:16px}.box{background:white;border-radiu
   }
 }
 </style>
+
+<style>
+/* RETORNÁVEIS — correção para celular:
+   no mobile os preços saem de cima da imagem e passam para baixo dela. */
+@media (max-width: 700px) {
+  #materiais .returnableGroup {
+    position: relative !important;
+    display: block !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+  }
+
+  #materiais .returnableGroup > img {
+    position: relative !important;
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    margin: 0 auto !important;
+    object-fit: contain !important;
+  }
+
+  #materiais .returnableGroup .returnablePrices {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    width: calc(100% - 12px) !important;
+    box-sizing: border-box !important;
+    margin: 10px auto 0 !important;
+    padding: 7px !important;
+    background: #fff !important;
+    border-radius: 12px !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,.10) !important;
+  }
+
+  #materiais .returnableGroup .priceGrid {
+    grid-template-columns: 1fr !important;
+    gap: 7px !important;
+  }
+
+  #materiais .returnableGroup .priceBlock {
+    padding: 9px !important;
+  }
+
+  #materiais .returnableGroup .priceTitle {
+    font-size: 15px !important;
+  }
+
+  #materiais .returnableGroup .priceLine {
+    grid-template-columns: 58px 1fr !important;
+    font-size: 13px !important;
+    padding: 6px 0 !important;
+  }
+}
+
+/* Em telas médias, evita que o painel ultrapasse a área da imagem. */
+@media (min-width: 701px) and (max-width: 900px) {
+  #materiais .returnableGroup .returnablePrices {
+    left: 5% !important;
+    right: 5% !important;
+  }
+}
+</style>
 </head>
 <body>
 <header><div class="head"><div class="brand">COBERTURAS • EQUIPE ITURAMA<small>Acompanhamento de metas e clientes realizados</small></div>
