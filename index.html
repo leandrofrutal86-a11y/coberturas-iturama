@@ -455,6 +455,7 @@ main{max-width:920px;margin:auto;padding:16px}.box{background:white;border-radiu
 }
 </style>
 <style>
+#imperdoaveisPanel{display:none !important;}
 #imperdoaveisStatus{font-weight:900}
 .imperdoaveisPanel .impNotice{line-height:1.45}
 </style>
@@ -875,9 +876,7 @@ DATA.consultores.forEach(c=>{
   DATA.metas[c.rota+"|ESTRELLA ORIGINAL"]=10;
   DATA.metas[c.rota+"|ESTRELLA RGB"]=3;
 });
-function openImperdoaveisFiltered(){
-  window.open('https://imperdoaveis-urla.pages.dev/','_blank','noopener,noreferrer');
-}
+function openImperdoaveisFiltered(){window.open('https://imperdoaveis-urla.pages.dev/','_blank','noopener,noreferrer');}
 const qs=s=>document.querySelector(s);
 
 const ESTRELLA_VENDAS = [{"cliente":"1452227","rota":"8C1","razao":"65.926.894 DIANA PAULA DE ALMEIDA S","material":"1893","marca":"ESTRELLA GALICIA","descricao":"ESTRELLA GALICIA 0,0 LT 330 ML 6x1"},{"cliente":"1439894","rota":"8C1","razao":"ANA LUCIA DE CASTRO OLIVEIRA ME","material":"1893","marca":"ESTRELLA GALICIA","descricao":"ESTRELLA GALICIA 0,0 LT 330 ML 6x1"},{"cliente":"1439900","rota":"8A1","razao":"AUTO POSTO KAJUBI LTDA","material":"1893","marca":"ESTRELLA GALICIA","descricao":"ESTRELLA GALICIA 0,0 LT 330 ML 6x1"},{"cliente":"1439900","rota":"8A1","razao":"AUTO POSTO KAJUBI LTDA","material":"1893","marca":"ESTRELLA GALICIA","descricao":"ESTRELLA GALICIA 0,0 LT 330 ML 6x1"},{"cliente":"1439860","rota":"8B1","razao":"COMERCIAL 2000 LTDA","material":"8140","marca":"ESTRELLA GALICIA","descricao":"ESTRELLA GALICIA 0,0 LN TOSTAD 330ML 6x1"},{"cliente":"1439821","rota":"8C1","razao":"EUDES PEREIRA BARROS MERCEARIAS","material":"1885","marca":"ESTRELLA GALICIA","descricao":"ESTRELLA GALICIA LATA 350ML 12X1"},{"cliente":"1439961","rota":"8A1","razao":"GENEBALDO ALVES DO CARMO","material":"1893","marca":"ESTRELLA GALICIA","descricao":"ESTRELLA GALICIA 0,0 LT 330 ML 6x1"},{"cliente":"1439720","rota":"8D1","razao":"JONAS SEBASTIAO DE SOUZA FILHO","material":"1885","marca":"ESTRELLA GALICIA","descricao":"ESTRELLA GALICIA LATA 350ML 12X1"},{"cliente":"1439810","rota":"8A1","razao":"MINI MERCADO 3 IRMAOS LTDA","material":"1893","marca":"ESTRELLA GALICIA","descricao":"ESTRELLA GALICIA 0,0 LT 330 ML 6x1"},{"cliente":"1439810","rota":"8A1","razao":"MINI MERCADO 3 IRMAOS LTDA","material":"8138","marca":"ESTRELLA GALICIA","descricao":"ESTRELLA GALICIA 0,0 LN 330 ML 6x1"},{"cliente":"1439737","rota":"8C1","razao":"RDE JLONGO E CIA LTDA 99645089","material":"1885","marca":"ESTRELLA GALICIA","descricao":"ESTRELLA GALICIA LATA 350ML 12X1"},{"cliente":"1439986","rota":"8D1","razao":"SEBASTIAO BELARMINO DE OLIVEIRA","material":"1885","marca":"ESTRELLA GALICIA","descricao":"ESTRELLA GALICIA LATA 350ML 12X1"},{"cliente":"1439816","rota":"8C1","razao":"SERGIO BAPTISTA DE MELO","material":"1885","marca":"ESTRELLA GALICIA","descricao":"ESTRELLA GALICIA LATA 350ML 12X1"},{"cliente":"1444247","rota":"8A1","razao":"SUPERMERCADO E ATACADO 3 IRMAOS LTD","material":"1893","marca":"ESTRELLA GALICIA","descricao":"ESTRELLA GALICIA 0,0 LT 330 ML 6x1"},{"cliente":"1444247","rota":"8A1","razao":"SUPERMERCADO E ATACADO 3 IRMAOS LTD","material":"8138","marca":"ESTRELLA GALICIA","descricao":"ESTRELLA GALICIA 0,0 LN 330 ML 6x1"},{"cliente":"1444247","rota":"8A1","razao":"SUPERMERCADO E ATACADO 3 IRMAOS LTD","material":"1893","marca":"ESTRELLA GALICIA","descricao":"ESTRELLA GALICIA 0,0 LT 330 ML 6x1"},{"cliente":"1440230","rota":"8A1","razao":"SUPERMERCADO E ATACADO 3 IRMAOS LTD","material":"1893","marca":"ESTRELLA GALICIA","descricao":"ESTRELLA GALICIA 0,0 LT 330 ML 6x1"},{"cliente":"1440156","rota":"8A1","razao":"SUPERMERCADO E ATACADO 3 IRMAOS LTD","material":"1893","marca":"ESTRELLA GALICIA","descricao":"ESTRELLA GALICIA 0,0 LT 330 ML 6x1"},{"cliente":"1440084","rota":"8F1","razao":"SUPERMERCADO JB DE FRUTAL LTDA","material":"1893","marca":"ESTRELLA GALICIA","descricao":"ESTRELLA GALICIA 0,0 LT 330 ML 6x1"},{"cliente":"1439873","rota":"8F1","razao":"VIP CONVENIENCIA 24 HRS LTDA","material":"8140","marca":"ESTRELLA GALICIA","descricao":"ESTRELLA GALICIA 0,0 LN TOSTAD 330ML 6x1"}];
@@ -1132,7 +1131,6 @@ function searchPV(){
   result.style.display="block";
   msg.style.color="#198754";
   msg.textContent=`Cliente encontrado: ${base.razao||"Razão Social não informada"}`;
-  consultImperdoaveis(pv);
   window.scrollTo({top:0,behavior:"smooth"});
 }
 
