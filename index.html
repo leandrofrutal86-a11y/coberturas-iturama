@@ -749,8 +749,36 @@ main{max-width:920px;margin:auto;padding:16px}.box{background:white;border-radiu
   }
 }
 </style>
-<style id="baseUpdateStampStyle">#baseUpdateStamp{position:fixed;top:76px;left:14px;right:auto;z-index:9999;background:rgba(0,0,0,.78);color:#fff;padding:7px 11px;border-radius:10px;font:700 12px/1.2 Arial,sans-serif;box-shadow:0 2px 8px rgba(0,0,0,.18);white-space:nowrap}@media(max-width:600px){#baseUpdateStamp{top:64px;left:7px;right:auto;font-size:10px;padding:6px 8px}}</style></head>
-<body><div id="baseUpdateStamp">Base atualizada em 27/08/2026 às 17:23</div>
+<style id="baseUpdateStampStyle">
+#baseUpdateStamp{
+  position:relative;
+  top:auto;
+  left:auto;
+  right:auto;
+  z-index:1;
+  display:block;
+  width:fit-content;
+  max-width:calc(100% - 28px);
+  margin:8px 14px 0;
+  box-sizing:border-box;
+  background:rgba(0,0,0,.78);
+  color:#fff;
+  padding:7px 11px;
+  border-radius:10px;
+  font:700 12px/1.2 Arial,sans-serif;
+  box-shadow:0 2px 8px rgba(0,0,0,.18);
+  white-space:normal;
+}
+@media(max-width:600px){
+  #baseUpdateStamp{
+    margin:7px 7px 0;
+    max-width:calc(100% - 14px);
+    font-size:10px;
+    padding:6px 8px;
+  }
+}
+</style></head>
+<body>
 <header><div class="head"><div class="brand">COBERTURAS • EQUIPE ITURAMA<small>Acompanhamento de metas e clientes realizados</small></div>
 <div class="headActions">
 <button class="quickBtn" onclick="openImperdoaveisFiltered()" type="button">Imperdoáveis</button>
@@ -759,6 +787,7 @@ main{max-width:920px;margin:auto;padding:16px}.box{background:white;border-radiu
 <a class="quickBtn" href="#materiais" onclick="showMateriais(); return false;">Materiais de Apoio</a>
 <button class="quickBtn" onclick="openTelefones()" type="button">Telefones Úteis</button>
 </div></div></header>
+<div id="baseUpdateStamp">Base atualizada em 27/08/2026 às 17:23</div>
 <main>
 <div class="filters">
 <div class="field"><label>Rota / Consultor</label><select id="consultor"></select></div>
