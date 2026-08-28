@@ -1184,6 +1184,16 @@ a[class*="red"]{
 </style>
 
 <style id="teamShortagePopupStyle">.team-shortage{margin:14px auto 4px;padding:12px 15px;text-align:left;border-radius:10px;background:rgba(255,255,255,.96);color:#222;border:1px solid rgba(0,0,0,.16);box-shadow:0 3px 8px rgba(0,0,0,.14);font-size:14px;line-height:1.45}.team-shortage-title{font-weight:900;color:#c90000;margin-bottom:5px}.team-shortage strong{font-weight:900}.team-shortage span{font-size:12px;color:#666}@media(max-width:600px){.team-shortage{font-size:13px;padding:10px 12px;line-height:1.38}.team-shortage span{font-size:11px}}</style>
+<style id="restanteOverviewStyle">
+.overviewMatrix .restanteRow td{font-weight:900;}
+.overviewMatrix .restanteRow{border-top:2px solid #1d2935;}
+.overviewMatrix .restanteCell{padding:10px 7px;text-align:center;font-weight:950;border-left:1px solid #d8e0e7;}
+.overviewMatrix .restantePositive{background:#fff3cd;color:#b35b00;}
+.overviewMatrix .restanteZero{background:#e8f7ee;color:#087443;}
+.overviewMatrix .restanteTotalCell{background:#fff0d8;color:#b35b00;font-size:1.05em;}
+.overviewMatrix .restantePercentCell{background:#f1f3f5;color:#555;}
+@media(max-width:800px){.overviewMatrix .restanteCell{padding:9px 5px;font-size:13px;}}
+</style>
 </head>
 <body>
 <div id="fechamentoPopupOverlay" role="dialog" aria-modal="true" aria-label="Aviso de fechamento">
@@ -1422,7 +1432,22 @@ function showOverview(){
    <td class="percentCell equipeCell"><b>${Math.round(equipePct*100)}%</b><div class="miniProgress"><i style="width:${Math.min(equipePct*100,100)}%"></i></div></td>
  </tr>`;
 
- body.innerHTML=consultorRows + equipeRow;
+ // Linha adicional: restante da equipe = Meta - Realizado por categoria.
+ // Cada célula ocupa exatamente a largura combinada de Meta + Real.
+ const restanteCells = cats.map(cat=>{
+   const x=equipe[cat];
+   const restante=Math.max(x.meta-x.realizado,0);
+   return `<td colspan="2" class="restanteCell ${restante===0 ? "restanteZero" : "restantePositive"}">${fmt(restante)}</td>`;
+ }).join("");
+ const restanteTotal=Math.max(equipeMetaTotal-equipeRealTotal,0);
+ const restanteRow = `<tr class="restanteRow">
+   <td class="consultorCell"><div><b>RESTANTE</b><small>Meta − Realizado</small></div></td>
+   ${restanteCells}
+   <td colspan="2" class="restanteCell restanteTotalCell">${fmt(restanteTotal)}</td>
+   <td class="percentCell restantePercentCell">—</td>
+ </tr>`;
+
+ body.innerHTML=consultorRows + equipeRow + restanteRow;
  window.scrollTo({top:0,behavior:"smooth"});
 }
 function showMain(){
