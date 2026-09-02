@@ -1448,7 +1448,7 @@ function buildAdmin(){
 function saveMetas(){document.querySelectorAll("#adminGrid input").forEach(i=>customMetas[i.dataset.key]=Number(i.value));localStorage.setItem("iturama_metas",JSON.stringify(customMetas));alert("Metas salvas neste navegador.");render()}
 function closeAdmin(){qs("#adminPanel").classList.remove("open")}
 init();
-\n\n</script>
+</script>
 <script>
 document.addEventListener("DOMContentLoaded",()=>{
   const dots=document.getElementById("admDotsButton");
@@ -1814,6 +1814,8 @@ function showCopied(button){
 }
 </script>
 <div id="leandroWatermark">Desenvolvido por Leandro</div>
+
+
 <!-- SUPABASE ONLINE SYNC V1 -->
 <script src="./supabase-online.js"></script>
 </body></html>
