@@ -17,24 +17,25 @@ jobs:
       - name: Baixar projeto
         uses: actions/checkout@v4
 
-      - name: Inserir script de sincronização
+      - name: Inserir script de sincronização e corrigir ADM
         shell: python
         run: |
           from pathlib import Path
-          import re
 
           path = Path('index.html')
           text = path.read_text(encoding='utf-8')
           marker = '<!-- SUPABASE ONLINE SYNC V1 -->'
 
-          # Remove eventual versão anterior, inclusive a primeira versão que foi
-          # inserida dentro do bloco <script> por engano.
+          # Remove eventual versão anterior do bloco de sincronização.
           pos = text.find(marker)
           if pos >= 0:
               end = text.find('</script>', pos)
               if end >= 0:
                   end += len('</script>')
                   text = text[:pos] + text[end:]
+
+          # Corrige a sequência literal que estava dentro do primeiro bloco JS.
+          text = text.replace('\n\\n\\n</script>', '\n</script>')
 
           # Garante que o script externo seja carregado uma única vez, no fim do body.
           tag = '<script src="./supabase-online.js"></script>'
@@ -44,6 +45,22 @@ jobs:
               raise SystemExit('</body> não encontrado')
           text = text[:body_end] + '\n' + marker + '\n' + tag + '\n' + text[body_end:]
           path.write_text(text, encoding='utf-8')
+
+      - name: Validar JavaScript principal
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+          text = Path('index.html').read_text(encoding='utf-8')
+          scripts = re.findall(r'<script(?![^>]*\bsrc=)[^>]*>(.*?)</script>', text, flags=re.I|re.S)
+          main = scripts[0]
+          if '\\n\\n</script>' in main:
+              raise SystemExit('Ainda existe sequência literal inválida no JavaScript principal')
+          Path('/tmp/main.js').write_text(main, encoding='utf-8')
+
+      - name: Verificar sintaxe
+        shell: bash
+        run: node --check /tmp/main.js
 
       - name: Publicar alteração
         shell: bash
@@ -55,5 +72,5 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add index.html
-          git commit -m 'Conectar site à base online do Supabase'
+          git commit -m 'Corrigir JavaScript do acesso ADM'
           git push
