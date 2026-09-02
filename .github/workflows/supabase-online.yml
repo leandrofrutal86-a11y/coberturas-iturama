@@ -1,9 +1,10 @@
-name: Conectar site ao Supabase
+name: Integrar Supabase ao site
 
 on:
   push:
     paths:
       - '.github/workflows/supabase-online.yml'
+      - 'supabase-online.js'
   workflow_dispatch:
 
 permissions:
@@ -16,27 +17,33 @@ jobs:
       - name: Baixar projeto
         uses: actions/checkout@v4
 
-      - name: Integrar leitura online do Supabase
+      - name: Inserir script de sincronização
         shell: python
         run: |
           from pathlib import Path
+          import re
 
           path = Path('index.html')
           text = path.read_text(encoding='utf-8')
           marker = '<!-- SUPABASE ONLINE SYNC V1 -->'
 
-          if marker not in text:
-              data_pos = text.find('const DATA')
-              if data_pos < 0:
-                  raise SystemExit('const DATA não encontrado no index.html')
+          # Remove eventual versão anterior, inclusive a primeira versão que foi
+          # inserida dentro do bloco <script> por engano.
+          pos = text.find(marker)
+          if pos >= 0:
+              end = text.find('</script>', pos)
+              if end >= 0:
+                  end += len('</script>')
+                  text = text[:pos] + text[end:]
 
-              script_end = text.find('</script>', data_pos)
-              if script_end < 0:
-                  raise SystemExit('Fechamento do script da DATA não encontrado')
-
-              code = r'''\n<!-- SUPABASE ONLINE SYNC V1 -->\n<script>\n(async()=>{\n  try{\n    const SUPABASE_URL='https://harlrfhukjvhpufwhtep.supabase.co';\n    const SUPABASE_KEY='sb_publishable_gxhN7WK6y9j_m3TJwGDHNw_x_lszXgO';\n    const headers={apikey:SUPABASE_KEY};\n    const load=async(from,to)=>{\n      const r=await fetch(`${SUPABASE_URL}/rest/v1/vendas?select=cliente,rota,razao,material,marca,descricao,subcanal,data_nota_fiscal,origem&order=id.asc`,{headers:{...headers,Range:`${from}-${to}`}});\n      if(!r.ok) throw new Error(`Supabase HTTP ${r.status}`);\n      return await r.json();\n    };\n    const all=[...await load(0,999),...await load(1000,1999)];\n    if(Array.isArray(all)&&all.length){\n      DATA.vendas=all.map(r=>({\n        cliente:r.cliente??'',rota:r.rota??'',razao:r.razao??'',material:r.material??'',\n        marca:r.marca??'',descricao:r.descricao??'',subcanal:r.subcanal??'',\n        dataNotaFiscal:r.data_nota_fiscal??'',origem:r.origem??''\n      }));\n      window.__SUPABASE_ONLINE_READY__=true;\n      if(typeof fillFilters==='function') fillFilters();\n      if(typeof render==='function') render();\n      console.info(`[Supabase] ${DATA.vendas.length} vendas carregadas online.`);\n    }\n  }catch(err){\n    console.warn('[Supabase] Falha ao carregar base online; mantendo base incorporada.',err);\n  }\n})();\n</script>\n'''
-              text = text[:script_end] + code + text[script_end:]
-              path.write_text(text, encoding='utf-8')
+          # Garante que o script externo seja carregado uma única vez, no fim do body.
+          tag = '<script src="./supabase-online.js"></script>'
+          text = text.replace(tag, '')
+          body_end = text.lower().rfind('</body>')
+          if body_end < 0:
+              raise SystemExit('</body> não encontrado')
+          text = text[:body_end] + '\n' + marker + '\n' + tag + '\n' + text[body_end:]
+          path.write_text(text, encoding='utf-8')
 
       - name: Publicar alteração
         shell: bash
@@ -48,5 +55,5 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add index.html
-          git commit -m 'Integrar base de vendas online com Supabase'
+          git commit -m 'Conectar site à base online do Supabase'
           git push
