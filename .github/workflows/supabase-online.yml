@@ -59,6 +59,10 @@ jobs:
           s=s.replace("c.baseVendasAtualizada='EXPORT_20260902_111444.XLSX'","c.baseVendasAtualizada='EXPORT_20260904_004542(1).XLSX'")
           s=s.replace("c.source='EXPORT_20260902_111444.XLSX'","c.source='EXPORT_20260904_004542(1).XLSX'")
           s=s.replace("c.updatedAt='2026-09-02'","c.updatedAt='2026-09-04'")
+          marker='id="v31-static-final-zero"'
+          if marker not in s:
+              final_script='''<script id="v31-static-final-zero">\n(function(){try{\n  if(typeof DATA!=="undefined" && DATA.metas){Object.keys(DATA.metas).forEach(function(k){DATA.metas[k]=0;});}\n  var K="iturama_admin_completo_v2";\n  var c=null; try{c=JSON.parse(localStorage.getItem(K)||"null");}catch(e){}\n  if(c){c.metas=c.metas||{};Object.keys(c.metas).forEach(function(k){c.metas[k]=0;});c.source="EXPORT_20260904_004542(1).XLSX";c.updatedAt="2026-09-04";c.baseVendasAtualizada="EXPORT_20260904_004542(1).XLSX";localStorage.setItem(K,JSON.stringify(c));}\n  localStorage.removeItem("iturama_metas");\n}catch(e){}})();\n</script>'''
+              s=s.replace('</body>',final_script+'\n</body>',1)
           index.write_text(s,encoding='utf-8')
           print(f'Vendas atualizadas: {len(vendas)} registros')
           PY
@@ -67,16 +71,16 @@ jobs:
         run: |
           python - <<'PY'
           from pathlib import Path
-          import base64,bz2,json
+          import base64,bz2,json,re
           s=Path('index.html').read_text(encoding='utf-8')
           b=''.join(p.read_text() for p in sorted(Path('.').glob('data-update-20260904-*.txt')))
           raw=bz2.decompress(base64.b64decode(b))
           vendas=json.loads(raw.decode('utf-8'))
-          if len(vendas)!=263: raise SystemExit(f'Quantidade inesperada: {len(vendas)}')
+          if len(vendas)!=3962: raise SystemExit(f'Quantidade inesperada: {len(vendas)}')
           if 'EXPORT_20260904_004542(1).XLSX' not in s: raise SystemExit('fonte nao atualizada')
-          if 'V31-STATIC-ZERO-METAS' not in s: raise SystemExit('metas zeradas ausentes')
+          if 'id="v31-static-final-zero"' not in s: raise SystemExit('zeragem final ausente')
           if 'let customMetas = {};' not in s: raise SystemExit('metas antigas podem ser usadas')
-          print('OK: 263 vendas relevantes novas, metas zeradas e versao estatica preservada')
+          print('OK: 3962 vendas novas, metas zeradas e versao estatica preservada')
           PY
 
       - name: Publicar
@@ -85,4 +89,4 @@ jobs:
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add index.html data-update-20260904-*.txt
-          git diff --cached --quiet || (git commit -m 'Atualizar vendas pela nova planilha' && git push)
+          git diff --cached --quiet || (git commit -m 'Corrigir base de vendas e zerar metas' && git push)
