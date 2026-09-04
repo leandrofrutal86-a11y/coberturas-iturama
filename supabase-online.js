@@ -1,7 +1,7 @@
 /* Sincronização online da base de vendas — não altera as demais funções do app. */
 (() => {
   const SUPABASE_URL = 'https://harlrfhukjvhpufwhtep.supabase.co';
-  const SUPABASE_KEY = 'sb_publishable_gxhN7WK6y9j_m3TJwGDHNw_x_lszXgO';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhhcmxyZmh1a2p2aHB1ZndodGVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzNjM2MDcsImV4cCI6MjEwMzkzOTYwN30.KDqqu5uEQRKiXQ_0tfMVG5a2RmRexT6rle2W8O6U7Bo';
   const API = `${SUPABASE_URL}/rest/v1/vendas`;
   const FN = `${SUPABASE_URL}/functions/v1/atualizar-vendas`;
   const headers = { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` };
