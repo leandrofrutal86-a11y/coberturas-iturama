@@ -4,10 +4,38 @@
   const SUPABASE_KEY = 'sb_publishable_gxhN7WK6y9j_m3TJwGDHNw_x_lszXgO';
   const API = `${SUPABASE_URL}/rest/v1/vendas`;
   const FN = `${SUPABASE_URL}/functions/v1/atualizar-vendas`;
-  const headers = { apikey: SUPABASE_KEY };
+  const headers = { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` };
 
-  // Corrige o acesso ADM sem alterar a senha existente: após o login válido,
-  // garante que a tela administrativa completa permaneça aberta.
+  const aplicarBase = (rows) => {
+    if (!Array.isArray(rows) || !rows.length) return;
+    try {
+      if (typeof DATA !== 'undefined' && Array.isArray(DATA.vendas)) {
+        DATA.vendas = rows.map(r => ({
+          cliente: String(r.cliente ?? '').trim(),
+          rota: String(r.rota ?? '').trim(),
+          razao: String(r.razao ?? '').trim(),
+          material: String(r.material ?? '').trim(),
+          marca: String(r.marca ?? '').trim(),
+          descricao: String(r.descricao ?? '').trim(),
+          subcanal: String(r.subcanal ?? '').trim(),
+          dataNotaFiscal: r.data_nota_fiscal || '',
+          origem: String(r.origem ?? '').trim()
+        }));
+      }
+      if (typeof window.__ITURAMA_ONLINE_APPLY__ === 'function') {
+        window.__ITURAMA_ONLINE_APPLY__(rows);
+      }
+      if (typeof window.refreshMainData === 'function') window.refreshMainData();
+      else {
+        if (typeof window.fillFilters === 'function') window.fillFilters();
+        if (typeof window.render === 'function') window.render();
+      }
+    } catch (e) {
+      console.warn('[Supabase] Aplicação da base:', e);
+    }
+  };
+
+  // Corrige o acesso ADM sem alterar a senha existente.
   const corrigirLoginADM = () => {
     if (typeof window.login !== 'function' || window.__ADM_LOGIN_CORRIGIDO__) return;
     const loginOriginal = window.login;
@@ -33,10 +61,7 @@
     const b = await get(1000, 1999);
     const rows = a.concat(b);
     if (!rows.length) return;
-    // A base principal continua sendo atualizada pelo código do app.
-    if (typeof window.__ITURAMA_ONLINE_APPLY__ === 'function') {
-      window.__ITURAMA_ONLINE_APPLY__(rows);
-    }
+    aplicarBase(rows);
     window.__SUPABASE_ONLINE_READY__ = true;
     console.info(`[Supabase] ${rows.length} vendas carregadas.`);
   }
@@ -47,9 +72,7 @@
 
   async function parseSpreadsheet(file) {
     let XLSXLib = window.XLSX;
-    if (!XLSXLib) {
-      XLSXLib = await import('https://cdn.sheetjs.com/xlsx-0.20.3/package/xlsx.mjs');
-    }
+    if (!XLSXLib) XLSXLib = await import('https://cdn.sheetjs.com/xlsx-0.20.3/package/xlsx.mjs');
     const ab = await file.arrayBuffer();
     const wb = XLSXLib.read(ab, { cellDates: true });
     const ws = wb.Sheets[wb.SheetNames[0]];
@@ -104,16 +127,12 @@
       if (!rows.length) throw new Error('A planilha não possui registros válidos.');
       const response = await fetch(FN, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': SUPABASE_KEY,
-          'Authorization': `Bearer ${SUPABASE_KEY}`
-        },
+        headers: { 'Content-Type': 'application/json', ...headers },
         body: JSON.stringify({ rows })
       });
       const result = await response.json().catch(() => ({}));
       if (!response.ok || result.success === false) throw new Error(result.error || `Erro HTTP ${response.status}`);
-      if (typeof window.__ITURAMA_ONLINE_APPLY__ === 'function') window.__ITURAMA_ONLINE_APPLY__(rows);
+      aplicarBase(rows);
       alert(`Base atualizada com sucesso!\n\n${rows.length.toLocaleString('pt-BR')} registros enviados ao banco online.`);
       if (button) button.textContent = '✅ Base online atualizada';
     } catch (err) {
