@@ -31,15 +31,71 @@
     } catch (e) { console.warn('[Supabase] Aplicação da base:', e); }
   };
 
-  const corrigirLoginADM = () => {
-    if (typeof window.login !== 'function' || window.__ADM_LOGIN_CORRIGIDO__) return;
-    const loginOriginal = window.login;
-    window.login = function () {
+  const zerarMetasInicialmente = () => {
+    const marker = 'iturama_metas_zeradas_v1';
+    if (localStorage.getItem(marker)) return;
+    try {
+      localStorage.setItem('iturama_metas', '{}');
+      const key = 'iturama_admin_completo_v2';
+      const c = JSON.parse(localStorage.getItem(key) || 'null');
+      if (c) {
+        c.metas = {};
+        localStorage.setItem(key, JSON.stringify(c));
+      }
+      if (typeof DATA !== 'undefined' && DATA.metas && typeof DATA.metas === 'object') {
+        Object.keys(DATA.metas).forEach(k => DATA.metas[k] = 0);
+      }
+      localStorage.setItem(marker, '1');
+    } catch (e) { console.warn('[ADM] Não foi possível zerar metas:', e); }
+    setTimeout(() => {
+      document.querySelectorAll('#adminFull input[type="number"], #adminPanel input[type="number"]').forEach(input => {
+        input.value = '0';
+      });
+    }, 50);
+  };
+
+  const abrirADM = () => {
+    try {
       const modal = document.getElementById('modal');
-      loginOriginal();
-      if (modal && !modal.classList.contains('open') && typeof window.openAdminFull === 'function') window.openAdminFull();
+      if (typeof closeModal === 'function') closeModal();
+      if (typeof window.openAdminFull === 'function') window.openAdminFull();
+      else {
+        const full = document.getElementById('adminFull');
+        if (full) {
+          full.classList.add('open');
+          document.body.classList.add('admin-open');
+        }
+      }
+      if (typeof window.buildAdmin === 'function') window.buildAdmin();
+      else if (typeof buildAdmin === 'function') buildAdmin();
+      if (typeof window.render === 'function') window.render('metas');
+      zerarMetasInicialmente();
+      return true;
+    } catch (e) {
+      console.error('[ADM] Erro ao abrir:', e);
+      return false;
+    }
+  };
+
+  const corrigirLoginADM = () => {
+    window.__loginADM = function () {
+      const pass = document.getElementById('pass');
+      const err = document.getElementById('err');
+      if (pass && typeof DATA !== 'undefined' && pass.value === DATA.adminPassword) {
+        return abrirADM();
+      }
+      if (err) err.textContent = 'Senha incorreta.';
+      return false;
     };
-    window.__ADM_LOGIN_CORRIGIDO__ = true;
+    if (typeof window.login === 'function' && !window.__ADM_LOGIN_CORRIGIDO__) {
+      const loginOriginal = window.login;
+      window.login = function () {
+        const pass = document.getElementById('pass');
+        if (pass && typeof DATA !== 'undefined' && pass.value === DATA.adminPassword) return abrirADM();
+        loginOriginal();
+      };
+      window.__ADM_LOGIN_CORRIGIDO__ = true;
+    }
   };
 
   async function carregarVendasOnline() {
