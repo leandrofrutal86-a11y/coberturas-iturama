@@ -1,71 +1,103 @@
-name: Finalizar versao estatica
+name: Publicar atualizacao de vendas
 
 on:
   push:
     paths:
-      - '.github/workflows/supabase-online.yml'
+      - 'data-update.json'
   workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
-  finalizar:
+  atualizar:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Transformar em versao estatica
+      - name: Atualizar vendas no HTML
         run: |
+          if [ ! -f data-update.json ]; then
+            echo 'Nenhuma atualizacao de vendas pendente.'
+            exit 0
+          fi
           python - <<'PY'
           from pathlib import Path
-          import re
-          p=Path('index.html')
-          s=p.read_text(encoding='utf-8')
+          import json, re
 
-          # Esta publicacao nao usa banco de dados.
-          s=re.sub(r'<script\s+src=["\']\./supabase-online\.js(?:\?[^"\']*)?["\']\s*></script>\s*','',s,flags=re.I)
+          index = Path('index.html')
+          update = Path('data-update.json')
+          s = index.read_text(encoding='utf-8')
+          payload = json.loads(update.read_text(encoding='utf-8'))
+          vendas = payload['vendas']
+          vendas_json = json.dumps(vendas, ensure_ascii=False, separators=(',', ':'))
 
-          # Retirar o acesso visivel ao ADM.
-          s=re.sub(r'<div class="admMenu" style="position:relative">\s*<button[^>]*id="admDotsButton"[^>]*>.*?</div>\s*</div>', '', s, count=1, flags=re.S|re.I)
+          m = re.search(r'const DATA = (\\{)', s)
+          if not m:
+              raise SystemExit('DATA nao encontrada')
+          start = m.start(1)
 
-          # Bloquear qualquer tela administrativa que exista no HTML legado.
-          hide='<style id="static-version-fix">#adminPanel,#modal,#adminFull,.admMenu{display:none!important}</style>'
-          if 'id="static-version-fix"' not in s:
-              s=s.replace('</head>',hide+'</head>',1)
+          def matching(text, pos, op='{', cl='}'):
+              depth = 0
+              ins = False
+              esc = False
+              for i in range(pos, len(text)):
+                  c = text[i]
+                  if ins:
+                      if esc: esc = False
+                      elif c == '\\\\': esc = True
+                      elif c == '"': ins = False
+                  else:
+                      if c == '"': ins = True
+                      elif c == op: depth += 1
+                      elif c == cl:
+                          depth -= 1
+                          if depth == 0: return i
+              return -1
 
-          # Remover a informacao de senha administrativa embutida no DATA.
-          s=re.sub(r',?"adminPassword":"[^"]*"', '', s, count=1)
+          end = matching(s, start)
+          if end < 0:
+              raise SystemExit('fim de DATA nao encontrado')
 
-          # Ignorar totalmente metas antigas salvas no navegador.
-          s=re.sub(r'let customMetas\s*=\s*[^;]+;', 'let customMetas = {};', s, count=1)
+          vkey = s.find('"vendas":', start, end)
+          if vkey < 0:
+              raise SystemExit('campo vendas nao encontrado')
+          arr_start = s.find('[', vkey, end)
+          arr_end = matching(s, arr_start, '[', ']')
+          if arr_start < 0 or arr_end < 0:
+              raise SystemExit('array vendas nao encontrado')
 
-          # Garantir metas zero antes do primeiro carregamento da tela.
-          zero='// V31-STATIC-ZERO-METAS\nif(typeof DATA!=="undefined" && DATA.metas){Object.keys(DATA.metas).forEach(k=>DATA.metas[k]=0);}\ntry{localStorage.removeItem("iturama_metas");}catch(e){}\n'
-          if 'V31-STATIC-ZERO-METAS' not in s:
-              pos=s.find('init();')
-              if pos<0: raise SystemExit('init() nao encontrado')
-              s=s[:pos]+zero+s[pos:]
+          s = s[:arr_start] + vendas_json + s[arr_end+1:]
+          s = re.sub(r'"source":"[^"]*","updatedAt":"[^"]*"',
+                     '"source":"' + payload['source'] + '","updatedAt":"' + payload['updatedAt'] + '"', s, count=1)
+          s = s.replace("c.baseVendasAtualizada='EXPORT_20260902_111444.XLSX'", "c.baseVendasAtualizada='" + payload['source'] + "'")
+          s = s.replace("c.source='EXPORT_20260902_111444.XLSX'", "c.source='" + payload['source'] + "'")
+          s = s.replace("c.updatedAt='2026-09-02'", "c.updatedAt='" + payload['updatedAt'] + "'")
 
-          p.write_text(s,encoding='utf-8')
+          index.write_text(s, encoding='utf-8')
+          print(f'Vendas atualizadas: {len(vendas)} registros')
           PY
 
-      - name: Validar versao final
+      - name: Validar
         run: |
+          if [ ! -f data-update.json ]; then exit 0; fi
           python - <<'PY'
           from pathlib import Path
-          import re
+          import json, re
           s=Path('index.html').read_text(encoding='utf-8')
-          if re.search(r'<script\s+src=["\']\./supabase-online\.js',s,re.I): raise SystemExit('Supabase ainda presente')
-          if 'id="static-version-fix"' not in s: raise SystemExit('bloqueio ADM ausente')
-          if 'V31-STATIC-ZERO-METAS' not in s: raise SystemExit('zeragem das metas ausente')
-          if not re.search(r'let customMetas\s*=\s*\{\};',s): raise SystemExit('metas antigas ainda podem ser usadas')
-          print('OK: versao estatica, sem banco/ADM e com metas zeradas')
+          p=json.loads(Path('data-update.json').read_text(encoding='utf-8'))
+          if len(p.get('vendas',[])) == 0: raise SystemExit('planilha sem vendas')
+          if f'"source":"{p["source"]}"' not in s: raise SystemExit('source nao atualizado')
+          if 'V31-STATIC-ZERO-METAS' not in s: raise SystemExit('metas zeradas ausentes')
+          if not re.search(r'let customMetas\\s*=\\s*\\{\\};',s): raise SystemExit('metas antigas podem ser usadas')
+          print('OK: vendas novas, metas zeradas e versao estatica preservadas')
           PY
 
       - name: Publicar
         run: |
+          if [ ! -f data-update.json ]; then exit 0; fi
+          rm -f data-update.json
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add index.html .github/workflows/supabase-online.yml
-          git diff --cached --quiet || (git commit -m 'Publicar versao estatica sem ADM e metas zeradas' && git push)
+          git add index.html data-update.json
+          git diff --cached --quiet || (git commit -m 'Atualizar vendas pela nova planilha' && git push)
