@@ -3,7 +3,7 @@ name: Publicar atualizacao de vendas
 on:
   push:
     paths:
-      - 'data-update-part-*.txt'
+      - 'data-update-20260904-*.txt'
   workflow_dispatch:
 
 permissions:
@@ -17,12 +17,12 @@ jobs:
 
       - name: Atualizar vendas no HTML
         run: |
-          parts=(data-update-part-*.txt)
+          parts=(data-update-20260904-*.txt)
           if [ ! -e "${parts[0]}" ]; then
             echo 'Nenhuma atualizacao de vendas pendente.'
             exit 0
           fi
-          cat data-update-part-*.txt | tr -d '\n\r ' > /tmp/vendas.b64
+          cat data-update-20260904-*.txt | tr -d '\n\r ' > /tmp/vendas.b64
           python - <<'PY'
           from pathlib import Path
           import base64,bz2,json,re
@@ -69,19 +69,20 @@ jobs:
           from pathlib import Path
           import base64,bz2,json
           s=Path('index.html').read_text(encoding='utf-8')
-          raw=bz2.decompress(base64.b64decode(''.join(Path(p).read_text() for p in sorted(Path('.').glob('data-update-part-*.txt')))))
+          b=''.join(p.read_text() for p in sorted(Path('.').glob('data-update-20260904-*.txt')))
+          raw=bz2.decompress(base64.b64decode(b))
           vendas=json.loads(raw.decode('utf-8'))
-          if len(vendas)!=3962: raise SystemExit(f'Quantidade inesperada: {len(vendas)}')
+          if len(vendas)!=263: raise SystemExit(f'Quantidade inesperada: {len(vendas)}')
           if 'EXPORT_20260904_004542(1).XLSX' not in s: raise SystemExit('fonte nao atualizada')
           if 'V31-STATIC-ZERO-METAS' not in s: raise SystemExit('metas zeradas ausentes')
           if 'let customMetas = {};' not in s: raise SystemExit('metas antigas podem ser usadas')
-          print('OK: 3962 vendas novas, metas zeradas e versao estatica preservadas')
+          print('OK: 263 vendas relevantes novas, metas zeradas e versao estatica preservada')
           PY
 
       - name: Publicar
         run: |
-          rm -f data-update-part-*.txt
+          rm -f data-update-20260904-*.txt
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add index.html data-update-part-*.txt
+          git add index.html data-update-20260904-*.txt
           git diff --cached --quiet || (git commit -m 'Atualizar vendas pela nova planilha' && git push)
