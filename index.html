@@ -1841,7 +1841,8 @@ window.__loginADM=function(){
     if(typeof closeModal==="function") closeModal();
     const full=document.getElementById("adminFull");
     if(full){full.classList.add("open");document.body.classList.add("admin-open");}
-    if(typeof buildAdmin==="function") buildAdmin();
+    if(typeof window.renderAdminInicial==="function") window.renderAdminInicial();
+    if(typeof buildAdmin==="function"){ try{ customMetas={}; }catch(e){} buildAdmin(); }
     if(typeof window.render==="function") window.render("metas");
     return true;
   }
