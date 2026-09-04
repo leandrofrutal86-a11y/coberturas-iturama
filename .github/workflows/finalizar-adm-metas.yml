@@ -1,0 +1,100 @@
+name: Finalizar ADM e zerar metas
+
+on:
+  push:
+    paths:
+      - '.github/workflows/finalizar-adm-metas.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Corrigir ADM e zerar metas
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          marker='<!-- FINAL ADM + METAS FIX -->'
+          start=s.find(marker)
+          if start>=0:
+              end=s.find('</body>', start)
+              s=s[:start]+s[end:]
+          fix=r'''<script>
+          /* FINAL ADM + METAS FIX */
+          (function(){
+            function zerarTudo(){
+              try{
+                if(typeof DATA!=='undefined' && DATA.metas){ Object.keys(DATA.metas).forEach(k=>DATA.metas[k]=0); }
+                if(typeof customMetas!=='undefined'){ Object.keys(customMetas).forEach(k=>delete customMetas[k]); }
+                localStorage.setItem('iturama_metas','{}');
+                const k='iturama_admin_completo_v2';
+                try{ const c=JSON.parse(localStorage.getItem(k)||'null'); if(c){ c.metas={}; localStorage.setItem(k,JSON.stringify(c)); } }catch(e){}
+              }catch(e){}
+            }
+            function abrir(){
+              const p=document.getElementById('pass'), err=document.getElementById('err');
+              if(!p) return false;
+              const ok=(typeof DATA!=='undefined' && p.value===DATA.adminPassword);
+              if(!ok){ if(err) err.textContent='Senha incorreta.'; return false; }
+              zerarTudo();
+              try{ if(typeof closeModal==='function') closeModal(); }catch(e){}
+              const full=document.getElementById('adminFull');
+              if(full){
+                full.classList.add('open');
+                document.body.classList.add('admin-open');
+                try{ if(typeof window.openAdminFull==='function') window.openAdminFull(); }catch(e){}
+                setTimeout(function(){
+                  try{ document.querySelectorAll('#adminFull input[type="number"]').forEach(function(x){x.value='0';}); }catch(e){}
+                  full.scrollIntoView({behavior:'smooth',block:'start'});
+                },100);
+              }else{
+                const panel=document.getElementById('adminPanel');
+                if(panel){ panel.classList.add('open'); panel.style.display='block'; panel.scrollIntoView({behavior:'smooth',block:'start'); }
+                try{ if(typeof buildAdmin==='function') buildAdmin(); }catch(e){}
+                setTimeout(function(){ document.querySelectorAll('#adminGrid input[type="number"]').forEach(function(x){x.value='0';}); },50);
+              }
+              return true;
+            }
+            window.__loginADM=abrir;
+            window.login=abrir;
+            document.addEventListener('click',function(e){
+              const b=e.target && e.target.closest ? e.target.closest('button') : null;
+              if(!b) return;
+              const t=String(b.textContent||'').trim().toLowerCase();
+              if(t==='entrar' && document.getElementById('pass')){ e.preventDefault(); e.stopImmediatePropagation(); abrir(); }
+            },true);
+            document.addEventListener('keydown',function(e){
+              if(e.key==='Enter'){
+                const p=document.getElementById('pass');
+                if(p && document.activeElement===p){ e.preventDefault(); abrir(); }
+              }
+            },true);
+            zerarTudo();
+            if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',zerarTudo);
+          })();
+          </script>
+          '''
+          i=s.lower().rfind('</body>')
+          if i<0: raise SystemExit('body missing')
+          s=s[:i]+marker+'\n'+fix+s[i:]
+          p.write_text(s,encoding='utf-8')
+          PY
+      - name: Validar
+        run: |
+          test -s index.html
+          grep -q 'FINAL ADM + METAS FIX' index.html
+          grep -q 'window.__loginADM=abrir' index.html
+          grep -q "localStorage.setItem('iturama_metas','{}')" index.html
+          echo 'OK: ADM e metas zeradas'
+      - name: Publicar correção
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git diff --cached --quiet || (git commit -m 'Finalizar ADM e zerar metas' && git push)
