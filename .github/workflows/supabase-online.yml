@@ -22,16 +22,31 @@ jobs:
           import re
           p=Path('index.html')
           s=p.read_text(encoding='utf-8')
+
+          # Esta publicacao nao usa banco de dados.
           s=re.sub(r'<script\s+src=["\']\./supabase-online\.js(?:\?[^"\']*)?["\']\s*></script>\s*','',s,flags=re.I)
+
+          # Retirar o acesso visivel ao ADM.
           s=re.sub(r'<div class="admMenu" style="position:relative">\s*<button[^>]*id="admDotsButton"[^>]*>.*?</div>\s*</div>', '', s, count=1, flags=re.S|re.I)
+
+          # Bloquear qualquer tela administrativa que exista no HTML legado.
           hide='<style id="static-version-fix">#adminPanel,#modal,#adminFull,.admMenu{display:none!important}</style>'
           if 'id="static-version-fix"' not in s:
               s=s.replace('</head>',hide+'</head>',1)
+
+          # Remover a informacao de senha administrativa embutida no DATA.
           s=re.sub(r',?"adminPassword":"[^"]*"', '', s, count=1)
-          s=s.replace('let customMetas = JSON.parse(localStorage.getItem("iturama_metas")||"null") || {};','let customMetas = {};')
-          marker='// V22: normaliza a nova planilha'
-          if marker in s and 'V31-STATIC-ZERO-METAS' not in s:
-              s=s.replace(marker,'// V31-STATIC-ZERO-METAS\nif(DATA && DATA.metas){Object.keys(DATA.metas).forEach(k=>DATA.metas[k]=0);}\n'+marker,1)
+
+          # Ignorar totalmente metas antigas salvas no navegador.
+          s=re.sub(r'let customMetas\s*=\s*[^;]+;', 'let customMetas = {};', s, count=1)
+
+          # Garantir metas zero antes do primeiro carregamento da tela.
+          zero='// V31-STATIC-ZERO-METAS\nif(typeof DATA!=="undefined" && DATA.metas){Object.keys(DATA.metas).forEach(k=>DATA.metas[k]=0);}\ntry{localStorage.removeItem("iturama_metas");}catch(e){}\n'
+          if 'V31-STATIC-ZERO-METAS' not in s:
+              pos=s.find('init();')
+              if pos<0: raise SystemExit('init() nao encontrado')
+              s=s[:pos]+zero+s[pos:]
+
           p.write_text(s,encoding='utf-8')
           PY
 
@@ -44,7 +59,7 @@ jobs:
           if re.search(r'<script\s+src=["\']\./supabase-online\.js',s,re.I): raise SystemExit('Supabase ainda presente')
           if 'id="static-version-fix"' not in s: raise SystemExit('bloqueio ADM ausente')
           if 'V31-STATIC-ZERO-METAS' not in s: raise SystemExit('zeragem das metas ausente')
-          if 'let customMetas = {};' not in s: raise SystemExit('metas salvas ainda podem ser usadas')
+          if not re.search(r'let customMetas\s*=\s*\{\};',s): raise SystemExit('metas antigas ainda podem ser usadas')
           print('OK: versao estatica, sem banco/ADM e com metas zeradas')
           PY
 
