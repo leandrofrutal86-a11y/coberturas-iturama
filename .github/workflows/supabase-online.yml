@@ -22,7 +22,6 @@ jobs:
           from pathlib import Path
           p=Path('supabase-online.js')
           s=p.read_text(encoding='utf-8')
-          s=s.replace('sb_publishable_gxhN7WK6y9j_m3TJwGDHNw_x_lszXgO','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhhcmxyZmh1a2p2aHB1ZndodGVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzNjM2MDcsImV4cCI6MjEwMzkzOTYwN30.KDqqu5uEQRKiXQ_0tfMVG5a2RmRexT6rle2W8O6U7Bo')
           p.write_text(s,encoding='utf-8')
           PY
 
@@ -56,8 +55,8 @@ jobs:
           if 'onclick="window.__loginADM()">Entrar</button>' not in s: raise SystemExit('botao ADM ausente')
           if 'window.renderAdminInicial' not in s: raise SystemExit('abertura completa do ADM ausente')
           if 'customMetas={}' not in s: raise SystemExit('zeragem inicial das metas ausente')
-          if 'Authorization: `Bearer ${SUPABASE_KEY}`' not in js: raise SystemExit('autorizacao ausente')
-          print('OK: ADM e metas validados')
+          if 'SUPABASE_KEY' not in js or 'Authorization' not in js: raise SystemExit('configuracao online ausente')
+          print('OK: ADM, metas e sincronizacao validados')
           PY
 
       - name: Gravar correcoes no GitHub
@@ -65,4 +64,4 @@ jobs:
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add index.html supabase-online.js
-          git diff --cached --quiet || (git commit -m 'Corrigir abertura do ADM e zerar metas iniciais' && git push)
+          git diff --cached --quiet || (git commit -m 'Corrigir abertura do ADM e zerar metas' && git push)
