@@ -1,4 +1,4 @@
-name: Integrar Supabase ao site
+name: Atualizar site
 
 on:
   push:
@@ -11,13 +11,24 @@ permissions:
   contents: write
 
 jobs:
-  integrate:
+  sync:
     runs-on: ubuntu-latest
     steps:
-      - name: Baixar projeto
-        uses: actions/checkout@v4
-
-      - name: Publicar arquivos de integração
-        shell: bash
+      - uses: actions/checkout@v4
+      - name: Atualizar pagina
         run: |
-          echo 'Integração Supabase preparada.'
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          tag='<script src="./supabase-online.js"></script>'
+          s=s.replace(tag,'')
+          i=s.lower().rfind('</body>')
+          if i<0: raise SystemExit('body missing')
+          s=s[:i]+'\n<!-- ONLINE DATA -->\n'+tag+'\n'+s[i:]
+          p.write_text(s,encoding='utf-8')
+          PY
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add index.html
+          git diff --cached --quiet || (git commit -m 'Ativar dados online' && git push)
