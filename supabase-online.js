@@ -22,44 +22,42 @@
           origem: String(r.origem ?? '').trim()
         }));
       }
-      if (typeof window.__ITURAMA_ONLINE_APPLY__ === 'function') {
-        window.__ITURAMA_ONLINE_APPLY__(rows);
-      }
+      if (typeof window.__ITURAMA_ONLINE_APPLY__ === 'function') window.__ITURAMA_ONLINE_APPLY__(rows);
       if (typeof window.refreshMainData === 'function') window.refreshMainData();
       else {
         if (typeof window.fillFilters === 'function') window.fillFilters();
         if (typeof window.render === 'function') window.render();
       }
-    } catch (e) {
-      console.warn('[Supabase] Aplicação da base:', e);
-    }
+    } catch (e) { console.warn('[Supabase] Aplicação da base:', e); }
   };
 
-  // Corrige o acesso ADM sem alterar a senha existente.
   const corrigirLoginADM = () => {
     if (typeof window.login !== 'function' || window.__ADM_LOGIN_CORRIGIDO__) return;
     const loginOriginal = window.login;
     window.login = function () {
       const modal = document.getElementById('modal');
       loginOriginal();
-      if (modal && !modal.classList.contains('open')) {
-        if (typeof window.openAdminFull === 'function') window.openAdminFull();
-      }
+      if (modal && !modal.classList.contains('open') && typeof window.openAdminFull === 'function') window.openAdminFull();
     };
     window.__ADM_LOGIN_CORRIGIDO__ = true;
   };
 
   async function carregarVendasOnline() {
-    const get = async (from, to) => {
+    const pageSize = 1000;
+    let from = 0;
+    const rows = [];
+    while (true) {
+      const to = from + pageSize - 1;
       const r = await fetch(`${API}?select=cliente,rota,razao,material,marca,descricao,subcanal,data_nota_fiscal,origem&order=id.asc`, {
         headers: { ...headers, Range: `${from}-${to}` }
       });
       if (!r.ok) throw new Error(`Supabase HTTP ${r.status}`);
-      return r.json();
-    };
-    const a = await get(0, 999);
-    const b = await get(1000, 1999);
-    const rows = a.concat(b);
+      const page = await r.json();
+      if (!Array.isArray(page) || !page.length) break;
+      rows.push(...page);
+      if (page.length < pageSize) break;
+      from += pageSize;
+    }
     if (!rows.length) return;
     aplicarBase(rows);
     window.__SUPABASE_ONLINE_READY__ = true;
@@ -91,26 +89,14 @@
     return raw.map(row => {
       const map = {};
       Object.keys(row).forEach(k => map[normalizeHeader(k)] = row[k]);
-      const pick = names => {
-        for (const n of names) {
-          const x = map[normalizeHeader(n)];
-          if (x !== undefined && x !== '') return x;
-        }
-        return '';
-      };
+      const pick = names => { for (const n of names) { const x = map[normalizeHeader(n)]; if (x !== undefined && x !== '') return x; } return ''; };
       let dt = pick(aliases.data_nota_fiscal);
       if (dt instanceof Date && !isNaN(dt)) dt = dt.toISOString().slice(0, 10);
       else if (dt) dt = String(dt).slice(0, 10);
       return {
-        cliente: String(pick(aliases.cliente)).trim(),
-        rota: String(pick(aliases.rota)).trim(),
-        razao: String(pick(aliases.razao)).trim(),
-        material: String(pick(aliases.material)).trim(),
-        marca: String(pick(aliases.marca)).trim(),
-        descricao: String(pick(aliases.descricao)).trim(),
-        subcanal: String(pick(aliases.subcanal)).trim(),
-        data_nota_fiscal: dt || null,
-        origem: String(pick(aliases.origem)).trim()
+        cliente: String(pick(aliases.cliente)).trim(), rota: String(pick(aliases.rota)).trim(), razao: String(pick(aliases.razao)).trim(),
+        material: String(pick(aliases.material)).trim(), marca: String(pick(aliases.marca)).trim(), descricao: String(pick(aliases.descricao)).trim(),
+        subcanal: String(pick(aliases.subcanal)).trim(), data_nota_fiscal: dt || null, origem: String(pick(aliases.origem)).trim()
       };
     }).filter(r => r.cliente || r.material || r.razao);
   }
@@ -139,16 +125,9 @@
       console.error(err);
       alert(`Não foi possível atualizar a base online.\n\n${err.message || err}`);
       if (button) button.textContent = '📥 Carregar planilha para teste';
-    } finally {
-      if (button) button.disabled = false;
-    }
+    } finally { if (button) button.disabled = false; }
   };
 
-  const iniciar = () => {
-    corrigirLoginADM();
-    carregarVendasOnline().catch(err => console.warn('[Supabase]', err));
-  };
-
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', iniciar);
-  else iniciar();
+  const iniciar = () => { corrigirLoginADM(); carregarVendasOnline().catch(err => console.warn('[Supabase]', err)); };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', iniciar); else iniciar();
 })();
