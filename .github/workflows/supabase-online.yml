@@ -3,7 +3,7 @@ name: Publicar atualizacao de vendas
 on:
   push:
     paths:
-      - 'data-update.json'
+      - 'data-update-part-*.txt'
   workflow_dispatch:
 
 permissions:
@@ -17,23 +17,24 @@ jobs:
 
       - name: Atualizar vendas no HTML
         run: |
-          if [ ! -f data-update.json ]; then
+          parts=(data-update-part-*.txt)
+          if [ ! -e "${parts[0]}" ]; then
             echo 'Nenhuma atualizacao de vendas pendente.'
             exit 0
           fi
+          cat data-update-part-*.txt | tr -d '\n\r ' > /tmp/vendas.b64
           python - <<'PY'
           from pathlib import Path
-          import json, re
-          index = Path('index.html')
-          update = Path('data-update.json')
-          s = index.read_text(encoding='utf-8')
-          payload = json.loads(update.read_text(encoding='utf-8'))
-          vendas = payload['vendas']
-          vendas_json = json.dumps(vendas, ensure_ascii=False, separators=(',', ':'))
-          m = re.search(r'const DATA = (\{)', s)
+          import base64,bz2,json,re
+          index=Path('index.html')
+          s=index.read_text(encoding='utf-8')
+          raw=bz2.decompress(base64.b64decode(Path('/tmp/vendas.b64').read_text()))
+          vendas=json.loads(raw.decode('utf-8'))
+          vendas_json=json.dumps(vendas,ensure_ascii=False,separators=(',',':'))
+          m=re.search(r'const DATA = (\{)',s)
           if not m: raise SystemExit('DATA nao encontrada')
-          start = m.start(1)
-          def matching(text, pos, op='{', cl='}'):
+          start=m.start(1)
+          def matching(text,pos,op='{',cl='}'):
               depth=0; ins=False; esc=False
               for i in range(pos,len(text)):
                   c=text[i]
@@ -46,43 +47,41 @@ jobs:
                       elif c==op: depth+=1
                       elif c==cl:
                           depth-=1
-                          if depth==0: return i
+                          if depth==0:return i
               return -1
           end=matching(s,start)
-          if end<0: raise SystemExit('fim de DATA nao encontrado')
           vkey=s.find('"vendas":',start,end)
           arr_start=s.find('[',vkey,end)
           arr_end=matching(s,arr_start,'[',']')
           if vkey<0 or arr_start<0 or arr_end<0: raise SystemExit('array vendas nao encontrado')
           s=s[:arr_start]+vendas_json+s[arr_end+1:]
-          s=re.sub(r'"source":"[^"]*","updatedAt":"[^"]*"','"source":"'+payload['source']+'","updatedAt":"'+payload['updatedAt']+'"',s,count=1)
-          s=s.replace("c.baseVendasAtualizada='EXPORT_20260902_111444.XLSX'","c.baseVendasAtualizada='"+payload['source']+"'")
-          s=s.replace("c.source='EXPORT_20260902_111444.XLSX'","c.source='"+payload['source']+"'")
-          s=s.replace("c.updatedAt='2026-09-02'","c.updatedAt='"+payload['updatedAt']+"'")
+          s=re.sub(r'"source":"[^"]*","updatedAt":"[^"]*"','"source":"EXPORT_20260904_004542(1).XLSX","updatedAt":"2026-09-04"',s,count=1)
+          s=s.replace("c.baseVendasAtualizada='EXPORT_20260902_111444.XLSX'","c.baseVendasAtualizada='EXPORT_20260904_004542(1).XLSX'")
+          s=s.replace("c.source='EXPORT_20260902_111444.XLSX'","c.source='EXPORT_20260904_004542(1).XLSX'")
+          s=s.replace("c.updatedAt='2026-09-02'","c.updatedAt='2026-09-04'")
           index.write_text(s,encoding='utf-8')
           print(f'Vendas atualizadas: {len(vendas)} registros')
           PY
 
       - name: Validar
         run: |
-          if [ ! -f data-update.json ]; then exit 0; fi
           python - <<'PY'
           from pathlib import Path
-          import json
+          import base64,bz2,json
           s=Path('index.html').read_text(encoding='utf-8')
-          p=json.loads(Path('data-update.json').read_text(encoding='utf-8'))
-          if len(p.get('vendas',[]))==0: raise SystemExit('planilha sem vendas')
-          if f'"source":"{p["source"]}"' not in s: raise SystemExit('source nao atualizado')
+          raw=bz2.decompress(base64.b64decode(''.join(Path(p).read_text() for p in sorted(Path('.').glob('data-update-part-*.txt')))))
+          vendas=json.loads(raw.decode('utf-8'))
+          if len(vendas)!=3962: raise SystemExit(f'Quantidade inesperada: {len(vendas)}')
+          if 'EXPORT_20260904_004542(1).XLSX' not in s: raise SystemExit('fonte nao atualizada')
           if 'V31-STATIC-ZERO-METAS' not in s: raise SystemExit('metas zeradas ausentes')
           if 'let customMetas = {};' not in s: raise SystemExit('metas antigas podem ser usadas')
-          print('OK: vendas novas, metas zeradas e versao estatica preservadas')
+          print('OK: 3962 vendas novas, metas zeradas e versao estatica preservadas')
           PY
 
       - name: Publicar
         run: |
-          if [ ! -f data-update.json ]; then exit 0; fi
-          rm -f data-update.json
+          rm -f data-update-part-*.txt
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add index.html data-update.json
+          git add index.html data-update-part-*.txt
           git diff --cached --quiet || (git commit -m 'Atualizar vendas pela nova planilha' && git push)
