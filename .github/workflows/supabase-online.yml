@@ -22,44 +22,25 @@ jobs:
           from pathlib import Path
           p=Path('supabase-online.js')
           s=p.read_text(encoding='utf-8')
-          # A Edge Function atual exige um JWT legado no Authorization.
-          # A chave anon e publica e possui apenas os privilegios definidos por RLS.
           s=s.replace('sb_publishable_gxhN7WK6y9j_m3TJwGDHNw_x_lszXgO','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhhcmxyZmh1a2p2aHB1ZndodGVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzNjM2MDcsImV4cCI6MjEwMzkzOTYwN30.KDqqu5uEQRKiXQ_0tfMVG5a2RmRexT6rle2W8O6U7Bo')
           p.write_text(s,encoding='utf-8')
           PY
 
-      - name: Corrigir index sem duplicar scripts
+      - name: Corrigir index sem alterar o restante
         run: |
           python - <<'PY'
           from pathlib import Path
           import re
-
-          p = Path('index.html')
-          s = p.read_text(encoding='utf-8')
-          s = re.sub(r'<script\s+src=["\']\./supabase-online\.js(?:\?[^"\']*)?["\']\s*></script>', '', s, flags=re.I)
-          s = s.replace('onclick="login()">Entrar</button>', 'onclick="window.__loginADM()">Entrar</button>', 1)
-          s = re.sub(r'<script>\s*window\.__loginADM\s*=\s*function\(\)\s*\{.*?</script>\s*', '', s, flags=re.S)
-          login_fix = '''<script>
-          window.__loginADM=function(){
-            const pass=document.getElementById("pass");
-            const err=document.getElementById("err");
-            if(pass && typeof DATA!=="undefined" && pass.value===DATA.adminPassword){
-              if(typeof closeModal==="function") closeModal();
-              const full=document.getElementById("adminFull");
-              if(full){full.classList.add("open");document.body.classList.add("admin-open");}
-              if(typeof buildAdmin==="function") buildAdmin();
-              if(typeof window.render==="function") window.render("metas");
-              return true;
-            }
-            if(err) err.textContent="Senha incorreta.";
-            return false;
-          };
-          </script>
-          '''
-          i = s.lower().rfind('</body>')
-          if i < 0: raise SystemExit('body missing')
-          s = s[:i] + login_fix + '<script src="./supabase-online.js?v=20260904"></script>\n' + s[i:]
-          p.write_text(s, encoding='utf-8')
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          s=re.sub(r'<script\s+src=["\']\./supabase-online\.js(?:\?[^"\']*)?["\']\s*></script>','',s,flags=re.I)
+          s=s.replace('onclick="login()">Entrar</button>','onclick="window.__loginADM()">Entrar</button>',1)
+          s=re.sub(r'<script>\s*window\.__loginADM\s*=\s*function\(\)\s*\{.*?</script>\s*','',s,flags=re.S)
+          login_fix='''<script>\nwindow.__loginADM=function(){\n  const pass=document.getElementById("pass");\n  const err=document.getElementById("err");\n  if(pass && typeof DATA!=="undefined" && pass.value===DATA.adminPassword){\n    if(typeof closeModal==="function") closeModal();\n    const full=document.getElementById("adminFull");\n    if(full){full.classList.add("open");document.body.classList.add("admin-open");}\n    if(typeof window.renderAdminInicial==="function") window.renderAdminInicial();\n    if(typeof buildAdmin==="function"){ try{ customMetas={}; }catch(e){} buildAdmin(); }\n    if(typeof window.render==="function") window.render("metas");\n    return true;\n  }\n  if(err) err.textContent="Senha incorreta.";\n  return false;\n};\n</script>\n'''
+          i=s.lower().rfind('</body>')
+          if i<0: raise SystemExit('body missing')
+          s=s[:i]+login_fix+'<script src="./supabase-online.js?v=20260904"></script>\n'+s[i:]
+          p.write_text(s,encoding='utf-8')
           PY
 
       - name: Validar arquivos
@@ -70,11 +51,13 @@ jobs:
           s=Path('index.html').read_text(encoding='utf-8')
           js=Path('supabase-online.js').read_text(encoding='utf-8')
           n=len(re.findall(r'<script\s+src=["\']\./supabase-online\.js(?:\?[^"\']*)?["\']\s*></script>',s,re.I))
-          if n != 1: raise SystemExit(f'supabase-online.js duplicado/ausente: {n}')
-          if 'window.__loginADM=function' not in s: raise SystemExit('correcao de login ausente')
-          if 'onclick="window.__loginADM()">Entrar</button>' not in s: raise SystemExit('botao ADM nao corrigido')
-          if 'Authorization: `Bearer ${SUPABASE_KEY}`' not in js: raise SystemExit('autorizacao da funcao ausente')
-          print('OK: sincronizacao e index validados')
+          if n!=1: raise SystemExit(f'supabase-online.js duplicado/ausente: {n}')
+          if 'window.__loginADM=function' not in s: raise SystemExit('login ADM ausente')
+          if 'onclick="window.__loginADM()">Entrar</button>' not in s: raise SystemExit('botao ADM ausente')
+          if 'window.renderAdminInicial' not in s: raise SystemExit('abertura completa do ADM ausente')
+          if 'customMetas={}' not in s: raise SystemExit('zeragem inicial das metas ausente')
+          if 'Authorization: `Bearer ${SUPABASE_KEY}`' not in js: raise SystemExit('autorizacao ausente')
+          print('OK: ADM e metas validados')
           PY
 
       - name: Gravar correcoes no GitHub
@@ -82,4 +65,4 @@ jobs:
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add index.html supabase-online.js
-          git diff --cached --quiet || (git commit -m 'Liberar atualizacao da base pelo ADM' && git push)
+          git diff --cached --quiet || (git commit -m 'Corrigir abertura do ADM e zerar metas iniciais' && git push)
