@@ -6,6 +6,21 @@
   const FN = `${SUPABASE_URL}/functions/v1/atualizar-vendas`;
   const headers = { apikey: SUPABASE_KEY };
 
+  // Corrige o acesso ADM sem alterar a senha existente: após o login válido,
+  // garante que a tela administrativa completa permaneça aberta.
+  const corrigirLoginADM = () => {
+    if (typeof window.login !== 'function' || window.__ADM_LOGIN_CORRIGIDO__) return;
+    const loginOriginal = window.login;
+    window.login = function () {
+      const modal = document.getElementById('modal');
+      loginOriginal();
+      if (modal && !modal.classList.contains('open')) {
+        if (typeof window.openAdminFull === 'function') window.openAdminFull();
+      }
+    };
+    window.__ADM_LOGIN_CORRIGIDO__ = true;
+  };
+
   async function carregarVendasOnline() {
     const get = async (from, to) => {
       const r = await fetch(`${API}?select=cliente,rota,razao,material,marca,descricao,subcanal,data_nota_fiscal,origem&order=id.asc`, {
@@ -18,21 +33,12 @@
     const b = await get(1000, 1999);
     const rows = a.concat(b);
     if (!rows.length) return;
-    DATA.vendas = rows.map(r => ({
-      cliente: String(r.cliente ?? ''),
-      rota: String(r.rota ?? ''),
-      razao: String(r.razao ?? ''),
-      material: String(r.material ?? ''),
-      marca: String(r.marca ?? ''),
-      descricao: String(r.descricao ?? ''),
-      subcanal: String(r.subcanal ?? ''),
-      dataNotaFiscal: String(r.data_nota_fiscal ?? ''),
-      origem: String(r.origem ?? '')
-    }));
+    // A base principal continua sendo atualizada pelo código do app.
+    if (typeof window.__ITURAMA_ONLINE_APPLY__ === 'function') {
+      window.__ITURAMA_ONLINE_APPLY__(rows);
+    }
     window.__SUPABASE_ONLINE_READY__ = true;
-    if (typeof fillFilters === 'function') fillFilters();
-    if (typeof render === 'function') render();
-    console.info(`[Supabase] ${DATA.vendas.length} vendas carregadas.`);
+    console.info(`[Supabase] ${rows.length} vendas carregadas.`);
   }
 
   function normalizeHeader(v) {
@@ -40,13 +46,14 @@
   }
 
   async function parseSpreadsheet(file) {
-    if (typeof XLSX === 'undefined') {
-      await import('https://cdn.sheetjs.com/xlsx-0.20.3/package/xlsx.mjs').then(() => {});
+    let XLSXLib = window.XLSX;
+    if (!XLSXLib) {
+      XLSXLib = await import('https://cdn.sheetjs.com/xlsx-0.20.3/package/xlsx.mjs');
     }
     const ab = await file.arrayBuffer();
-    const wb = XLSX.read(ab, { cellDates: true });
+    const wb = XLSXLib.read(ab, { cellDates: true });
     const ws = wb.Sheets[wb.SheetNames[0]];
-    const raw = XLSX.utils.sheet_to_json(ws, { defval: '' });
+    const raw = XLSXLib.utils.sheet_to_json(ws, { defval: '' });
     const aliases = {
       cliente: ['cliente', 'codigo cliente', 'codigocliente', 'pv'],
       rota: ['rota', 'codigo rota', 'codigorota'],
@@ -106,9 +113,7 @@
       });
       const result = await response.json().catch(() => ({}));
       if (!response.ok || result.success === false) throw new Error(result.error || `Erro HTTP ${response.status}`);
-      DATA.vendas = rows.map(r => ({ ...r, dataNotaFiscal: r.data_nota_fiscal }));
-      if (typeof fillFilters === 'function') fillFilters();
-      if (typeof render === 'function') render();
+      if (typeof window.__ITURAMA_ONLINE_APPLY__ === 'function') window.__ITURAMA_ONLINE_APPLY__(rows);
       alert(`Base atualizada com sucesso!\n\n${rows.length.toLocaleString('pt-BR')} registros enviados ao banco online.`);
       if (button) button.textContent = '✅ Base online atualizada';
     } catch (err) {
@@ -120,6 +125,11 @@
     }
   };
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', carregarVendasOnline);
-  else carregarVendasOnline();
+  const iniciar = () => {
+    corrigirLoginADM();
+    carregarVendasOnline().catch(err => console.warn('[Supabase]', err));
+  };
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', iniciar);
+  else iniciar();
 })();
