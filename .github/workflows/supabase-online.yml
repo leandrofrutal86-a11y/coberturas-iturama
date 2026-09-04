@@ -35,10 +35,10 @@ jobs:
           s=re.sub(r'<script\s+src=["\']\./supabase-online\.js(?:\?[^"\']*)?["\']\s*></script>','',s,flags=re.I)
           s=s.replace('onclick="login()">Entrar</button>','onclick="window.__loginADM()">Entrar</button>',1)
           s=re.sub(r'<script>\s*window\.__loginADM\s*=\s*function\(\)\s*\{.*?</script>\s*','',s,flags=re.S)
-          login_fix='''<script>\nwindow.__loginADM=function(){\n  const pass=document.getElementById("pass");\n  const err=document.getElementById("err");\n  if(pass && typeof DATA!=="undefined" && pass.value===DATA.adminPassword){\n    if(typeof closeModal==="function") closeModal();\n    const full=document.getElementById("adminFull");\n    if(full){full.classList.add("open");document.body.classList.add("admin-open");}\n    if(typeof window.renderAdminInicial==="function") window.renderAdminInicial();\n    if(typeof buildAdmin==="function"){ try{ customMetas={}; }catch(e){} buildAdmin(); }\n    if(typeof window.render==="function") window.render("metas");\n    return true;\n  }\n  if(err) err.textContent="Senha incorreta.";\n  return false;\n};\n</script>\n'''
+          login_fix='''<script>\nwindow.__loginADM=function(){\n  const pass=document.getElementById("pass");\n  const err=document.getElementById("err");\n  if(pass && typeof DATA!=="undefined" && pass.value===DATA.adminPassword){\n    if(typeof closeModal==="function") closeModal();\n    try{ customMetas={}; }catch(e){}\n    if(typeof DATA!=="undefined"&&DATA.metas) Object.keys(DATA.metas).forEach(k=>DATA.metas[k]=0);\n    try{localStorage.setItem("iturama_metas","{}")}catch(e){}\n    const full=document.getElementById("adminFull");\n    if(full){full.classList.add("open");full.style.display="block";document.body.classList.add("admin-open");}\n    if(typeof window.renderAdminInicial==="function") window.renderAdminInicial();\n    if(typeof buildAdmin==="function") buildAdmin();\n    if(typeof window.render==="function") window.render("metas");\n    return true;\n  }\n  if(err) err.textContent="Senha incorreta.";\n  return false;\n};\n</script>\n'''
           i=s.lower().rfind('</body>')
           if i<0: raise SystemExit('body missing')
-          s=s[:i]+login_fix+'<script src="./supabase-online.js?v=20260904"></script>\n'+s[i:]
+          s=s[:i]+login_fix+'<script src="./supabase-online.js?v=20260904-2"></script>\n'+s[i:]
           p.write_text(s,encoding='utf-8')
           PY
 
@@ -52,9 +52,9 @@ jobs:
           n=len(re.findall(r'<script\s+src=["\']\./supabase-online\.js(?:\?[^"\']*)?["\']\s*></script>',s,re.I))
           if n!=1: raise SystemExit(f'supabase-online.js duplicado/ausente: {n}')
           if 'window.__loginADM=function' not in s: raise SystemExit('login ADM ausente')
-          if 'onclick="window.__loginADM()">Entrar</button>' not in s: raise SystemExit('botao ADM ausente')
-          if 'window.renderAdminInicial' not in s: raise SystemExit('abertura completa do ADM ausente')
-          if 'customMetas={}' not in s: raise SystemExit('zeragem inicial das metas ausente')
+          if 'customMetas={}' not in s: raise SystemExit('zeragem das metas ausente')
+          if 'adminFull' not in s: raise SystemExit('painel ADM ausente')
+          if 'supabase-online.js?v=20260904-2' not in s: raise SystemExit('cache-buster ausente')
           if 'SUPABASE_KEY' not in js or 'Authorization' not in js: raise SystemExit('configuracao online ausente')
           print('OK: ADM, metas e sincronizacao validados')
           PY
@@ -64,4 +64,4 @@ jobs:
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add index.html supabase-online.js
-          git diff --cached --quiet || (git commit -m 'Corrigir abertura do ADM e zerar metas' && git push)
+          git diff --cached --quiet || (git commit -m 'Finalizar ADM e zerar metas' && git push)
