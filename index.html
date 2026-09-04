@@ -1851,4 +1851,59 @@ window.__loginADM=function(){
 };
 </script>
 <script src="./supabase-online.js?v=20260904"></script>
+<!-- FINAL ADM + METAS FIX -->
+<script>
+/* FINAL ADM + METAS FIX */
+(function(){
+  function zerarTudo(){
+    try{
+      if(typeof DATA!=='undefined' && DATA.metas){ Object.keys(DATA.metas).forEach(k=>DATA.metas[k]=0); }
+      if(typeof customMetas!=='undefined'){ Object.keys(customMetas).forEach(k=>delete customMetas[k]); }
+      localStorage.setItem('iturama_metas','{}');
+      const k='iturama_admin_completo_v2';
+      try{ const c=JSON.parse(localStorage.getItem(k)||'null'); if(c){ c.metas={}; localStorage.setItem(k,JSON.stringify(c)); } }catch(e){}
+    }catch(e){}
+  }
+  function abrir(){
+    const p=document.getElementById('pass'), err=document.getElementById('err');
+    if(!p) return false;
+    const ok=(typeof DATA!=='undefined' && p.value===DATA.adminPassword);
+    if(!ok){ if(err) err.textContent='Senha incorreta.'; return false; }
+    zerarTudo();
+    try{ if(typeof closeModal==='function') closeModal(); }catch(e){}
+    const full=document.getElementById('adminFull');
+    if(full){
+      full.classList.add('open');
+      document.body.classList.add('admin-open');
+      try{ if(typeof window.openAdminFull==='function') window.openAdminFull(); }catch(e){}
+      setTimeout(function(){
+        try{ document.querySelectorAll('#adminFull input[type="number"]').forEach(function(x){x.value='0';}); }catch(e){}
+        full.scrollIntoView({behavior:'smooth',block:'start'});
+      },100);
+    }else{
+      const panel=document.getElementById('adminPanel');
+      if(panel){ panel.classList.add('open'); panel.style.display='block'; panel.scrollIntoView({behavior:'smooth',block:'start'); }
+      try{ if(typeof buildAdmin==='function') buildAdmin(); }catch(e){}
+      setTimeout(function(){ document.querySelectorAll('#adminGrid input[type="number"]').forEach(function(x){x.value='0';}); },50);
+    }
+    return true;
+  }
+  window.__loginADM=abrir;
+  window.login=abrir;
+  document.addEventListener('click',function(e){
+    const b=e.target && e.target.closest ? e.target.closest('button') : null;
+    if(!b) return;
+    const t=String(b.textContent||'').trim().toLowerCase();
+    if(t==='entrar' && document.getElementById('pass')){ e.preventDefault(); e.stopImmediatePropagation(); abrir(); }
+  },true);
+  document.addEventListener('keydown',function(e){
+    if(e.key==='Enter'){
+      const p=document.getElementById('pass');
+      if(p && document.activeElement===p){ e.preventDefault(); abrir(); }
+    }
+  },true);
+  zerarTudo();
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',zerarTudo);
+})();
+</script>
 </body></html>
