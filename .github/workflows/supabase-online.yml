@@ -16,6 +16,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Corrigir sincronizacao online
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('supabase-online.js')
+          s=p.read_text(encoding='utf-8')
+          # A Edge Function atual exige um JWT legado no Authorization.
+          # A chave anon e publica e possui apenas os privilegios definidos por RLS.
+          s=s.replace('sb_publishable_gxhN7WK6y9j_m3TJwGDHNw_x_lszXgO','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhhcmxyZmh1a2p2aHB1ZndodGVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzNjM2MDcsImV4cCI6MjEwMzkzOTYwN30.KDqqu5uEQRKiXQ_0tfMVG5a2RmRexT6rle2W8O6U7Bo')
+          p.write_text(s,encoding='utf-8')
+          PY
+
       - name: Corrigir index sem duplicar scripts
         run: |
           python - <<'PY'
@@ -24,16 +36,9 @@ jobs:
 
           p = Path('index.html')
           s = p.read_text(encoding='utf-8')
-
-          # Remove qualquer versão anterior do script online para deixar uma só.
           s = re.sub(r'<script\s+src=["\']\./supabase-online\.js(?:\?[^"\']*)?["\']\s*></script>', '', s, flags=re.I)
-
-          # Corrige o botão de entrada do administrador sem depender da ordem dos scripts.
           s = s.replace('onclick="login()">Entrar</button>', 'onclick="window.__loginADM()">Entrar</button>', 1)
-
-          # Remove versões anteriores da correção de login.
           s = re.sub(r'<script>\s*window\.__loginADM\s*=\s*function\(\)\s*\{.*?</script>\s*', '', s, flags=re.S)
-
           login_fix = '''<script>
           window.__loginADM=function(){
             const pass=document.getElementById("pass");
@@ -51,33 +56,30 @@ jobs:
           };
           </script>
           '''
-
           i = s.lower().rfind('</body>')
-          if i < 0:
-              raise SystemExit('body missing')
+          if i < 0: raise SystemExit('body missing')
           s = s[:i] + login_fix + '<script src="./supabase-online.js?v=20260904"></script>\n' + s[i:]
           p.write_text(s, encoding='utf-8')
           PY
 
-      - name: Validar index
+      - name: Validar arquivos
         run: |
           python - <<'PY'
           from pathlib import Path
           import re
           s=Path('index.html').read_text(encoding='utf-8')
+          js=Path('supabase-online.js').read_text(encoding='utf-8')
           n=len(re.findall(r'<script\s+src=["\']\./supabase-online\.js(?:\?[^"\']*)?["\']\s*></script>',s,re.I))
-          if n != 1:
-              raise SystemExit(f'supabase-online.js duplicado/ausente: {n}')
-          if 'window.__loginADM=function' not in s:
-              raise SystemExit('correção de login ausente')
-          if 'onclick="window.__loginADM()">Entrar</button>' not in s:
-              raise SystemExit('botão ADM não corrigido')
-          print('OK: index validado')
+          if n != 1: raise SystemExit(f'supabase-online.js duplicado/ausente: {n}')
+          if 'window.__loginADM=function' not in s: raise SystemExit('correcao de login ausente')
+          if 'onclick="window.__loginADM()">Entrar</button>' not in s: raise SystemExit('botao ADM nao corrigido')
+          if 'Authorization: `Bearer ${SUPABASE_KEY}`' not in js: raise SystemExit('autorizacao da funcao ausente')
+          print('OK: sincronizacao e index validados')
           PY
 
-      - name: Gravar correção no GitHub
+      - name: Gravar correcoes no GitHub
         run: |
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add index.html
-          git diff --cached --quiet || (git commit -m 'Corrigir gravação e carregamento do site' && git push)
+          git add index.html supabase-online.js
+          git diff --cached --quiet || (git commit -m 'Liberar atualizacao da base pelo ADM' && git push)
