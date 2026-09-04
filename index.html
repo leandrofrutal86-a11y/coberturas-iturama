@@ -1833,24 +1833,6 @@ function showCopied(button){
 
 <!-- ONLINE DATA -->
 
-<script>
-window.__loginADM=function(){
-  const pass=document.getElementById("pass");
-  const err=document.getElementById("err");
-  if(pass && typeof DATA!=="undefined" && pass.value===DATA.adminPassword){
-    if(typeof closeModal==="function") closeModal();
-    const full=document.getElementById("adminFull");
-    if(full){full.classList.add("open");document.body.classList.add("admin-open");}
-    if(typeof window.renderAdminInicial==="function") window.renderAdminInicial();
-    if(typeof buildAdmin==="function"){ try{ customMetas={}; }catch(e){} buildAdmin(); }
-    if(typeof window.render==="function") window.render("metas");
-    return true;
-  }
-  if(err) err.textContent="Senha incorreta.";
-  return false;
-};
-</script>
-<script src="./supabase-online.js?v=20260904"></script>
 <!-- FINAL ADM + METAS FIX -->
 <script>
 /* FINAL ADM + METAS FIX */
@@ -1906,4 +1888,25 @@ window.__loginADM=function(){
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',zerarTudo);
 })();
 </script>
+<script>
+window.__loginADM=function(){
+  const pass=document.getElementById("pass");
+  const err=document.getElementById("err");
+  if(pass && typeof DATA!=="undefined" && pass.value===DATA.adminPassword){
+    if(typeof closeModal==="function") closeModal();
+    try{ customMetas={}; }catch(e){}
+    if(typeof DATA!=="undefined"&&DATA.metas) Object.keys(DATA.metas).forEach(k=>DATA.metas[k]=0);
+    try{localStorage.setItem("iturama_metas","{}")}catch(e){}
+    const full=document.getElementById("adminFull");
+    if(full){full.classList.add("open");full.style.display="block";document.body.classList.add("admin-open");}
+    if(typeof window.renderAdminInicial==="function") window.renderAdminInicial();
+    if(typeof buildAdmin==="function") buildAdmin();
+    if(typeof window.render==="function") window.render("metas");
+    return true;
+  }
+  if(err) err.textContent="Senha incorreta.";
+  return false;
+};
+</script>
+<script src="./supabase-online.js?v=20260904-2"></script>
 </body></html>
