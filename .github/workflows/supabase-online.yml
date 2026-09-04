@@ -1,67 +1,56 @@
-name: Atualizar site
+name: Finalizar versao estatica
 
 on:
   push:
     paths:
       - '.github/workflows/supabase-online.yml'
-      - 'supabase-online.js'
   workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
-  sync:
+  finalizar:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Corrigir sincronizacao online
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-          p=Path('supabase-online.js')
-          s=p.read_text(encoding='utf-8')
-          p.write_text(s,encoding='utf-8')
-          PY
-
-      - name: Corrigir index sem alterar o restante
+      - name: Transformar em versao estatica
         run: |
           python - <<'PY'
           from pathlib import Path
           import re
           p=Path('index.html')
           s=p.read_text(encoding='utf-8')
-          s=re.sub(r'<script\s+src=["\']\./supabase-online\.js(?:\?[^"\']*)?["\']\s*></script>','',s,flags=re.I)
-          s=s.replace('onclick="login()">Entrar</button>','onclick="window.__loginADM()">Entrar</button>',1)
-          s=re.sub(r'<script>\s*window\.__loginADM\s*=\s*function\(\)\s*\{.*?</script>\s*','',s,flags=re.S)
-          login_fix='''<script>\nwindow.__loginADM=function(){\n  const pass=document.getElementById("pass");\n  const err=document.getElementById("err");\n  if(pass && typeof DATA!=="undefined" && pass.value===DATA.adminPassword){\n    if(typeof closeModal==="function") closeModal();\n    try{ customMetas={}; }catch(e){}\n    if(typeof DATA!=="undefined"&&DATA.metas) Object.keys(DATA.metas).forEach(k=>DATA.metas[k]=0);\n    try{localStorage.setItem("iturama_metas","{}")}catch(e){}\n    const full=document.getElementById("adminFull");\n    if(full){full.classList.add("open");full.style.display="block";document.body.classList.add("admin-open");}\n    if(typeof window.renderAdminInicial==="function") window.renderAdminInicial();\n    if(typeof buildAdmin==="function") buildAdmin();\n    if(typeof window.render==="function") window.render("metas");\n    return true;\n  }\n  if(err) err.textContent="Senha incorreta.";\n  return false;\n};\n</script>\n'''
-          i=s.lower().rfind('</body>')
-          if i<0: raise SystemExit('body missing')
-          s=s[:i]+login_fix+'<script src="./supabase-online.js?v=20260904-2"></script>\n'+s[i:]
+          s=re.sub(r'<script\s+src=["\']\./supabase-online\.js(?:\?[^"\']*)?["\']\s*></script>\s*','',s,flags=re.I)
+          s=re.sub(r'<div class="admMenu" style="position:relative">\s*<button[^>]*id="admDotsButton"[^>]*>.*?</div>\s*</div>', '', s, count=1, flags=re.S|re.I)
+          hide='<style id="static-version-fix">#adminPanel,#modal,#adminFull,.admMenu{display:none!important}</style>'
+          if 'id="static-version-fix"' not in s:
+              s=s.replace('</head>',hide+'</head>',1)
+          s=re.sub(r',?"adminPassword":"[^"]*"', '', s, count=1)
+          s=s.replace('let customMetas = JSON.parse(localStorage.getItem("iturama_metas")||"null") || {};','let customMetas = {};')
+          marker='// V22: normaliza a nova planilha'
+          if marker in s and 'V31-STATIC-ZERO-METAS' not in s:
+              s=s.replace(marker,'// V31-STATIC-ZERO-METAS\nif(DATA && DATA.metas){Object.keys(DATA.metas).forEach(k=>DATA.metas[k]=0);}\n'+marker,1)
           p.write_text(s,encoding='utf-8')
           PY
 
-      - name: Validar arquivos
+      - name: Validar versao final
         run: |
           python - <<'PY'
           from pathlib import Path
           import re
           s=Path('index.html').read_text(encoding='utf-8')
-          js=Path('supabase-online.js').read_text(encoding='utf-8')
-          n=len(re.findall(r'<script\s+src=["\']\./supabase-online\.js(?:\?[^"\']*)?["\']\s*></script>',s,re.I))
-          if n!=1: raise SystemExit(f'supabase-online.js duplicado/ausente: {n}')
-          if 'window.__loginADM=function' not in s: raise SystemExit('login ADM ausente')
-          if 'customMetas={}' not in s: raise SystemExit('zeragem das metas ausente')
-          if 'adminFull' not in s: raise SystemExit('painel ADM ausente')
-          if 'supabase-online.js?v=20260904-2' not in s: raise SystemExit('cache-buster ausente')
-          if 'SUPABASE_KEY' not in js or 'Authorization' not in js: raise SystemExit('configuracao online ausente')
-          print('OK: ADM, metas e sincronizacao validados')
+          if re.search(r'<script\s+src=["\']\./supabase-online\.js',s,re.I): raise SystemExit('Supabase ainda presente')
+          if 'id="static-version-fix"' not in s: raise SystemExit('bloqueio ADM ausente')
+          if 'V31-STATIC-ZERO-METAS' not in s: raise SystemExit('zeragem das metas ausente')
+          if 'let customMetas = {};' not in s: raise SystemExit('metas salvas ainda podem ser usadas')
+          print('OK: versao estatica, sem banco/ADM e com metas zeradas')
           PY
 
-      - name: Gravar correcoes no GitHub
+      - name: Publicar
         run: |
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add index.html supabase-online.js
-          git diff --cached --quiet || (git commit -m 'Finalizar ADM e zerar metas' && git push)
+          git add index.html .github/workflows/supabase-online.yml
+          git diff --cached --quiet || (git commit -m 'Publicar versao estatica sem ADM e metas zeradas' && git push)
