@@ -1268,17 +1268,51 @@ function isEstrellaCategory(cat){
   return cat==="ESTRELLA GERAL" || cat==="ESTRELLA ORIGINAL" || cat==="ESTRELLA RGB";
 }
 function categoryRows(rota, cat){
-  if(cat==="ESTRELLA GERAL"){
-    return ESTRELLA_VENDAS.filter(r=>r.rota===rota && String(r.marca||"").toUpperCase().includes("ESTRELLA"));
+  const R=String(rota);
+  const rows=(DATA.vendas||[]).filter(r=>String(r.Rota??r.rota??'')===R);
+  const mat=r=>String(r.Material??r.material??'').trim().replace(/^0+/, '');
+  const brand=r=>String(r.Marca??r.marca??'').trim().toUpperCase();
+  const desc=r=>String(r.Descrição??r.descricao??r['descrição']??'').trim().toUpperCase();
+  const client=r=>String(r.Cliente??r.cliente??'').trim();
+  if(cat==='FINI') return rows.filter(r=>brand(r)==='FINI');
+  if(cat==='PERFETTI') return rows.filter(r=>brand(r)==='PERFETTI');
+  if(cat==='MONSTER ULTRA') return rows.filter(r=>brand(r).includes('MONSTER ULTRA') || desc(r).includes('MONSTER ULTRA'));
+  if(cat==='MARCA CAMPARI') return rows.filter(r=>brand(r)==='CAMPARI');
+  if(cat==='APEROL') return rows.filter(r=>brand(r)==='APEROL' || desc(r).includes('APEROL'));
+  if(cat==='OLD PARR') return rows.filter(r=>['8280','1965'].includes(mat(r)));
+  if(cat==='RED LABEL') return rows.filter(r=>['1973','1964','8014'].includes(mat(r)));
+  if(cat==='SMIRNOFF VODKA') return rows.filter(r=>desc(r).includes('SMIRNOFF') && !desc(r).includes('ICE'));
+  if(cat==='ESTRELLA GERAL') return rows.filter(r=>brand(r).includes('ESTRELLA') || desc(r).includes('ESTRELLA'));
+  if(cat==='ESTRELLA ORIGINAL') return rows.filter(r=>['1960','1885','1891'].includes(mat(r)));
+  if(cat==='ESTRELLA RGB') return rows.filter(r=>mat(r)==='1891');
+  if(cat==='TRIO PÃO DE QUEIJO'){
+    const byClient=new Map();
+    rows.forEach(r=>{const pv=client(r);if(!pv)return;if(!byClient.has(pv))byClient.set(pv,[]);byClient.get(pv).push(r);});
+    const complete=[];
+    byClient.forEach(rs=>{
+      if(client(rs[0])==='1440002')return;
+      const g1=rs.some(r=>['1918','1919'].includes(mat(r)));
+      const g2=rs.some(r=>mat(r)==='1916');
+      const g3=rs.some(r=>mat(r)==='1827');
+      if(g1&&g2&&g3)complete.push(rs[0]);
+    });
+    return complete;
   }
-  if(cat==="ESTRELLA ORIGINAL"){
-    return ESTRELLA_VENDAS.filter(r=>r.rota===rota && ["1960","1885","1891"].includes(String(r.material||"").replace(/^0+/,"")));
+  if(cat==='COBERTURA HEINEKEN') return rows.filter(r=>{
+    const b=brand(r);
+    return b==='BAVARIA'||b.includes('BAVARIA')||b==='EISENBAHN'||b.includes('EISENBAHN')||b==='KAISER'||b.includes('KAISER')||b==='SOL'||b.startsWith('SOL ');
+  });
+  const info=(typeof getCatInfo==='function'?getCatInfo()[cat]:{})||{};
+  const tipo=String(info.tipo||'').toUpperCase();
+  if(tipo==='CÓDIGO'||tipo==='CODIGO'){
+    const codes=(info.valores||[]).map(v=>String(v).trim().replace(/^0+/,'')).filter(Boolean);
+    return rows.filter(r=>codes.includes(mat(r)));
   }
-  if(cat==="ESTRELLA RGB"){
-    return ESTRELLA_VENDAS.filter(r=>r.rota===rota && String(r.material||"").replace(/^0+/,"")==="1891");
+  if(tipo==='MARCA'&&(info.valores||[]).length){
+    const brands=(info.valores||[]).map(v=>String(v).toUpperCase().trim()).filter(Boolean);
+    return rows.filter(r=>brands.some(b=>brand(r).includes(b)));
   }
-  const col=cov[cat];
-  return col ? DATA.vendas.filter(r=>r.rota===rota && r[col]===1) : [];
+  return [];
 }
 function uniqueClientsForCategory(rota, cat){
   // Uma cobertura por cliente dentro de cada rota/categoria.
