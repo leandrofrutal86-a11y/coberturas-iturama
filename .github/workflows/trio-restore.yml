@@ -1,0 +1,93 @@
+name: Restaurar Trio Pao de Queijo
+
+on:
+  workflow_run:
+    workflows: ["Publicar atualizacao de vendas"]
+    types: [completed]
+
+permissions:
+  contents: write
+
+jobs:
+  restaurar:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Restaurar categoria e acompanhamento do Trio
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re,json
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          cats=["PERFETTI","FINI","MONSTER ULTRA","MARCA CAMPARI","APEROL","RED LABEL","OLD PARR","SMIRNOFF VODKA","ESTRELLA GERAL","ESTRELLA ORIGINAL","ESTRELLA RGB","TRIO PÃO DE QUEIJO","COBERTURA HEINEKEN"]
+          s,n=re.subn(r'("categorias"\s*:\s*)\[[^\]]*\]',lambda m:m.group(1)+json.dumps(cats,ensure_ascii=False),s,count=1)
+          if n!=1: raise SystemExit('categorias nao encontrada')
+
+          fn=r'''function renderTrioAcompanhamento(rota,cat){
+            let box=document.getElementById('trioAcompanhamento');
+            if(!box){const tb=document.getElementById('tbody');const panel=tb&&tb.closest('.panel');if(!panel)return;box=document.createElement('div');box.id='trioAcompanhamento';box.className='panel';panel.insertAdjacentElement('afterend',box);}
+            if(cat!=='TRIO PÃO DE QUEIJO'){box.style.display='none';return;}
+            const rows=(DATA.vendas||[]).filter(r=>String(r.Rota??r.rota??'')===String(rota));
+            const mat=r=>String(r.Material??r.material??'').trim().replace(/^0+/,'');
+            const client=r=>String(r.Cliente??r.cliente??'').trim();
+            const razao=pv=>{const b=(typeof CLIENTES_BASE!=='undefined'?(CLIENTES_BASE.find(x=>String(x.cliente).trim()===pv)||{}):{});return String(b.razao||'');};
+            const by=new Map();rows.forEach(r=>{const pv=client(r);if(!pv||pv==='1440002')return;if(!by.has(pv))by.set(pv,[]);by.get(pv).push(r);});
+            const list=[];by.forEach(rs=>{const g1=rs.some(r=>['1918','1919'].includes(mat(r)));const g2=rs.some(r=>mat(r)==='1916');const g3=rs.some(r=>mat(r)==='1827');const feitos=(g1?1:0)+(g2?1:0)+(g3?1:0);if(feitos>0)list.push({pv:client(rs[0]),razao:razao(client(rs[0])),g1,g2,g3,feitos});});
+            list.sort((a,b)=>a.razao.localeCompare(b.razao,'pt-BR'));
+            const st=(ok,miss)=>`<td style="text-align:center;font-weight:800;color:${ok?'#198754':'#d71920'}">${ok?'✓ Feito':'✕ Falta'}${ok?'':'<small style="display:block;color:#69707a">'+miss+'</small>'}</td>`;
+            box.innerHTML=`<div class="panelHead"><h2>Trio Pão de Queijo — acompanhamento</h2><span class="count">${list.length} clientes</span></div><div style="padding:0 12px 14px;overflow:auto"><table><thead><tr><th>Cliente</th><th>Razão Social</th><th>Grupo 1<br><small>1918 ou 1919</small></th><th>Grupo 2<br><small>1916</small></th><th>Grupo 3<br><small>1827</small></th><th>Realizado</th><th>Falta</th></tr></thead><tbody>${list.length?list.map(x=>`<tr><td>${esc(x.pv)}</td><td>${esc(x.razao)}</td>${st(x.g1,'1918 ou 1919')}${st(x.g2,'1916')}${st(x.g3,'1827')}<td style="text-align:center;font-weight:900">${x.feitos}/3</td><td style="font-weight:800;color:${x.feitos===3?'#198754':'#d71920'}">${x.feitos===3?'Completo':[!x.g1?'Grupo 1 (1918/1919)':'',!x.g2?'Grupo 2 (1916)':'',!x.g3?'Grupo 3 (1827)':''].filter(Boolean).join(', ')}</td></tr>`).join(''):`<tr><td colspan="7" class="empty">Nenhum cliente realizou item do Trio nesta rota.</td></tr>`}</tbody></table></div>`;
+            box.style.display='block';
+          }'''
+          if 'function renderTrioAcompanhamento(rota,cat)' not in s:s=s.replace('function render(){',fn+'\nfunction render(){',1)
+          marker='qs("#tbody").innerHTML=uniq.length?uniq.map((r,i)=>`<tr><td>${i+1}</td><td>${esc(r.cliente)}</td><td>${esc(r.razao)}</td></tr>`).join(""):`<tr><td colspan="3" class="empty">Nenhum cliente realizado para esta combinação.</td></tr>`;'
+          if marker not in s: raise SystemExit('render marker nao encontrado')
+          if 'renderTrioAcompanhamento(rota,cat);' not in s:s=s.replace(marker,marker+'\n renderTrioAcompanhamento(rota,cat);',1)
+
+          pvfn=r'''function renderTrioPV(base){
+            const pv=normalizePV(base.cliente),result=document.getElementById('pvResultPanel');let box=document.getElementById('pvTrioDetail');
+            if(!box){box=document.createElement('div');box.id='pvTrioDetail';box.className='panel';result.appendChild(box);}
+            const rows=(DATA.vendas||[]).filter(r=>String(r.Rota??r.rota??'')===String(base.rota)&&normalizePV(r.Cliente??r.cliente)===pv);const mat=r=>String(r.Material??r.material??'').trim().replace(/^0+/,'');
+            if(pv==='1440002'){box.innerHTML='<div class="panelHead"><h2>TRIO PÃO DE QUEIJO</h2></div><div style="padding:18px;font-weight:800;color:#d71920">DEPÓSITO DE BEBIDAS — CLIENTE NÃO PARTICIPA DO INCENTIVO<br><small style="color:#69707a">Este cliente não entra na cobertura nem na somatória do Trio Pão de Queijo.</small></div>';return;}
+            const g1=rows.some(r=>['1918','1919'].includes(mat(r))),g2=rows.some(r=>mat(r)==='1916'),g3=rows.some(r=>mat(r)==='1827'),feitos=(g1?1:0)+(g2?1:0)+(g3?1:0),faltas=[!g1?'Grupo 1 — falta 1918 ou 1919':'',!g2?'Grupo 2 — falta 1916':'',!g3?'Grupo 3 — falta 1827':''].filter(Boolean);
+            box.innerHTML=`<div class="panelHead"><h2>TRIO PÃO DE QUEIJO</h2><span class="count">${feitos}/3</span></div><div style="padding:18px"><b>${feitos}/3 grupos realizados</b><div style="line-height:2;margin-top:10px">${g1?'✓ Grupo 1 — 1918 ou 1919':'✕ Grupo 1 — falta 1918 ou 1919'}<br>${g2?'✓ Grupo 2 — 1916':'✕ Grupo 2 — falta 1916'}<br>${g3?'✓ Grupo 3 — 1827':'✕ Grupo 3 — falta 1827'}</div><div style="margin-top:12px;font-weight:800;color:${faltas.length?'#d71920':'#198754'}">${faltas.length?'Falta: '+faltas.join(', '):'TRIO COMPLETO — 3/3'}</div></div>`;
+          }'''
+          if 'function renderTrioPV(base)' not in s:s=s.replace('function searchPV(){',pvfn+'\nfunction searchPV(){',1)
+          if 'renderTrioPV(base);' not in s:s=s.replace('  body.innerHTML=status.map(x=>`<tr>', '  renderTrioPV(base);\n\n  body.innerHTML=status.map(x=>`<tr>',1)
+          p.write_text(s,encoding='utf-8')
+          PY
+      - name: Validar
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re,json
+          s=Path('index.html').read_text(encoding='utf-8')
+          m=re.search(r'const DATA = (\{)',s)
+          if not m: raise SystemExit('DATA ausente')
+          start=m.start(1);depth=0;ins=False;esc=False
+          for i in range(start,len(s)):
+            c=s[i]
+            if ins:
+              if esc:esc=False
+              elif c=='\\':esc=True
+              elif c=='"':ins=False
+            else:
+              if c=='"':ins=True
+              elif c=='{':depth+=1
+              elif c=='}':
+                depth-=1
+                if depth==0:end=i+1;break
+          d=json.loads(s[start:end])
+          if 'TRIO PÃO DE QUEIJO' not in d.get('categorias',[]):raise SystemExit('Trio ausente')
+          if len(d.get('vendas',[]))!=232:raise SystemExit('Base inesperada')
+          for x in ['function renderTrioAcompanhamento(rota,cat)','function renderTrioPV(base)']:
+            if x not in s:raise SystemExit('Ausente: '+x)
+          print('OK - Trio restaurado')
+          PY
+      - name: Publicar
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add index.html
+          git diff --cached --quiet || (git commit -m 'Restaurar Trio Pao de Queijo' && git push)
