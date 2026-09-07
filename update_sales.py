@@ -6,14 +6,12 @@ from zoneinfo import ZoneInfo
 INDEX=Path('index.html')
 s=INDEX.read_text(encoding='utf-8')
 
-# A base 01351efe04b998a528172fa387d99170e43496ea ja contem a nova
-# planilha processada anteriormente (232 registros relevantes).
 if 'const DATA =' not in s:
     raise SystemExit('DATA nao encontrada')
 
-# Atualiza automaticamente a data/hora da ultima publicacao no fuso de Sao Paulo.
-now=datetime.now(ZoneInfo('America/Sao_Paulo')).isoformat(timespec='minutes')
-s,n_date=re.subn(r'(updatedAt"\s*:\s*")[^"]*(")',r'\g<1>'+now+r'\2',s,count=1)
+now=datetime.now(ZoneInfo('America/Sao_Paulo'))
+iso=now.isoformat(timespec='minutes')
+s,n_date=re.subn(r'(updatedAt"\s*:\s*")[^"]*(")',r'\g<1>'+iso+r'\2',s,count=1)
 if n_date!=1:
     raise SystemExit('updatedAt nao encontrado')
 
@@ -39,37 +37,27 @@ new_fn=r'''function categoryRows(rota, cat){
     const byClient=new Map();
     rows.forEach(r=>{const pv=client(r);if(!pv)return;if(!byClient.has(pv))byClient.set(pv,[]);byClient.get(pv).push(r);});
     const complete=[];
-    byClient.forEach(rs=>{
-      if(client(rs[0])==='1440002')return;
-      const g1=rs.some(r=>['1918','1919'].includes(mat(r)));
-      const g2=rs.some(r=>mat(r)==='1916');
-      const g3=rs.some(r=>mat(r)==='1827');
-      if(g1&&g2&&g3)complete.push(rs[0]);
-    });
+    byClient.forEach(rs=>{if(client(rs[0])==='1440002')return;const g1=rs.some(r=>['1918','1919'].includes(mat(r)));const g2=rs.some(r=>mat(r)==='1916');const g3=rs.some(r=>mat(r)==='1827');if(g1&&g2&&g3)complete.push(rs[0]);});
     return complete;
   }
-  if(cat==='COBERTURA HEINEKEN') return rows.filter(r=>{
-    const b=brand(r);
-    return b==='BAVARIA'||b.includes('BAVARIA')||b==='EISENBAHN'||b.includes('EISENBAHN')||b==='KAISER'||b.includes('KAISER')||b==='SOL'||b.startsWith('SOL ');
-  });
+  if(cat==='COBERTURA HEINEKEN') return rows.filter(r=>{const b=brand(r);return b==='BAVARIA'||b.includes('BAVARIA')||b==='EISENBAHN'||b.includes('EISENBAHN')||b==='KAISER'||b.includes('KAISER')||b==='SOL'||b.startsWith('SOL ');});
   const info=(typeof getCatInfo==='function'?getCatInfo()[cat]:{})||{};
   const tipo=String(info.tipo||'').toUpperCase();
-  if(tipo==='CÓDIGO'||tipo==='CODIGO'){
-    const codes=(info.valores||[]).map(v=>String(v).trim().replace(/^0+/,'')).filter(Boolean);
-    return rows.filter(r=>codes.includes(mat(r)));
-  }
-  if(tipo==='MARCA'&&(info.valores||[]).length){
-    const brands=(info.valores||[]).map(v=>String(v).toUpperCase().trim()).filter(Boolean);
-    return rows.filter(r=>brands.some(b=>brand(r).includes(b)));
-  }
+  if(tipo==='CÓDIGO'||tipo==='CODIGO'){const codes=(info.valores||[]).map(v=>String(v).trim().replace(/^0+/,'')).filter(Boolean);return rows.filter(r=>codes.includes(mat(r)));}
+  if(tipo==='MARCA'&&(info.valores||[]).length){const brands=(info.valores||[]).map(v=>String(v).toUpperCase().trim()).filter(Boolean);return rows.filter(r=>brands.some(b=>brand(r).includes(b)));}
   return [];
 }'''
 s,n=re.subn(r'function categoryRows\(rota, cat\)\{.*?\n\}\nfunction uniqueClientsForCategory',new_fn+'\nfunction uniqueClientsForCategory',s,count=1,flags=re.S)
 if n!=1: raise SystemExit('categoryRows nao encontrada')
 
-zero='''<script id="v31-static-final-zero">\n(function(){try{\nif(typeof DATA!=="undefined"&&DATA.metas){Object.keys(DATA.metas).forEach(function(k){DATA.metas[k]=0;});}\ntry{localStorage.removeItem("iturama_metas");}catch(e){}\nvar K="iturama_admin_completo_v2";var c=null;try{c=JSON.parse(localStorage.getItem(K)||"null");}catch(e){}\nif(c){c.metas=c.metas||{};Object.keys(c.metas).forEach(function(k){c.metas[k]=0;});localStorage.setItem(K,JSON.stringify(c));}\n}catch(e){}})();\n</script>'''
-if 'id="v31-static-final-zero"' not in s:
-    s=s.replace('</body>',zero+'\n</body>',1)
+# Zeragem final apos os scripts legados, inclusive Estrella Geral/Original/RGB.
+zero='''<script id="v31-static-final-zero">\n(function(){\n  function aplicar(){try{\n    if(typeof DATA!=="undefined"&&DATA.metas){Object.keys(DATA.metas).forEach(function(k){DATA.metas[k]=0;});}\n    try{localStorage.removeItem("iturama_metas");}catch(e){}\n    var K="iturama_admin_completo_v2",c=null;try{c=JSON.parse(localStorage.getItem(K)||"null");}catch(e){}\n    if(c){c.metas=c.metas||{};Object.keys(c.metas).forEach(function(k){c.metas[k]=0;});localStorage.setItem(K,JSON.stringify(c));}\n  }catch(e){}}\n  aplicar();window.addEventListener("load",aplicar);setTimeout(aplicar,300);setTimeout(aplicar,1000);setTimeout(aplicar,2500);\n})();\n</script>'''
+s=re.sub(r'<script id="v31-static-final-zero">.*?</script>',zero,s,count=1,flags=re.S)
+if 'id="v31-static-final-zero"' not in s:s=s.replace('</body>',zero+'\n</body>',1)
+
+# Atualiza tambem o texto visivel do cabecalho.
+vis=f'Atualizada em {now.strftime("%d/%m/%Y às %H:%M")}'
+s=re.sub(r'Atualizada em[^<]{0,100}',vis,s)
 
 INDEX.write_text(s,encoding='utf-8')
-print('OK - parametros corrigidos, metas zeradas e data/hora atualizada:',now)
+print('OK - metas zeradas e data/hora atualizada:',vis)
