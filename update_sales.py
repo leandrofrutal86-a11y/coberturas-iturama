@@ -51,8 +51,8 @@ new_fn=r'''function categoryRows(rota, cat){
 s,n=re.subn(r'function categoryRows\(rota, cat\)\{.*?\n\}\nfunction uniqueClientsForCategory',new_fn+'\nfunction uniqueClientsForCategory',s,count=1,flags=re.S)
 if n!=1: raise SystemExit('categoryRows nao encontrada')
 
-# Zera as metas depois de todos os scripts legados e força nova renderizacao.
-zero='''<script id="v31-static-final-zero">\n(function(){\n  function aplicar(){try{\n    if(typeof DATA!=="undefined"&&DATA.metas){Object.keys(DATA.metas).forEach(function(k){DATA.metas[k]=0;});}\n    try{localStorage.removeItem("iturama_metas");}catch(e){}\n    var K="iturama_admin_completo_v2",c=null;try{c=JSON.parse(localStorage.getItem(K)||"null");}catch(e){}\n    if(c){c.metas=c.metas||{};Object.keys(c.metas).forEach(function(k){c.metas[k]=0;});localStorage.setItem(K,JSON.stringify(c));}\n    if(typeof render==='function'){try{render('metas');}catch(e){try{render();}catch(x){}}}\n    if(typeof window.render==='function'){try{window.render('metas');}catch(e){}}\n  }catch(e){}}\n  aplicar();window.addEventListener("load",aplicar);setTimeout(aplicar,300);setTimeout(aplicar,1000);setTimeout(aplicar,2500);\n})();\n</script>'''
+# Forca todas as metas a zero e impede scripts legados de recolocarem valores.
+zero='''<script id="v31-static-final-zero">\n(function(){\n  var Z={};\n  function aplicar(){try{\n    if(typeof DATA!=="undefined") {\n      Object.keys(Z).forEach(function(k){Z[k]=0;});\n      try{\n        Object.keys(DATA.metas||{}).forEach(function(k){Z[k]=0;});\n        Object.defineProperty(DATA,"metas",{configurable:false,enumerable:true,get:function(){return Z;},set:function(v){try{Object.keys(v||{}).forEach(function(k){Z[k]=0;});}catch(e){}}});\n      }catch(e){if(DATA.metas)Object.keys(DATA.metas).forEach(function(k){DATA.metas[k]=0;});}\n    }\n    try{localStorage.removeItem("iturama_metas");}catch(e){}\n    try{\n      var K="iturama_admin_completo_v2",c=JSON.parse(localStorage.getItem(K)||"null");\n      if(c){c.metas=c.metas||{};Object.keys(c.metas).forEach(function(k){c.metas[k]=0;});localStorage.setItem(K,JSON.stringify(c));}\n    }catch(e){}\n    if(typeof render==='function'){try{render('metas');}catch(e){try{render();}catch(x){}}}\n    if(typeof window.render==='function'){try{window.render('metas');}catch(e){}}\n  }catch(e){}}\n  aplicar();\n  window.addEventListener("load",aplicar);\n  setTimeout(aplicar,100);setTimeout(aplicar,500);setTimeout(aplicar,1500);setTimeout(aplicar,3000);\n})();\n</script>'''
 s=re.sub(r'<script id="v31-static-final-zero">.*?</script>',zero,s,count=1,flags=re.S)
 if 'id="v31-static-final-zero"' not in s:s=s.replace('</body>',zero+'\n</body>',1)
 
@@ -61,4 +61,4 @@ vis=f'Atualizada em {now.strftime("%d/%m/%Y às %H:%M")}'
 s=re.sub(r'(Base atualizada em|Atualizada em)[^<]{0,100}',vis,s)
 
 INDEX.write_text(s,encoding='utf-8')
-print('OK - metas zeradas, renderizacao refeita e data/hora atualizada:',vis)
+print('OK - metas zeradas de forma definitiva e data/hora atualizada:',vis)
