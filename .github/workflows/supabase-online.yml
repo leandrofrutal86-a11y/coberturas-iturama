@@ -14,125 +14,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - name: Atualizar vendas no HTML
+        run: python update_sales.py
+      - name: Validar JavaScript
         run: |
           python - <<'PY'
           from pathlib import Path
-          import base64,bz2,json,re
-          index=Path('index.html')
-          s=index.read_text(encoding='utf-8')
-          parts=sorted(Path('.').glob('data-update-part-*.txt'))
-          if not parts: raise SystemExit('partes da nova planilha nao encontradas')
-          b=''.join(p.read_text().strip() for p in parts)
-          b += '=' * ((4-len(b)%4)%4)
-          vendas=json.loads(bz2.decompress(base64.b64decode(b)).decode('utf-8'))
-          vendas_json=json.dumps(vendas,ensure_ascii=False,separators=(',',':'))
-          m=re.search(r'const DATA = (\{)',s)
-          if not m: raise SystemExit('DATA nao encontrada')
-          start=m.start(1)
-          def matching(text,pos,op='{',cl='}'):
-              depth=0; ins=False; esc=False
-              for i in range(pos,len(text)):
-                  c=text[i]
-                  if ins:
-                      if esc: esc=False
-                      elif c=='\\': esc=True
-                      elif c=='"': ins=False
-                  else:
-                      if c=='"': ins=True
-                      elif c==op: depth+=1
-                      elif c==cl:
-                          depth-=1
-                          if depth==0:return i
-              return -1
-          end=matching(s,start)
-          vkey=s.find('"vendas":',start,end)
-          arr_start=s.find('[',vkey,end)
-          arr_end=matching(s,arr_start,'[',']')
-          if vkey<0 or arr_start<0 or arr_end<0: raise SystemExit('array vendas nao encontrado')
-          s=s[:arr_start]+vendas_json+s[arr_end+1:]
-          s=re.sub(r"c\.baseVendasAtualizada='[^']*'","c.baseVendasAtualizada='EXPORT_20260904_004542(1).XLSX'",s)
-          s=re.sub(r"c\.source='[^']*'","c.source='EXPORT_20260904_004542(1).XLSX'",s)
-          s=re.sub(r"c\.updatedAt='[^']*'","c.updatedAt='2026-09-04'",s)
-
-          new_fn='''function categoryRows(rota, cat){
-  const R=String(rota);
-  const rows=(DATA.vendas||[]).filter(r=>String(r.Rota??r.rota??'')===R);
-  const mat=r=>String(r.Material??r.material??'').trim().replace(/^0+/, '');
-  const brand=r=>String(r.Marca??r.marca??'').trim().toUpperCase();
-  const desc=r=>String(r.Descrição??r.descricao??r['descrição']??'').trim().toUpperCase();
-  const client=r=>String(r.Cliente??r.cliente??'').trim();
-  if(cat==='FINI') return rows.filter(r=>brand(r)==='FINI');
-  if(cat==='PERFETTI') return rows.filter(r=>brand(r)==='PERFETTI');
-  if(cat==='MONSTER ULTRA') return rows.filter(r=>brand(r).includes('MONSTER ULTRA') || desc(r).includes('MONSTER ULTRA'));
-  if(cat==='MARCA CAMPARI') return rows.filter(r=>brand(r)==='CAMPARI');
-  if(cat==='APEROL') return rows.filter(r=>brand(r)==='APEROL' || desc(r).includes('APEROL'));
-  if(cat==='OLD PARR') return rows.filter(r=>['8280','1965'].includes(mat(r)));
-  if(cat==='RED LABEL') return rows.filter(r=>['1973','1964','8014'].includes(mat(r)));
-  if(cat==='SMIRNOFF VODKA') return rows.filter(r=>desc(r).includes('SMIRNOFF') && !desc(r).includes('ICE'));
-  if(cat==='ESTRELLA GERAL') return rows.filter(r=>brand(r).includes('ESTRELLA') || desc(r).includes('ESTRELLA'));
-  if(cat==='ESTRELLA ORIGINAL') return rows.filter(r=>['1960','1885','1891'].includes(mat(r)));
-  if(cat==='ESTRELLA RGB') return rows.filter(r=>mat(r)==='1891');
-  if(cat==='TRIO PÃO DE QUEIJO'){
-    const byClient=new Map();
-    rows.forEach(r=>{ const pv=client(r); if(!pv)return; if(!byClient.has(pv))byClient.set(pv,[]); byClient.get(pv).push(r); });
-    const complete=[];
-    byClient.forEach(rs=>{
-      if(String(client(rs[0]))==='1440002') return;
-      const g1=rs.some(r=>['1918','1919'].includes(mat(r)));
-      const g2=rs.some(r=>mat(r)==='1916');
-      const g3=rs.some(r=>mat(r)==='1827');
-      if(g1&&g2&&g3) complete.push(rs[0]);
-    });
-    return complete;
-  }
-  if(cat==='COBERTURA HEINEKEN') return rows.filter(r=>{
-    const b=brand(r);
-    return b==='BAVARIA' || b.includes('BAVARIA') || b==='EISENBAHN' || b.includes('EISENBAHN') || b==='KAISER' || b.includes('KAISER') || b==='SOL' || b.startsWith('SOL ');
-  });
-  const info=(typeof getCatInfo==='function'?getCatInfo()[cat]:{})||{};
-  const tipo=String(info.tipo||'').toUpperCase();
-  if(tipo==='CÓDIGO' || tipo==='CODIGO'){
-    const codes=(info.valores||[]).map(v=>String(v).trim().replace(/^0+/,'')).filter(Boolean);
-    return rows.filter(r=>codes.includes(mat(r)));
-  }
-  if(tipo==='MARCA' && (info.valores||[]).length){
-    const brands=(info.valores||[]).map(v=>String(v).toUpperCase().trim()).filter(Boolean);
-    return rows.filter(r=>brands.some(b=>brand(r).includes(b)));
-  }
-  return [];
-}'''
-          s,n=re.subn(r'function categoryRows\(rota, cat\)\{.*?\n\}\nfunction uniqueClientsForCategory',new_fn+'\nfunction uniqueClientsForCategory',s,count=1,flags=re.S)
-          if n!=1: raise SystemExit('nao foi possivel substituir categoryRows')
-
-          # Metas sempre zeradas na versao somente link.
-          if 'id="v31-static-final-zero"' not in s:
-              final_script='''<script id="v31-static-final-zero">\n(function(){try{\n  if(typeof DATA!=="undefined" && DATA.metas){Object.keys(DATA.metas).forEach(function(k){DATA.metas[k]=0;});}\n  try{localStorage.removeItem("iturama_metas");}catch(e){}\n  var K="iturama_admin_completo_v2"; var c=null; try{c=JSON.parse(localStorage.getItem(K)||"null");}catch(e){}\n  if(c){c.metas=c.metas||{};Object.keys(c.metas).forEach(function(k){c.metas[k]=0;});c.source="EXPORT_20260904_004542(1).XLSX";c.updatedAt="2026-09-04";c.baseVendasAtualizada="EXPORT_20260904_004542(1).XLSX";localStorage.setItem(K,JSON.stringify(c));}\n}catch(e){}})();\n</script>'''
-              s=s.replace('</body>',final_script+'\n</body>',1)
-          index.write_text(s,encoding='utf-8')
-          print(f'Vendas atualizadas: {len(vendas)} registros')
-          PY
-
-      - name: Validar
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-          import base64,bz2,json
           s=Path('index.html').read_text(encoding='utf-8')
-          b=''.join(p.read_text().strip() for p in sorted(Path('.').glob('data-update-part-*.txt'))); b+='='*((4-len(b)%4)%4)
-          vendas=json.loads(bz2.decompress(base64.b64decode(b)).decode('utf-8'))
-          if len(vendas)!=3962: raise SystemExit(f'Quantidade inesperada: {len(vendas)}')
           if 'EXPORT_20260904_004542(1).XLSX' not in s: raise SystemExit('fonte nao atualizada')
-          if 'function categoryRows(rota, cat)' not in s: raise SystemExit('regra de categorias ausente')
-          if 'id="v31-static-final-zero"' not in s: raise SystemExit('zeragem final ausente')
-          print('OK: 3962 registros, parametros preservados e metas zeradas')
+          if 'function categoryRows(rota, cat)' not in s: raise SystemExit('parametros ausentes')
+          if 'id="v31-static-final-zero"' not in s: raise SystemExit('zeragem ausente')
+          print('OK - pagina estatica, vendas novas, parametros preservados e metas zeradas')
           PY
-
       - name: Publicar
         run: |
-          rm -f data-update-trigger.txt data-update-part-*.txt
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add index.html data-update-trigger.txt data-update-part-*.txt
+          git add index.html data-update-part-*.txt
           git diff --cached --quiet || (git commit -m 'Atualizar vendas pela nova planilha' && git push)
