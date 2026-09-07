@@ -15,6 +15,7 @@ s,n_date=re.subn(r'(updatedAt"\s*:\s*")[^"]*(")',r'\g<1>'+iso+r'\2',s,count=1)
 if n_date!=1:
     raise SystemExit('updatedAt nao encontrado')
 
+# Corrige somente a funcao de calculo das categorias, preservando os parametros definidos.
 new_fn=r'''function categoryRows(rota, cat){
   const R=String(rota);
   const rows=(DATA.vendas||[]).filter(r=>String(r.Rota??r.rota??'')===R);
@@ -50,14 +51,14 @@ new_fn=r'''function categoryRows(rota, cat){
 s,n=re.subn(r'function categoryRows\(rota, cat\)\{.*?\n\}\nfunction uniqueClientsForCategory',new_fn+'\nfunction uniqueClientsForCategory',s,count=1,flags=re.S)
 if n!=1: raise SystemExit('categoryRows nao encontrada')
 
-# Zeragem final apos os scripts legados, inclusive Estrella Geral/Original/RGB.
-zero='''<script id="v31-static-final-zero">\n(function(){\n  function aplicar(){try{\n    if(typeof DATA!=="undefined"&&DATA.metas){Object.keys(DATA.metas).forEach(function(k){DATA.metas[k]=0;});}\n    try{localStorage.removeItem("iturama_metas");}catch(e){}\n    var K="iturama_admin_completo_v2",c=null;try{c=JSON.parse(localStorage.getItem(K)||"null");}catch(e){}\n    if(c){c.metas=c.metas||{};Object.keys(c.metas).forEach(function(k){c.metas[k]=0;});localStorage.setItem(K,JSON.stringify(c));}\n  }catch(e){}}\n  aplicar();window.addEventListener("load",aplicar);setTimeout(aplicar,300);setTimeout(aplicar,1000);setTimeout(aplicar,2500);\n})();\n</script>'''
+# Zera as metas depois de todos os scripts legados e força nova renderizacao.
+zero='''<script id="v31-static-final-zero">\n(function(){\n  function aplicar(){try{\n    if(typeof DATA!=="undefined"&&DATA.metas){Object.keys(DATA.metas).forEach(function(k){DATA.metas[k]=0;});}\n    try{localStorage.removeItem("iturama_metas");}catch(e){}\n    var K="iturama_admin_completo_v2",c=null;try{c=JSON.parse(localStorage.getItem(K)||"null");}catch(e){}\n    if(c){c.metas=c.metas||{};Object.keys(c.metas).forEach(function(k){c.metas[k]=0;});localStorage.setItem(K,JSON.stringify(c));}\n    if(typeof render==='function'){try{render('metas');}catch(e){try{render();}catch(x){}}}\n    if(typeof window.render==='function'){try{window.render('metas');}catch(e){}}\n  }catch(e){}}\n  aplicar();window.addEventListener("load",aplicar);setTimeout(aplicar,300);setTimeout(aplicar,1000);setTimeout(aplicar,2500);\n})();\n</script>'''
 s=re.sub(r'<script id="v31-static-final-zero">.*?</script>',zero,s,count=1,flags=re.S)
 if 'id="v31-static-final-zero"' not in s:s=s.replace('</body>',zero+'\n</body>',1)
 
-# Atualiza tambem o texto visivel do cabecalho.
+# Atualiza o texto fixo visivel do cabecalho, quando existir.
 vis=f'Atualizada em {now.strftime("%d/%m/%Y às %H:%M")}'
-s=re.sub(r'Atualizada em[^<]{0,100}',vis,s)
+s=re.sub(r'(Base atualizada em|Atualizada em)[^<]{0,100}',vis,s)
 
 INDEX.write_text(s,encoding='utf-8')
-print('OK - metas zeradas e data/hora atualizada:',vis)
+print('OK - metas zeradas, renderizacao refeita e data/hora atualizada:',vis)
