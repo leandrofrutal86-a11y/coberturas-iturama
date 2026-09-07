@@ -47,6 +47,7 @@
     const mat=r=>cc(r?.material??r?.Material??'');
     const brand=r=>String(r?.marca??r?.Marca??'').trim().toUpperCase();
     const desc=r=>String(r?.descricao??r?.Descrição??r?.['descrição']??'').trim().toUpperCase();
+    const subcanal=r=>String(r?.subcanal??r?.Subcanal??r?.['Subcanal']??'').trim().toUpperCase();
     const rowsFor=rota=>(DATA.vendas||[]).filter(r=>route(r)===String(rota));
 
     window.categoryRows=function(rota,cat){
@@ -63,8 +64,18 @@
       if(cat==='ESTRELLA ORIGINAL') return rows.filter(r=>['1960','1885','1891'].includes(mat(r)));
       if(cat==='ESTRELLA RGB') return rows.filter(r=>mat(r)==='1891');
       if(cat==='TRIO PÃO DE QUEIJO') {
-        const by=new Map(); rows.forEach(r=>{const pv=client(r);if(!pv)return;if(!by.has(pv))by.set(pv,[]);by.get(pv).push(r)});
-        const out=[]; by.forEach(rs=>{const g1=rs.some(r=>['1918','1919'].includes(mat(r))),g2=rs.some(r=>mat(r)==='1916'),g3=rs.some(r=>mat(r)==='1827');if(g1&&g2&&g3)out.push(rs[0])});
+        const by=new Map();
+        rows.forEach(r=>{
+          if(subcanal(r)==='DEPOSITO DE BEBIDAS') return;
+          const pv=client(r);if(!pv)return;
+          if(!by.has(pv))by.set(pv,[]);
+          by.get(pv).push(r)
+        });
+        const out=[];
+        by.forEach(rs=>{
+          const g1=rs.some(r=>['1918','1919'].includes(mat(r))),g2=rs.some(r=>mat(r)==='1916'),g3=rs.some(r=>mat(r)==='1827');
+          if(g1&&g2&&g3)out.push(rs[0])
+        });
         return out;
       }
       if(cat==='COBERTURA HEINEKEN') return rows.filter(r=>{const b=brand(r);return b.includes('BAVARIA')||b.includes('EISENBAHN')||b.includes('KAISER')||b==='SOL'||b.startsWith('SOL ')});
@@ -75,12 +86,12 @@
       const panel=document.getElementById('v10ComboDetail'),cat=document.getElementById('categoria'),cons=document.getElementById('consultor');
       if(!panel||!cat||cat.value!=='TRIO PÃO DE QUEIJO') {if(panel)panel.style.display='none';return;}
       const rota=cons?.value||'',groups=[['19-18','19-19'],['19-16'],['18-27']],map=new Map();
-      (DATA.vendas||[]).filter(r=>route(r)===String(rota)).forEach(r=>{const pv=client(r);if(!pv)return;if(!map.has(pv))map.set(pv,{pv,razao:String(r.razao??r['Razão Social']??'').trim(),rows:[]});map.get(pv).rows.push(r)});
+      (DATA.vendas||[]).filter(r=>route(r)===String(rota)&&subcanal(r)!=='DEPOSITO DE BEBIDAS').forEach(r=>{const pv=client(r);if(!pv)return;if(!map.has(pv))map.set(pv,{pv,razao:String(r.razao??r['Razão Social']??'').trim(),rows:[]});map.get(pv).rows.push(r)});
       const arr=[];map.forEach(c=>{const feitos=groups.map(g=>c.rows.some(r=>g.map(cc).includes(mat(r))));const q=feitos.filter(Boolean).length;if(q)arr.push({...c,feitos,q,missing:3-q})});
       arr.sort((a,b)=>a.razao.localeCompare(b.razao,'pt-BR'));
       const completos=arr.filter(x=>x.q===3).length,parciais=arr.length-completos;
       panel.style.display='block';
-      panel.innerHTML='<h3>🔗 Acompanhamento — TRIO PÃO DE QUEIJO</h3><div style="font-size:12px;color:#69707a;margin-bottom:10px"><b>Grupo 1:</b> 19-18 ou 19-19 &nbsp;•&nbsp; <b>Grupo 2:</b> 19-16 &nbsp;•&nbsp; <b>Grupo 3:</b> 18-27. O Trio só fecha com os 3 grupos.</div><div style="font-size:12px;margin-bottom:10px"><b>'+completos+'</b> completos · <b>'+parciais+'</b> com venda parcial</div><div style="overflow:auto"><table><thead><tr><th>PV</th><th>Cliente</th><th>G1</th><th>G2</th><th>G3</th><th>Status</th><th>Falta</th></tr></thead><tbody>'+(arr.length?arr.map(c=>{const s=c.feitos.map(x=>x?'✓':'✕').map(x=>'<td style="font-size:18px;font-weight:800">'+x+'</td>').join('');return '<tr><td><b>'+String(c.pv)+'</b></td><td>'+String(c.razao)+'</td>'+s+'<td class="'+(c.q===3?'v10-combo-done':'v10-combo-missing')+'">'+(c.q===3?'✓ TRIO FECHADO':'✕ NÃO FECHOU')+'</td><td class="v10-combo-missing"><b>'+ (c.missing?('Faltam '+c.missing+' grupo'+(c.missing===1?'':'s')):'—') +'</b></td></tr>'}).join(''):'<tr><td colspan="7">Nenhum cliente vendeu material do Trio nesta rota.</td></tr>')+'</tbody></table></div><div style="font-size:12px;color:#69707a;margin-top:8px">✓ = grupo já vendido. ✕ = grupo ainda não vendido. Se fez 1 grupo, aparecerá ✕ NÃO FECHOU e Faltam 2 grupos.</div>';
+      panel.innerHTML='<h3>🔗 Acompanhamento — TRIO PÃO DE QUEIJO</h3><div style="font-size:12px;color:#69707a;margin-bottom:10px"><b>Grupo 1:</b> 19-18 ou 19-19 &nbsp;•&nbsp; <b>Grupo 2:</b> 19-16 &nbsp;•&nbsp; <b>Grupo 3:</b> 18-27. O Trio só fecha com os 3 grupos.</div><div style="font-size:12px;margin-bottom:10px"><b>'+completos+'</b> completos · <b>'+parciais+'</b> com venda parcial</div><div style="overflow:auto"><table><thead><tr><th>PV</th><th>Cliente</th><th>G1</th><th>G2</th><th>G3</th><th>Status</th><th>Falta</th></tr></thead><tbody>'+(arr.length?arr.map(c=>{const s=c.feitos.map(x=>x?'✓':'✕').map(x=>'<td style="font-size:18px;font-weight:800">'+x+'</td>').join('');return '<tr><td><b>'+String(c.pv)+'</b></td><td>'+String(c.razao)+'</td>'+s+'<td class="'+(c.q===3?'v10-combo-done':'v10-combo-missing')+'">'+(c.q===3?'✓ TRIO FECHADO':'✕ NÃO FECHOU')+'</td><td class="v10-combo-missing"><b>'+ (c.missing?('Faltam '+c.missing+' grupo'+(c.missing===1?'':'s')):'—') +'</b></td></tr>'}).join(''):'<tr><td colspan="7">Nenhum cliente vendeu material do Trio nesta rota.</td></tr>')+'</tbody></table></div><div style="font-size:12px;color:#69707a;margin-top:8px">✓ = grupo já vendido. ✕ = grupo ainda não vendido. Depósito de Bebidas não participa do Trio.</div>';
     };
 
     const oldRender=window.render;
