@@ -28,8 +28,7 @@ jobs:
           s=Path('index.html').read_text(encoding='utf-8')
           m=re.search(r'const DATA = (\{)',s)
           if not m: raise SystemExit('DATA ausente')
-          start=m.start(1)
-          depth=0;ins=False;esc=False;end=-1
+          start=m.start(1); depth=0; ins=False; esc=False; end=-1
           for i in range(start,len(s)):
               c=s[i]
               if ins:
@@ -46,8 +45,8 @@ jobs:
           if len(d.get('vendas',[]))!=232: raise SystemExit(f"Base inesperada: {len(d.get('vendas',[]))}")
           if 'function categoryRows(rota, cat)' not in s: raise SystemExit('Parametros ausentes')
           if 'id="v31-static-final-zero"' not in s: raise SystemExit('Zeragem ausente')
-          if 'admDotsButton' in s: raise SystemExit('Administrador ainda visivel')
-          print('OK - 232 registros da nova planilha, parametros preservados, metas zeradas e sem administrador')
+          if '#adminPanel,#modal,#adminFull,.admMenu{display:none!important}' not in s: raise SystemExit('Administrador nao esta oculto')
+          print('OK - 232 registros da nova planilha, parametros preservados, metas zeradas e administrador oculto')
           PY
       - name: Publicar
         run: |
