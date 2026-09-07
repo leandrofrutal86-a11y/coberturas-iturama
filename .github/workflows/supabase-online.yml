@@ -20,6 +20,53 @@ jobs:
           git checkout 01351efe04b998a528172fa387d99170e43496ea -- index.html
       - name: Aplicar parametros finais
         run: python update_sales.py
+      - name: Corrigir navegacao da Visao Geral
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          s=s.replace('onclick="showOverview()"','onclick="window.__openOverview()"',1)
+          fix='''<script id="v33-fix-overview-button">
+          (function(){
+            function fallback(){
+              try{
+                var panel=document.getElementById('overviewPanel');
+                if(!panel)return;
+                document.querySelectorAll('main > .panel').forEach(function(el){el.style.display=(el===panel?'block':'none');});
+                document.querySelectorAll('.filters,.hero,.cards').forEach(function(el){el.style.display='none';});
+                panel.style.display='block';
+                window.scrollTo(0,0);
+              }catch(e){}
+            }
+            window.__openOverview=function(){
+              try{
+                if(typeof window.showOverview==='function'){window.showOverview();return true;}
+              }catch(e){}
+              fallback();
+              return true;
+            };
+            function bind(){
+              document.querySelectorAll('button').forEach(function(b){
+                if((b.textContent||'').trim().toUpperCase().indexOf('VISÃO GERAL DA EQUIPE')>=0){
+                  b.type='button';
+                  b.onclick=window.__openOverview;
+                }
+              });
+            }
+            bind();
+            window.addEventListener('load',bind);
+            setTimeout(bind,100);setTimeout(bind,500);setTimeout(bind,1500);
+          })();
+          </script>'''
+          if 'id="v33-fix-overview-button"' in s:
+              s=re.sub(r'<script id="v33-fix-overview-button">.*?</script>',fix,s,count=1,flags=re.S)
+          else:
+              s=s.replace('</body>',fix+'\n</body>',1)
+          p.write_text(s,encoding='utf-8')
+          print('OK - botao Visao Geral reforcado')
+          PY
       - name: Validar
         run: |
           python - <<'PY'
@@ -45,12 +92,13 @@ jobs:
           if len(d.get('vendas',[]))!=232: raise SystemExit(f"Base inesperada: {len(d.get('vendas',[]))}")
           if 'function categoryRows(rota, cat)' not in s: raise SystemExit('Parametros ausentes')
           if 'id="v31-static-final-zero"' not in s: raise SystemExit('Zeragem ausente')
+          if 'id="v33-fix-overview-button"' not in s: raise SystemExit('Correcao da Visao Geral ausente')
           if '#adminPanel,#modal,#adminFull,.admMenu{display:none!important}' not in s: raise SystemExit('Administrador nao esta oculto')
-          print('OK - 232 registros da nova planilha, parametros preservados, metas zeradas e administrador oculto')
+          print('OK - 232 registros, parametros preservados, metas zeradas, Visao Geral corrigida e administrador oculto')
           PY
       - name: Publicar
         run: |
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add index.html
-          git diff --cached --quiet || (git commit -m 'Publicar vendas da nova planilha' && git push)
+          git diff --cached --quiet || (git commit -m 'Corrigir botao Visao Geral da Equipe' && git push)
