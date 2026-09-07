@@ -2,14 +2,14 @@ from pathlib import Path
 import base64,bz2,json,re
 
 INDEX=Path('index.html')
-PARTS=sorted(Path('.').glob('data-update-part-*.txt'))
+PARTS=sorted(Path('.').glob('relevant-part-*.txt'))
 if not PARTS:
     raise SystemExit('Partes da nova planilha nao encontradas')
 
 b=''.join(p.read_text().strip() for p in PARTS)
 b += '='*((4-len(b)%4)%4)
 vendas=json.loads(bz2.decompress(base64.b64decode(b)).decode('utf-8'))
-if len(vendas)!=3962:
+if len(vendas)!=254:
     raise SystemExit(f'Quantidade inesperada: {len(vendas)}')
 
 s=INDEX.read_text(encoding='utf-8')
@@ -92,16 +92,12 @@ new_fn=r'''function categoryRows(rota, cat){
 s,n=re.subn(r'function categoryRows\(rota, cat\)\{.*?\n\}\nfunction uniqueClientsForCategory',new_fn+'\nfunction uniqueClientsForCategory',s,count=1,flags=re.S)
 if n!=1: raise SystemExit('categoryRows nao encontrada')
 
-# Zera metas na versao somente link e limpa valores antigos do navegador.
 zero='''<script id="v31-static-final-zero">\n(function(){try{\nif(typeof DATA!=="undefined"&&DATA.metas){Object.keys(DATA.metas).forEach(function(k){DATA.metas[k]=0;});}\ntry{localStorage.removeItem("iturama_metas");}catch(e){}\nvar K="iturama_admin_completo_v2";var c=null;try{c=JSON.parse(localStorage.getItem(K)||"null");}catch(e){}\nif(c){c.metas=c.metas||{};Object.keys(c.metas).forEach(function(k){c.metas[k]=0;});localStorage.setItem(K,JSON.stringify(c));}\n}catch(e){}})();\n</script>'''
 if 'id="v31-static-final-zero"' not in s:
     s=s.replace('</body>',zero+'\n</body>',1)
 
-# Garante que o menu de administrador permaneça invisivel.
-s=s.replace('#adminPanel,#modal,#adminFull,.admMenu{display:none!important}', '#adminPanel,#modal,#adminFull,.admMenu{display:none!important}')
 INDEX.write_text(s,encoding='utf-8')
-print('OK -',len(vendas),'registros inseridos')
-
-for p in PARTS:
-    p.unlink()
+print('OK -',len(vendas),'registros relevantes inseridos')
+for p in PARTS: p.unlink()
+for p in Path('.').glob('data-update-part-*.txt'): p.unlink()
 print('Partes temporarias removidas')
