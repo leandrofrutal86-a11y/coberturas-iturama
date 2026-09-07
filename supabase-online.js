@@ -1,4 +1,4 @@
-/* Correcao final ADM + metas zeradas + sincronizacao online */
+/* Base de vendas atualizada em 07/09/2026 + parametros de categorias */
 (() => {
   const SUPABASE_URL='https://harlrfhukjvhpufwhtep.supabase.co';
   const SUPABASE_KEY='sb_publishable_gxhN7WK6y9j_m3TJwGDHNw_x_lszXgO';
@@ -95,7 +95,7 @@
     try{
       let from=0,rows=[],size=1000;
       while(true){
-        const r=await fetch(`${API}?select=cliente,rota,razao,material,marca,descricao,subcanal,data_nota_fiscal,origem&order=id.asc`,{headers:{...headers,Range:`${from}-${from+size-1}`}});
+        const r=await fetch(`${API}?select=cliente,rota,razao,material,marca,descricao,subcanal,data_nota_fiscal,origem`,{headers:{...headers,Range:`${from}-${from+size-1}`}});
         if(!r.ok)throw Error(`Supabase HTTP ${r.status}`);
         const p=await r.json();if(!Array.isArray(p)||!p.length)break;rows.push(...p);if(p.length<size)break;from+=size;
       }
