@@ -1,46 +1,13 @@
 from pathlib import Path
-import base64,bz2,json,re
+import re
 
 INDEX=Path('index.html')
-PARTS=sorted(Path('.').glob('relevant-part-*.txt'))
-if not PARTS:
-    raise SystemExit('Partes da nova planilha nao encontradas')
-
-b=''.join(p.read_text().strip() for p in PARTS)
-b += '='*((4-len(b)%4)%4)
-vendas=json.loads(bz2.decompress(base64.b64decode(b)).decode('utf-8'))
-if len(vendas)!=254:
-    raise SystemExit(f'Quantidade inesperada: {len(vendas)}')
-
 s=INDEX.read_text(encoding='utf-8')
 
-def matching(text,pos,op='{',cl='}'):
-    depth=0; ins=False; esc=False
-    for i in range(pos,len(text)):
-        c=text[i]
-        if ins:
-            if esc: esc=False
-            elif c=='\\': esc=True
-            elif c=='"': ins=False
-        else:
-            if c=='"': ins=True
-            elif c==op: depth+=1
-            elif c==cl:
-                depth-=1
-                if depth==0:return i
-    return -1
-
-m=re.search(r'const DATA = (\{)',s)
-if not m: raise SystemExit('DATA nao encontrada')
-start=m.start(1); end=matching(s,start)
-vkey=s.find('"vendas":',start,end)
-arr_start=s.find('[',vkey,end); arr_end=matching(s,arr_start,'[',']')
-if vkey<0 or arr_start<0 or arr_end<0: raise SystemExit('array vendas nao encontrado')
-vendas_json=json.dumps(vendas,ensure_ascii=False,separators=(',',':'))
-s=s[:arr_start]+vendas_json+s[arr_end+1:]
-s=re.sub(r"c\.baseVendasAtualizada='[^']*'","c.baseVendasAtualizada='EXPORT_20260904_004542(1).XLSX'",s)
-s=re.sub(r"c\.source='[^']*'","c.source='EXPORT_20260904_004542(1).XLSX'",s)
-s=re.sub(r"c\.updatedAt='[^']*'","c.updatedAt='2026-09-04'",s)
+# A base 01351efe04b998a528172fa387d99170e43496ea ja contem a nova
+# planilha processada anteriormente (232 registros relevantes).
+if 'const DATA =' not in s:
+    raise SystemExit('DATA nao encontrada')
 
 new_fn=r'''function categoryRows(rota, cat){
   const R=String(rota);
@@ -97,7 +64,4 @@ if 'id="v31-static-final-zero"' not in s:
     s=s.replace('</body>',zero+'\n</body>',1)
 
 INDEX.write_text(s,encoding='utf-8')
-print('OK -',len(vendas),'registros relevantes inseridos')
-for p in PARTS: p.unlink()
-for p in Path('.').glob('data-update-part-*.txt'): p.unlink()
-print('Partes temporarias removidas')
+print('OK - parametros corrigidos e metas zeradas')
