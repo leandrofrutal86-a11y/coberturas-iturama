@@ -1,5 +1,7 @@
 from pathlib import Path
 import re
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 INDEX=Path('index.html')
 s=INDEX.read_text(encoding='utf-8')
@@ -8,6 +10,12 @@ s=INDEX.read_text(encoding='utf-8')
 # planilha processada anteriormente (232 registros relevantes).
 if 'const DATA =' not in s:
     raise SystemExit('DATA nao encontrada')
+
+# Atualiza automaticamente a data/hora da ultima publicacao no fuso de Sao Paulo.
+now=datetime.now(ZoneInfo('America/Sao_Paulo')).isoformat(timespec='minutes')
+s,n_date=re.subn(r'(updatedAt"\s*:\s*")[^"]*(")',r'\g<1>'+now+r'\2',s,count=1)
+if n_date!=1:
+    raise SystemExit('updatedAt nao encontrado')
 
 new_fn=r'''function categoryRows(rota, cat){
   const R=String(rota);
@@ -64,4 +72,4 @@ if 'id="v31-static-final-zero"' not in s:
     s=s.replace('</body>',zero+'\n</body>',1)
 
 INDEX.write_text(s,encoding='utf-8')
-print('OK - parametros corrigidos e metas zeradas')
+print('OK - parametros corrigidos, metas zeradas e data/hora atualizada:',now)
