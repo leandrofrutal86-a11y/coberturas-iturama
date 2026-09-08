@@ -36,7 +36,8 @@
   }
 
   function instalarParametros(){
-    if(typeof window.categoryRows!=='function'||typeof DATA==='undefined')return;
+    if(typeof DATA==='undefined')return false;
+    if(typeof window.categoryRows!=='function')return false;
     const old=window.categoryRows;
     const cc=v=>String(v??'').trim().toUpperCase().replace(/[\s-]+/g,'').replace(/^0+(?=\d)/,'');
     const route=r=>String(r?.rota??r?.Rota??'').trim();
@@ -47,7 +48,7 @@
     const subcanal=r=>String(r?.subcanal??r?.Subcanal??r?.['Subcanal']??'').trim().toUpperCase();
     const rowsFor=rota=>(DATA.vendas||[]).filter(r=>route(r)===String(rota));
 
-    window.categoryRows=function(rota,cat){
+    const customCategoryRows=function(rota,cat){
       const rows=rowsFor(rota);
       if(cat==='FINI')return rows.filter(r=>brand(r)==='FINI');
       if(cat==='PERFETTI')return rows.filter(r=>brand(r)==='PERFETTI');
@@ -61,10 +62,10 @@
       if(cat==='ESTRELLA ORIGINAL')return rows.filter(r=>['1960','1885','1891'].includes(mat(r)));
       if(cat==='ESTRELLA RGB')return rows.filter(r=>mat(r)==='1891');
       if(cat==='TRIO PÃO DE QUEIJO'){
+        const depositClients=new Set(rows.filter(r=>subcanal(r)==='DEPOSITO DE BEBIDAS').map(client));
         const by=new Map();
         rows.forEach(r=>{
-          if(subcanal(r)==='DEPOSITO DE BEBIDAS')return;
-          const pv=client(r);if(!pv)return;
+          const pv=client(r);if(!pv||depositClients.has(pv))return;
           if(!by.has(pv))by.set(pv,[]);by.get(pv).push(r);
         });
         const out=[];
@@ -74,15 +75,42 @@
         });
         return out;
       }
-      if(cat==='COBERTURA HEINEKEN')return rows.filter(r=>{const b=brand(r);return b.includes('BAVARIA')||b.includes('EISENBAHN')||b.includes('KAISER')||b==='SOL'||b.startsWith('SOL ')});
+      if(cat==='COBERTURA HEINEKEN'){
+        /* Uma cobertura por cliente. Qualquer uma destas marcas atende a categoria. */
+        const marcas=['HEINEKEN','EISENBAHN','SOL','KAISER','BAVARIA'];
+        const clientes=new Map();
+        rows.forEach(r=>{
+          const b=brand(r);
+          if(marcas.some(m=>b===m||b.startsWith(m+' ')))clientes.set(client(r),r);
+        });
+        return [...clientes.values()];
+      }
       return old(rota,cat);
     };
+
+    window.categoryRows=customCategoryRows;
+
+    /* O render principal usa uniqueClientsForCategory(). Forca tambem essa funcao
+       para garantir 1 cobertura por cliente e evitar depender de estado antigo. */
+    if(typeof window.uniqueClientsForCategory==='function'){
+      const oldUnique=window.uniqueClientsForCategory;
+      if(!oldUnique.__ituramaOnlinePatch){
+        const unique=function(rota,cat){
+          const rows=window.categoryRows(rota,cat)||[];
+          return [...new Map(rows.map(r=>[String(r.cliente??r.Cliente??'').trim(),r]).filter(x=>x[0])).values()];
+        };
+        unique.__ituramaOnlinePatch=true;
+        window.uniqueClientsForCategory=unique;
+      }
+    }
 
     window.__renderTrioDetalhe=function(){
       const panel=document.getElementById('v10ComboDetail'),cat=document.getElementById('categoria'),cons=document.getElementById('consultor');
       if(!panel||!cat||cat.value!=='TRIO PÃO DE QUEIJO'){if(panel)panel.style.display='none';return;}
       const rota=cons?.value||'',groups=[['19-18','19-19'],['19-16','19-17'],['18-27']],map=new Map();
-      (DATA.vendas||[]).filter(r=>route(r)===String(rota)&&subcanal(r)!=='DEPOSITO DE BEBIDAS').forEach(r=>{
+      const rows=rowsFor(rota);
+      const depositClients=new Set(rows.filter(r=>subcanal(r)==='DEPOSITO DE BEBIDAS').map(client));
+      rows.filter(r=>!depositClients.has(client(r))).forEach(r=>{
         const pv=client(r);if(!pv)return;
         if(!map.has(pv))map.set(pv,{pv,razao:String(r.razao??r['Razão Social']??'').trim(),rows:[]});
         map.get(pv).rows.push(r);
@@ -91,7 +119,6 @@
         const feitos=groups.map(g=>c.rows.some(r=>g.map(cc).includes(mat(r)))),q=feitos.filter(Boolean).length;
         if(q)arr.push({...c,feitos,q,missing:3-q});
       });
-      /* Prioridade: 3 grupos completos, depois 2 grupos, depois 1 grupo. Dentro do mesmo nivel, ordem alfabetica. */
       arr.sort((a,b)=>b.q-a.q||a.razao.localeCompare(b.razao,'pt-BR'));
       const completos=arr.filter(x=>x.q===3).length,dois=arr.filter(x=>x.q===2).length,um=arr.filter(x=>x.q===1).length;
       panel.style.display='block';
@@ -99,11 +126,21 @@
     };
 
     const oldRender=window.render;
-    if(typeof oldRender==='function'&&!oldRender.__v32){
-      const wrapped=function(){const r=oldRender.apply(this,arguments);setTimeout(window.__renderTrioDetalhe,20);return r};
-      wrapped.__v32=true;window.render=wrapped;
+    if(typeof oldRender==='function'&&!oldRender.__v33){
+      const wrapped=function(){const r=oldRender.apply(this,arguments);setTimeout(()=>window.__renderTrioDetalhe?.(),30);return r};
+      wrapped.__v33=true;window.render=wrapped;
     }
-    setTimeout(window.__renderTrioDetalhe,100);
+    window.__PARAMETROS_INSTALADOS__=true;
+    return true;
+  }
+
+  function garantirParametros(){
+    if(instalarParametros())return;
+    let tentativas=0;
+    const timer=setInterval(()=>{
+      tentativas++;
+      if(instalarParametros()||tentativas>=40){clearInterval(timer);}
+    },100);
   }
 
   async function carregar(){
@@ -116,13 +153,28 @@
       }
       if(rows.length&&typeof DATA!=='undefined'&&Array.isArray(DATA.vendas)){
         DATA.vendas=rows.map(r=>({cliente:String(r.cliente??'').trim(),rota:String(r.rota??'').trim(),razao:String(r.razao??'').trim(),material:String(r.material??'').trim(),marca:String(r.marca??'').trim(),descricao:String(r.descricao??'').trim(),subcanal:String(r.subcanal??'').trim(),dataNotaFiscal:r.data_nota_fiscal||'',origem:String(r.origem??'').trim()}));
-        zerarMetas();instalarParametros();
-        if(typeof window.refreshMainData==='function')window.refreshMainData();else if(typeof window.render==='function')window.render();
-        setTimeout(()=>{zerarMetas();window.__renderTrioDetalhe?.()},100);window.__SUPABASE_ONLINE_READY__=true;
-      }else{zerarMetas();instalarParametros();if(typeof window.render==='function')window.render();}
-    }catch(e){console.warn('[Supabase]',e);zerarMetas();instalarParametros();if(typeof window.render==='function')window.render();}
+        garantirParametros();
+        /* Aguarda a instalacao das funcoes antes de renderizar: elimina o efeito de piscar
+           entre a base antiga e a base online. */
+        setTimeout(()=>{
+          garantirParametros();
+          try{
+            if(typeof window.refreshMainData==='function')window.refreshMainData();
+            else if(typeof window.fillFilters==='function')window.fillFilters();
+            if(typeof window.render==='function')window.render();
+          }catch(e){console.warn('[Render online]',e)}
+          window.__renderTrioDetalhe?.();
+        },120);
+        zerarMetas();
+        window.__SUPABASE_ONLINE_READY__=true;
+      }else{
+        garantirParametros();
+        zerarMetas();
+        setTimeout(()=>{try{if(typeof window.render==='function')window.render()}catch(e){};window.__renderTrioDetalhe?.()},120);
+      }
+    }catch(e){console.warn('[Supabase]',e);garantirParametros();zerarMetas();setTimeout(()=>window.__renderTrioDetalhe?.(),120);}
   }
 
-  function iniciar(){corrigir();zerarMetas();instalarParametros();carregar();}
+  function iniciar(){corrigir();zerarMetas();garantirParametros();carregar();}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',iniciar);else iniciar();
 })();
