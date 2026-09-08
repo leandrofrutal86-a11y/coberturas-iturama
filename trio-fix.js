@@ -46,7 +46,6 @@
     return {rota,arr,depositClients,complete:arr.filter(x=>x.q===3),two:arr.filter(x=>x.q===2),one:arr.filter(x=>x.q===1)};
   }
 
-  // Localiza o bloco pelo título e sobe apenas até o primeiro ancestral que contém a tabela.
   function findCard(label,extra=''){
     const nodes=[...document.querySelectorAll('h1,h2,h3,h4,div,span,p')].filter(e=>{
       const t=(e.textContent||'').replace(/\s+/g,' ').trim();
@@ -75,12 +74,12 @@
     const card=findCard('Trio Pão de Queijo — acompanhamento','acompanhamento')||findCard('Trio Pão de Queijo','acompanhamento');
     if(!card)return;
     const rowsHtml=d.arr.map(c=>{
-      const marks=c.feitos.map(x=>`<td style="font-size:18px;font-weight:800">${x?'✓':'✕'}</td>`).join('');
-      const status=c.q===3?'✓ TRIO REALIZADO':'✕ NÃO FECHOU';
+      const marks=c.feitos.map(x=>`<td style="font-size:20px;font-weight:900;text-align:center;color:${x?'#16a34a':'#dc2626'}">${x?'✓':'✕'}</td>`).join('');
+      const status=c.q===3?'<span style="color:#16a34a;font-weight:800">✓ TRIO REALIZADO</span>':'<span style="color:#dc2626;font-weight:800">✕ NÃO FECHOU</span>';
       const falta=c.missing?`Faltam ${c.missing} grupo${c.missing===1?'':'s'}`:'—';
       return `<tr><td><b>${esc(c.pv)}</b></td><td>${esc(c.razao)}</td>${marks}<td>${status}</td><td>${falta}</td></tr>`;
     }).join('');
-    card.innerHTML=`<div style="padding:20px 24px;border-bottom:1px solid #eee"><h2 style="margin:0 0 6px">Trio Pão de Queijo — acompanhamento</h2><div style="font-size:13px;color:#69707a">${d.arr.length} clientes com venda · <b>${d.complete.length}</b> completos · <b>${d.two.length}</b> com 2 grupos · <b>${d.one.length}</b> com 1 grupo</div></div><div style="padding:0 16px 16px;overflow:auto"><table><thead><tr><th>CLIENTE</th><th>RAZÃO SOCIAL</th><th>GRUPO 1<br>1918 OU 1919</th><th>GRUPO 2<br>1916 OU 1917</th><th>GRUPO 3<br>1827</th><th>REALIZADO</th><th>FALTA</th></tr></thead><tbody>${rowsHtml||'<tr><td colspan="7">Nenhum cliente vendeu material do Trio nesta rota.</td></tr>'}</tbody></table><div style="font-size:12px;color:#69707a;margin-top:8px">✓ = grupo vendido · ✕ = grupo ainda não vendido · Depósito de Bebidas não participa do acompanhamento nem da cobertura.</div></div>`;
+    card.innerHTML=`<div style="padding:20px 24px;border-bottom:1px solid #eee"><h2 style="margin:0 0 6px">Trio Pão de Queijo — acompanhamento</h2><div style="font-size:13px;color:#69707a">${d.arr.length} clientes com venda · <b>${d.complete.length}</b> completos · <b>${d.two.length}</b> com 2 grupos · <b>${d.one.length}</b> com 1 grupo</div></div><div style="padding:0 16px 16px;overflow:auto"><table><thead><tr><th>CLIENTE</th><th>RAZÃO SOCIAL</th><th>GRUPO 1<br>1918 OU 1919</th><th>GRUPO 2<br>1916 OU 1917</th><th>GRUPO 3<br>1827</th><th>REALIZADO</th><th>FALTA</th></tr></thead><tbody>${rowsHtml||'<tr><td colspan="7">Nenhum cliente vendeu material do Trio nesta rota.</td></tr>'}</tbody></table><div style="font-size:12px;color:#69707a;margin-top:8px">✓ verde = grupo vendido · ✕ vermelho = grupo ainda não vendido · Depósito de Bebidas não participa do acompanhamento nem da cobertura.</div></div>`;
   }
 
   function updateKpi(d){
