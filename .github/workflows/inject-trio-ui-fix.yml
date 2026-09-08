@@ -1,0 +1,35 @@
+name: Inject Trio UI Fix
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  inject:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inject Trio UI script
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          s=re.sub(r'\s*<script\s+src=["\']trio-ui-fix\.js(?:\?[^"\']*)?["\']\s*></script>', '', s, flags=re.I)
+          tag='<script src="trio-ui-fix.js?v=20260908-01"></script>'
+          pos=s.lower().rfind('</body>')
+          if pos >= 0:
+              s=s[:pos]+tag+'\n'+s[pos:]
+          else:
+              s+='\n'+tag+'\n'
+          p.write_text(s,encoding='utf-8')
+          PY
+      - name: Commit injection
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git diff --cached --quiet && exit 0
+          git commit -m 'Corrige painel de acompanhamento do Trio'
+          git push
