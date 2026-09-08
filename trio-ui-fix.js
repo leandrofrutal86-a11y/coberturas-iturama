@@ -5,12 +5,11 @@
   function norm(v){ return String(v ?? '').replace(/\s+/g,' ').trim().toUpperCase(); }
 
   function hideDuplicateTrioPanel(){
-    const headings = [...document.querySelectorAll('h1,h2,h3,h4,h5,h6,.panel-title,.title')];
-    headings.forEach(h => {
-      const t = norm(h.textContent);
-      if(t === 'TRIO PÃO DE QUEIJO — ACOMPANHAMENTO' || t === 'TRIO PÃO DE QUEIJO — ACOMPANHAMENTO'){
-        const panel = h.closest('.panel') || h.parentElement?.closest('.panel') || h.parentElement;
-        if(panel) panel.style.setProperty('display','none','important');
+    document.querySelectorAll('.panel').forEach(panel => {
+      const heading = panel.querySelector('h1,h2,h3,h4,h5,h6,.panel-title,.title');
+      const t = norm(heading?.textContent || '');
+      if(t === 'TRIO PÃO DE QUEIJO — ACOMPANHAMENTO'){
+        panel.style.setProperty('display','none','important');
       }
     });
   }
@@ -23,7 +22,9 @@
     const title = document.querySelector('#clientsCategory');
     if(title) title.textContent = wantedTitle;
 
-    const thead = document.querySelector('.panel table thead');
+    const body = document.querySelector('#tbody');
+    const table = body?.closest('table');
+    const thead = table?.querySelector('thead');
     if(thead){
       thead.innerHTML = '<tr>'+
         '<th>Nº</th><th>PV</th><th>Razão Social</th>'+
