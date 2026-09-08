@@ -17,7 +17,7 @@ jobs:
           p=Path('index.html')
           s=p.read_text(encoding='utf-8')
           s=re.sub(r'\s*<script\s+src=["\']force-category-fix\.js(?:\?[^"\']*)?["\']\s*></script>', '', s, flags=re.I)
-          tag='<script src="force-category-fix.js?v=20260908-final2"></script>'
+          tag='<script src="force-category-fix.js?v=20260908-final3"></script>'
           pos=s.lower().rfind('</body>')
           if pos >= 0:
               s=s[:pos]+tag+'\n'+s[pos:]
@@ -31,5 +31,5 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add index.html
           git diff --cached --quiet && exit 0
-          git commit -m 'Ativa correcao definitiva de coberturas'
+          git commit -m 'Ativa correcao final geral individual'
           git push
