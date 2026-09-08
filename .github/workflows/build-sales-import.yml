@@ -2,7 +2,7 @@ name: Build sales import data
 on:
   push:
     paths:
-      - 'data/import-20260907-0*.txt'
+      - 'data/import-*.txt'
       - '.github/workflows/build-sales-import.yml'
 jobs:
   build:
@@ -13,12 +13,24 @@ jobs:
       - uses: actions/checkout@v4
       - name: Build JSON
         run: |
-          cat data/import-20260907-0*.txt | tr -d '\n\r ' > /tmp/data.b64
+          cat data/import-*.txt | tr -d '\n\r ' > /tmp/data.b64
           base64 -d /tmp/data.b64 | gzip -d > data/import-20260907.json
+      - name: Registrar data e hora da atualizacao
+        run: |
+          python - <<'PY'
+          from datetime import datetime, timezone, timedelta
+          import json
+          tz=timezone(timedelta(hours=-3))
+          now=datetime.now(timezone.utc).astimezone(tz)
+          payload={"updated_at":now.isoformat(),"display":now.strftime('%d/%m/%Y às %H:%M')}
+          with open('data/last-update.json','w',encoding='utf-8') as f:
+              json.dump(payload,f,ensure_ascii=False,indent=2)
+              f.write('\n')
+          PY
       - name: Commit
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/import-20260907.json
-          git commit -m "Gera dados de vendas 07/09/2026" || exit 0
+          git add data/import-20260907.json data/last-update.json
+          git commit -m "Atualiza dados e horario da base" || exit 0
           git push
