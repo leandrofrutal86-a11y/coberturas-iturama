@@ -4,177 +4,18 @@
   const SUPABASE_KEY='sb_publishable_gxhN7WK6y9j_m3TJwGDHNw_x_lszXgO';
   const API=`${SUPABASE_URL}/rest/v1/vendas`;
   const headers={apikey:SUPABASE_KEY,Authorization:`Bearer ${SUPABASE_KEY}`};
-
-  function zerarMetas(){
-    try{
-      if(typeof DATA!=='undefined'&&DATA.metas) Object.keys(DATA.metas).forEach(k=>DATA.metas[k]=0);
-      if(typeof customMetas!=='undefined'){
-        if(typeof DATA!=='undefined'&&DATA.metas) Object.keys(DATA.metas).forEach(k=>customMetas[k]=0);
-        localStorage.setItem('iturama_metas',JSON.stringify(customMetas));
-      }else localStorage.setItem('iturama_metas','{}');
-      const k='iturama_admin_completo_v2',c=JSON.parse(localStorage.getItem(k)||'null');
-      if(c){c.metas=c.metas||{};Object.keys(c.metas).forEach(x=>c.metas[x]=0);localStorage.setItem(k,JSON.stringify(c));}
-      document.querySelectorAll('#adminFull input[type="number"],#adminPanel input[type="number"],#adminGrid input[type="number"]').forEach(e=>e.value='0');
-    }catch(e){console.warn('[Metas]',e)}
-  }
-
-  function abrirADM(){
-    const p=document.getElementById('pass'),err=document.getElementById('err');
-    if(!p||typeof DATA==='undefined'||p.value!==DATA.adminPassword){if(err)err.textContent='Senha incorreta.';return false;}
-    try{if(typeof closeModal==='function')closeModal();}catch(e){}
-    const f=document.getElementById('adminFull');
-    if(f){f.classList.add('open');f.style.display='block';f.style.visibility='visible';f.style.opacity='1';document.body.classList.add('admin-open');f.scrollIntoView({behavior:'smooth',block:'start'});}
-    zerarMetas();try{if(typeof window.openAdminFull==='function')window.openAdminFull();}catch(e){}
-    try{if(typeof window.render==='function')window.render('metas');}catch(e){}
-    setTimeout(zerarMetas,100);return true;
-  }
-
-  function corrigir(){
-    window.__loginADM=abrirADM;
-    document.addEventListener('click',e=>{const b=e.target&&e.target.closest?e.target.closest('button'):null;if(!b)return;const t=String(b.textContent||'').trim().toLowerCase(),o=String(b.getAttribute('onclick')||'').toLowerCase();if(t==='entrar'||o.includes('login')){e.preventDefault();e.stopImmediatePropagation();abrirADM();}},true);
-    document.addEventListener('keydown',e=>{if(e.key==='Enter'){const p=document.getElementById('pass');if(p&&document.activeElement===p){e.preventDefault();e.stopImmediatePropagation();abrirADM();}}},true);
-  }
-
+  function zerarMetas(){try{if(typeof DATA!=='undefined'&&DATA.metas)Object.keys(DATA.metas).forEach(k=>DATA.metas[k]=0);if(typeof customMetas!=='undefined'){if(typeof DATA!=='undefined'&&DATA.metas)Object.keys(DATA.metas).forEach(k=>customMetas[k]=0);localStorage.setItem('iturama_metas',JSON.stringify(customMetas));}else localStorage.setItem('iturama_metas','{}');const k='iturama_admin_completo_v2',c=JSON.parse(localStorage.getItem(k)||'null');if(c){c.metas=c.metas||{};Object.keys(c.metas).forEach(x=>c.metas[x]=0);localStorage.setItem(k,JSON.stringify(c));}document.querySelectorAll('#adminFull input[type="number"],#adminPanel input[type="number"],#adminGrid input[type="number"]').forEach(e=>e.value='0');}catch(e){console.warn('[Metas]',e)}}
+  function abrirADM(){const p=document.getElementById('pass'),err=document.getElementById('err');if(!p||typeof DATA==='undefined'||p.value!==DATA.adminPassword){if(err)err.textContent='Senha incorreta.';return false;}try{if(typeof closeModal==='function')closeModal();}catch(e){}const f=document.getElementById('adminFull');if(f){f.classList.add('open');f.style.display='block';f.style.visibility='visible';f.style.opacity='1';document.body.classList.add('admin-open');f.scrollIntoView({behavior:'smooth',block:'start'});}zerarMetas();try{if(typeof window.openAdminFull==='function')window.openAdminFull();}catch(e){}try{if(typeof window.render==='function')window.render('metas');}catch(e){}setTimeout(zerarMetas,100);return true;}
+  function corrigir(){window.__loginADM=abrirADM;document.addEventListener('click',e=>{const b=e.target&&e.target.closest?e.target.closest('button'):null;if(!b)return;const t=String(b.textContent||'').trim().toLowerCase(),o=String(b.getAttribute('onclick')||'').toLowerCase();if(t==='entrar'||o.includes('login')){e.preventDefault();e.stopImmediatePropagation();abrirADM();}},true);document.addEventListener('keydown',e=>{if(e.key==='Enter'){const p=document.getElementById('pass');if(p&&document.activeElement===p){e.preventDefault();e.stopImmediatePropagation();abrirADM();}}},true)}
   function instalarParametros(){
-    if(typeof DATA==='undefined')return false;
-    if(typeof window.categoryRows!=='function')return false;
-    const old=window.categoryRows;
-    const cc=v=>String(v??'').trim().toUpperCase().replace(/[\s-]+/g,'').replace(/^0+(?=\d)/,'');
-    const route=r=>String(r?.rota??r?.Rota??'').trim();
-    const client=r=>String(r?.cliente??r?.Cliente??'').trim();
-    const mat=r=>cc(r?.material??r?.Material??'');
-    const brand=r=>String(r?.marca??r?.Marca??'').trim().toUpperCase();
-    const desc=r=>String(r?.descricao??r?.Descrição??r?.['descrição']??'').trim().toUpperCase();
-    const subcanal=r=>String(r?.subcanal??r?.Subcanal??r?.['Subcanal']??'').trim().toUpperCase();
-    const rowsFor=rota=>(DATA.vendas||[]).filter(r=>route(r)===String(rota));
-
-    const customCategoryRows=function(rota,cat){
-      const rows=rowsFor(rota);
-      if(cat==='FINI')return rows.filter(r=>brand(r)==='FINI');
-      if(cat==='PERFETTI')return rows.filter(r=>brand(r)==='PERFETTI');
-      if(cat==='MONSTER ULTRA')return rows.filter(r=>brand(r).includes('MONSTER ULTRA')||desc(r).includes('MONSTER ULTRA'));
-      if(cat==='MARCA CAMPARI')return rows.filter(r=>brand(r)==='CAMPARI');
-      if(cat==='APEROL')return rows.filter(r=>brand(r)==='APEROL'||desc(r).includes('APEROL'));
-      if(cat==='OLD PARR')return rows.filter(r=>['8280','1965'].includes(mat(r)));
-      if(cat==='RED LABEL')return rows.filter(r=>['1973','1964','8014'].includes(mat(r)));
-      if(cat==='SMIRNOFF VODKA')return rows.filter(r=>desc(r).includes('SMIRNOFF')&&!desc(r).includes('ICE'));
-      if(cat==='ESTRELLA GERAL')return rows.filter(r=>brand(r).includes('ESTRELLA')||desc(r).includes('ESTRELLA'));
-      if(cat==='ESTRELLA ORIGINAL')return rows.filter(r=>['1960','1885','1891'].includes(mat(r)));
-      if(cat==='ESTRELLA RGB')return rows.filter(r=>mat(r)==='1891');
-      if(cat==='TRIO PÃO DE QUEIJO'){
-        const depositClients=new Set(rows.filter(r=>subcanal(r)==='DEPOSITO DE BEBIDAS').map(client));
-        const by=new Map();
-        rows.forEach(r=>{
-          const pv=client(r);if(!pv||depositClients.has(pv))return;
-          if(!by.has(pv))by.set(pv,[]);by.get(pv).push(r);
-        });
-        const out=[];
-        by.forEach(rs=>{
-          const g1=rs.some(r=>['1918','1919'].includes(mat(r))),g2=rs.some(r=>['1916','1917'].includes(mat(r))),g3=rs.some(r=>mat(r)==='1827');
-          if(g1&&g2&&g3)out.push(rs[0]);
-        });
-        return out;
-      }
-      if(cat==='COBERTURA HEINEKEN'){
-        /* Uma cobertura por cliente. Qualquer uma destas marcas atende a categoria. */
-        const marcas=['HEINEKEN','EISENBAHN','SOL','KAISER','BAVARIA'];
-        const clientes=new Map();
-        rows.forEach(r=>{
-          const b=brand(r);
-          if(marcas.some(m=>b===m||b.startsWith(m+' ')))clientes.set(client(r),r);
-        });
-        return [...clientes.values()];
-      }
-      return old(rota,cat);
-    };
-
+    if(typeof DATA==='undefined'||typeof window.categoryRows!=='function')return false;
+    const old=window.categoryRows,cc=v=>String(v??'').trim().toUpperCase().replace(/[\s-]+/g,'').replace(/^0+(?=\d)/,''),route=r=>String(r?.rota??r?.Rota??'').trim(),client=r=>String(r?.cliente??r?.Cliente??'').trim(),mat=r=>cc(r?.material??r?.Material??''),brand=r=>String(r?.marca??r?.Marca??'').trim().toUpperCase(),desc=r=>String(r?.descricao??r?.Descrição??r?.['descrição']??'').trim().toUpperCase(),subcanal=r=>String(r?.subcanal??r?.Subcanal??r?.['Subcanal']??'').trim().toUpperCase(),rowsFor=rota=>(DATA.vendas||[]).filter(r=>route(r)===String(rota));
+    const customCategoryRows=function(rota,cat){const rows=rowsFor(rota);if(cat==='FINI')return rows.filter(r=>brand(r)==='FINI');if(cat==='PERFETTI')return rows.filter(r=>brand(r)==='PERFETTI');if(cat==='MONSTER ULTRA')return rows.filter(r=>brand(r).includes('MONSTER ULTRA')||desc(r).includes('MONSTER ULTRA'));if(cat==='MARCA CAMPARI')return rows.filter(r=>brand(r)==='CAMPARI');if(cat==='APEROL')return rows.filter(r=>brand(r)==='APEROL'||desc(r).includes('APEROL'));if(cat==='OLD PARR')return rows.filter(r=>['8280','1965'].includes(mat(r)));if(cat==='RED LABEL')return rows.filter(r=>['1973','1964','8014'].includes(mat(r)));if(cat==='SMIRNOFF VODKA')return rows.filter(r=>desc(r).includes('SMIRNOFF')&&!desc(r).includes('ICE'));if(cat==='ESTRELLA GERAL')return rows.filter(r=>brand(r).includes('ESTRELLA')||desc(r).includes('ESTRELLA'));if(cat==='ESTRELLA ORIGINAL')return rows.filter(r=>['1960','1885','1891'].includes(mat(r)));if(cat==='ESTRELLA RGB')return rows.filter(r=>mat(r)==='1891');if(cat==='TRIO PÃO DE QUEIJO'){const depositClients=new Set(rows.filter(r=>subcanal(r)==='DEPOSITO DE BEBIDAS').map(client));const by=new Map();rows.forEach(r=>{const pv=client(r);if(!pv||depositClients.has(pv))return;if(!by.has(pv))by.set(pv,[]);by.get(pv).push(r)});const out=[];by.forEach(rs=>{const g1=rs.some(r=>['1918','1919'].includes(mat(r))),g2=rs.some(r=>['1916','1917'].includes(mat(r))),g3=rs.some(r=>mat(r)==='1827');if(g1&&g2&&g3)out.push(rs[0])});return out;}if(cat==='COBERTURA HEINEKEN'){const marcas=['HEINEKEN','EISENBAHN','SOL','KAISER','BAVARIA'],clientes=new Map();rows.forEach(r=>{const b=brand(r);if(marcas.some(m=>b===m||b.startsWith(m+' '))){const pv=client(r);if(pv)clientes.set(pv,r)}});return [...clientes.values()]}return old(rota,cat)};
     window.categoryRows=customCategoryRows;
-
-    /* O render principal usa uniqueClientsForCategory(). Forca tambem essa funcao
-       para garantir 1 cobertura por cliente e evitar depender de estado antigo. */
-    if(typeof window.uniqueClientsForCategory==='function'){
-      const oldUnique=window.uniqueClientsForCategory;
-      if(!oldUnique.__ituramaOnlinePatch){
-        const unique=function(rota,cat){
-          const rows=window.categoryRows(rota,cat)||[];
-          return [...new Map(rows.map(r=>[String(r.cliente??r.Cliente??'').trim(),r]).filter(x=>x[0])).values()];
-        };
-        unique.__ituramaOnlinePatch=true;
-        window.uniqueClientsForCategory=unique;
-      }
-    }
-
-    window.__renderTrioDetalhe=function(){
-      const panel=document.getElementById('v10ComboDetail'),cat=document.getElementById('categoria'),cons=document.getElementById('consultor');
-      if(!panel||!cat||cat.value!=='TRIO PÃO DE QUEIJO'){if(panel)panel.style.display='none';return;}
-      const rota=cons?.value||'',groups=[['19-18','19-19'],['19-16','19-17'],['18-27']],map=new Map();
-      const rows=rowsFor(rota);
-      const depositClients=new Set(rows.filter(r=>subcanal(r)==='DEPOSITO DE BEBIDAS').map(client));
-      rows.filter(r=>!depositClients.has(client(r))).forEach(r=>{
-        const pv=client(r);if(!pv)return;
-        if(!map.has(pv))map.set(pv,{pv,razao:String(r.razao??r['Razão Social']??'').trim(),rows:[]});
-        map.get(pv).rows.push(r);
-      });
-      const arr=[];map.forEach(c=>{
-        const feitos=groups.map(g=>c.rows.some(r=>g.map(cc).includes(mat(r)))),q=feitos.filter(Boolean).length;
-        if(q)arr.push({...c,feitos,q,missing:3-q});
-      });
-      arr.sort((a,b)=>b.q-a.q||a.razao.localeCompare(b.razao,'pt-BR'));
-      const completos=arr.filter(x=>x.q===3).length,dois=arr.filter(x=>x.q===2).length,um=arr.filter(x=>x.q===1).length;
-      panel.style.display='block';
-      panel.innerHTML='<h3>🔗 Acompanhamento — TRIO PÃO DE QUEIJO</h3><div style="font-size:12px;color:#69707a;margin-bottom:10px"><b>Grupo 1:</b> 19-18 ou 19-19 &nbsp;•&nbsp; <b>Grupo 2:</b> 19-16 ou 19-17 &nbsp;•&nbsp; <b>Grupo 3:</b> 18-27. O Trio fecha com os 3 grupos.</div><div style="font-size:12px;margin-bottom:10px"><b>'+completos+'</b> realizados · <b>'+dois+'</b> com 2 grupos · <b>'+um+'</b> com 1 grupo</div><div style="overflow:auto"><table><thead><tr><th>PV</th><th>Cliente</th><th>G1</th><th>G2</th><th>G3</th><th>Status</th><th>Falta</th></tr></thead><tbody>'+(arr.length?arr.map(c=>{const s=c.feitos.map(x=>x?'✓':'✕').map(x=>'<td style="font-size:18px;font-weight:800">'+x+'</td>').join('');return '<tr><td><b>'+String(c.pv)+'</b></td><td>'+String(c.razao)+'</td>'+s+'<td class="'+(c.q===3?'v10-combo-done':'v10-combo-missing')+'">'+(c.q===3?'✓ TRIO REALIZADO':'✕ NÃO FECHOU')+'</td><td class="v10-combo-missing"><b>'+ (c.missing?('Faltam '+c.missing+' grupo'+(c.missing===1?'':'s')):'—') +'</b></td></tr>'}).join(''):'<tr><td colspan="7">Nenhum cliente vendeu material do Trio nesta rota.</td></tr>')+'</tbody></table></div><div style="font-size:12px;color:#69707a;margin-top:8px">✓ = grupo vendido. ✕ = grupo ainda não vendido. Depósito de Bebidas não participa do Trio.</div>';
-    };
-
-    const oldRender=window.render;
-    if(typeof oldRender==='function'&&!oldRender.__v33){
-      const wrapped=function(){const r=oldRender.apply(this,arguments);setTimeout(()=>window.__renderTrioDetalhe?.(),30);return r};
-      wrapped.__v33=true;window.render=wrapped;
-    }
-    window.__PARAMETROS_INSTALADOS__=true;
-    return true;
-  }
-
-  function garantirParametros(){
-    if(instalarParametros())return;
-    let tentativas=0;
-    const timer=setInterval(()=>{
-      tentativas++;
-      if(instalarParametros()||tentativas>=40){clearInterval(timer);}
-    },100);
-  }
-
-  async function carregar(){
-    try{
-      let from=0,rows=[],size=1000;
-      while(true){
-        const r=await fetch(`${API}?select=cliente,rota,razao,material,marca,descricao,subcanal,data_nota_fiscal,origem`,{headers:{...headers,Range:`${from}-${from+size-1}`}});
-        if(!r.ok)throw Error(`Supabase HTTP ${r.status}`);
-        const p=await r.json();if(!Array.isArray(p)||!p.length)break;rows.push(...p);if(p.length<size)break;from+=size;
-      }
-      if(rows.length&&typeof DATA!=='undefined'&&Array.isArray(DATA.vendas)){
-        DATA.vendas=rows.map(r=>({cliente:String(r.cliente??'').trim(),rota:String(r.rota??'').trim(),razao:String(r.razao??'').trim(),material:String(r.material??'').trim(),marca:String(r.marca??'').trim(),descricao:String(r.descricao??'').trim(),subcanal:String(r.subcanal??'').trim(),dataNotaFiscal:r.data_nota_fiscal||'',origem:String(r.origem??'').trim()}));
-        garantirParametros();
-        /* Aguarda a instalacao das funcoes antes de renderizar: elimina o efeito de piscar
-           entre a base antiga e a base online. */
-        setTimeout(()=>{
-          garantirParametros();
-          try{
-            if(typeof window.refreshMainData==='function')window.refreshMainData();
-            else if(typeof window.fillFilters==='function')window.fillFilters();
-            if(typeof window.render==='function')window.render();
-          }catch(e){console.warn('[Render online]',e)}
-          window.__renderTrioDetalhe?.();
-        },120);
-        zerarMetas();
-        window.__SUPABASE_ONLINE_READY__=true;
-      }else{
-        garantirParametros();
-        zerarMetas();
-        setTimeout(()=>{try{if(typeof window.render==='function')window.render()}catch(e){};window.__renderTrioDetalhe?.()},120);
-      }
-    }catch(e){console.warn('[Supabase]',e);garantirParametros();zerarMetas();setTimeout(()=>window.__renderTrioDetalhe?.(),120);}
-  }
-
-  function iniciar(){corrigir();zerarMetas();garantirParametros();carregar();}
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',iniciar);else iniciar();
+    if(typeof window.uniqueClientsForCategory==='function'){const oldUnique=window.uniqueClientsForCategory;if(!oldUnique.__ituramaOnlinePatch){const unique=function(rota,cat){const rows=window.categoryRows(rota,cat)||[];return [...new Map(rows.map(r=>[String(r.cliente??r.Cliente??'').trim(),r]).filter(x=>x[0])).values()]};unique.__ituramaOnlinePatch=true;window.uniqueClientsForCategory=unique}}
+    window.__renderTrioDetalhe=function(){const panel=document.getElementById('v10ComboDetail'),cat=document.getElementById('categoria'),cons=document.getElementById('consultor');if(!panel||!cat||cat.value!=='TRIO PÃO DE QUEIJO'){if(panel)panel.style.display='none';return}const rota=cons?.value||'',groups=[['19-18','19-19'],['19-16','19-17'],['18-27']],map=new Map(),rows=rowsFor(rota),depositClients=new Set(rows.filter(r=>subcanal(r)==='DEPOSITO DE BEBIDAS').map(client));rows.filter(r=>!depositClients.has(client(r))).forEach(r=>{const pv=client(r);if(!pv)return;if(!map.has(pv))map.set(pv,{pv,razao:String(r.razao??r['Razão Social']??'').trim(),rows:[]});map.get(pv).rows.push(r)});const arr=[];map.forEach(c=>{const feitos=groups.map(g=>c.rows.some(r=>g.map(cc).includes(mat(r)))),q=feitos.filter(Boolean).length;if(q)arr.push({...c,feitos,q,missing:3-q})});arr.sort((a,b)=>b.q-a.q||a.razao.localeCompare(b.razao,'pt-BR'));const completos=arr.filter(x=>x.q===3).length,dois=arr.filter(x=>x.q===2).length,um=arr.filter(x=>x.q===1).length;panel.style.display='block';panel.innerHTML='<h3>🔗 Acompanhamento — TRIO PÃO DE QUEIJO</h3><div style="font-size:12px;color:#69707a;margin-bottom:10px"><b>Grupo 1:</b> 19-18 ou 19-19 &nbsp;•&nbsp; <b>Grupo 2:</b> 19-16 ou 19-17 &nbsp;•&nbsp; <b>Grupo 3:</b> 18-27. O Trio fecha com os 3 grupos.</div><div style="font-size:12px;margin-bottom:10px"><b>'+completos+'</b> realizados · <b>'+dois+'</b> com 2 grupos · <b>'+um+'</b> com 1 grupo</div><div style="overflow:auto"><table><thead><tr><th>PV</th><th>Cliente</th><th>G1</th><th>G2</th><th>G3</th><th>Status</th><th>Falta</th></tr></thead><tbody>'+(arr.length?arr.map(c=>{const s=c.feitos.map(x=>x?'✓':'✕').map(x=>'<td style="font-size:18px;font-weight:800">'+x+'</td>').join('');return '<tr><td><b>'+String(c.pv)+'</b></td><td>'+String(c.razao)+'</td>'+s+'<td class="'+(c.q===3?'v10-combo-done':'v10-combo-missing')+'">'+(c.q===3?'✓ TRIO REALIZADO':'✕ NÃO FECHOU')+'</td><td class="v10-combo-missing"><b>'+ (c.missing?('Faltam '+c.missing+' grupo'+(c.missing===1?'':'s')):'—') +'</b></td></tr>'}).join(''):'<tr><td colspan="7">Nenhum cliente vendeu material do Trio nesta rota.</td></tr>')+'</tbody></table></div><div style="font-size:12px;color:#69707a;margin-top:8px">✓ = grupo vendido. ✕ = grupo ainda não vendido. Depósito de Bebidas não participa do Trio.</div>'};
+    const oldRender=window.render;if(typeof oldRender==='function'&&!oldRender.__v33){const wrapped=function(){const r=oldRender.apply(this,arguments);setTimeout(()=>window.__renderTrioDetalhe?.(),30);return r};wrapped.__v33=true;window.render=wrapped}window.__PARAMETROS_INSTALADOS__=true;return true}
+  function garantirParametros(){if(instalarParametros())return;let tentativas=0;const timer=setInterval(()=>{tentativas++;if(instalarParametros()||tentativas>=40)clearInterval(timer)},100)}
+  async function carregar(){try{let from=0,rows=[],size=1000;while(true){const r=await fetch(`${API}?select=cliente,rota,razao,material,marca,descricao,subcanal,data_nota_fiscal,origem`,{headers:{...headers,Range:`${from}-${from+size-1}`}});if(!r.ok)throw Error(`Supabase HTTP ${r.status}`);const p=await r.json();if(!Array.isArray(p)||!p.length)break;rows.push(...p);if(p.length<size)break;from+=size}if(rows.length&&typeof DATA!=='undefined'&&Array.isArray(DATA.vendas)){DATA.vendas=rows.map(r=>({cliente:String(r.cliente??'').trim(),rota:String(r.rota??'').trim(),razao:String(r.razao??'').trim(),material:String(r.material??'').trim(),marca:String(r.marca??'').trim(),descricao:String(r.descricao??'').trim(),subcanal:String(r.subcanal??'').trim(),dataNotaFiscal:r.data_nota_fiscal||'',origem:String(r.origem??'').trim()}));zerarMetas();garantirParametros();setTimeout(()=>{try{if(typeof window.refreshMainData==='function'){window.refreshMainData()}else if(typeof window.fillFilters==='function'){window.fillFilters();if(typeof window.render==='function')window.render()}else if(typeof window.render==='function')window.render()}catch(e){console.warn('[Render online]',e)}window.__renderTrioDetalhe?.()},150);window.__SUPABASE_ONLINE_READY__=true}else{zerarMetas();garantirParametros();setTimeout(()=>window.__renderTrioDetalhe?.(),150)}}catch(e){console.warn('[Supabase]',e);zerarMetas();garantirParametros();setTimeout(()=>window.__renderTrioDetalhe?.(),150)}}
+  function iniciar(){corrigir();zerarMetas();garantirParametros();carregar()}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',iniciar);else iniciar();
 })();
