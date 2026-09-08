@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<meta name="theme-color" content="#d71920" />
+<title>Equipe Iturama</title>
+<link rel="manifest" href="manifest.json" />
+<style>
+:root{--red:#d71920;--red2:#a90f14;--green:#11875d;--blue:#1767d2;--amber:#f3a000;--ink:#182026;--muted:#65717e;--bg:#f4f7f8;--card:#fff;--line:#e4e9ec;--shadow:0 10px 30px rgba(22,34,46,.10)}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}button,input{font:inherit}.app{min-height:100vh}.hero{background:linear-gradient(145deg,#111 0%,#241010 38%,var(--red2) 100%);color:#fff;padding:22px 20px 34px}.brand{font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;opacity:.82}.hero h1{font-size:34px;line-height:1.02;margin:54px 0 8px}.hero p{margin:0;color:#f3d9d9}.login{width:min(460px,calc(100% - 24px));margin:-18px auto 24px;background:#fff;border-radius:24px;padding:22px;box-shadow:var(--shadow)}.login h2{margin:0 0 6px}.sub{color:var(--muted);font-size:14px}.field{margin-top:18px}.field label{display:block;font-size:13px;font-weight:800;margin-bottom:7px}.field input{width:100%;border:1px solid #cfd8dd;border-radius:14px;padding:15px 14px;outline:none;background:#fbfcfc}.field input:focus{border-color:var(--red);box-shadow:0 0 0 3px rgba(215,25,32,.10)}.btn{width:100%;border:0;border-radius:14px;padding:15px;font-weight:900;cursor:pointer;margin-top:18px}.btn.red{background:linear-gradient(135deg,var(--red),#ef2b32);color:#fff}.msg{min-height:20px;margin-top:12px;font-size:13px;color:#b00;font-weight:700}.hidden{display:none!important}.top{background:linear-gradient(135deg,var(--red),#a40f14);color:#fff;padding:20px 18px 30px}.toprow{display:flex;align-items:center;justify-content:space-between;gap:14px}.who strong{font-size:22px;display:block}.who span{opacity:.85}.logout{border:1px solid #ffffff55;background:#ffffff18;color:#fff;border-radius:12px;padding:9px 12px;font-weight:800}.wrap{width:min(980px,calc(100% - 24px));margin:-14px auto 30px}.status{background:#fff;border-radius:18px;padding:14px 16px;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:space-between;gap:12px}.dot{width:10px;height:10px;background:#20b26b;border-radius:50%;display:inline-block;margin-right:7px}.tabs{display:grid;grid-template-columns:1fr 1fr;background:#e9eef1;border-radius:14px;padding:4px;margin:16px 0}.tab{border:0;background:transparent;border-radius:11px;padding:12px;font-weight:900;color:#5d6873}.tab.active{background:#fff;color:var(--red);box-shadow:0 2px 10px #00000010}.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.metric{background:#fff;border-radius:16px;padding:16px;box-shadow:var(--shadow)}.metric b{font-size:26px;display:block}.metric small{color:var(--muted);font-weight:700}.panel{margin-top:14px;background:#fff;border-radius:18px;padding:16px;box-shadow:var(--shadow)}.panel h3{margin:0 0 12px}.cat{padding:14px 0;border-top:1px solid var(--line)}.cat:first-of-type{border-top:0}.catHead{display:flex;justify-content:space-between;gap:12px;align-items:center}.catName{font-weight:900}.nums{font-size:13px;color:var(--muted);margin-top:4px}.bar{height:8px;background:#edf1f3;border-radius:99px;overflow:hidden;margin-top:9px}.fill{height:100%;background:linear-gradient(90deg,var(--red),#ef4046);border-radius:99px}.teamNote{padding:12px;background:#f3f7ff;border:1px solid #dce8ff;border-radius:12px;color:#385170;font-size:13px;margin-bottom:8px}.empty{color:var(--muted);padding:20px 0;text-align:center}.spinner{width:20px;height:20px;border:3px solid #ffffff55;border-top-color:#fff;border-radius:50%;display:inline-block;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+@media(max-width:650px){.metrics{grid-template-columns:1fr 1fr}.hero h1{font-size:30px}.wrap{width:calc(100% - 18px)}.status{font-size:13px}}
+</style>
+</head>
+<body>
+<div id="loginScreen" class="app">
+  <section class="hero"><div class="brand">Uberlândia Refrescos • Equipe Iturama</div><h1>Bem-vindo!</h1><p>Acompanhe seu resultado e o consolidado da equipe.</p></section>
+  <section class="login">
+    <h2>Acesso do consultor</h2><div class="sub">Entre com sua matrícula e senha.</div>
+    <div class="field"><label>Matrícula</label><input id="matricula" autocomplete="username" placeholder="Ex.: 8A1" /></div>
+    <div class="field"><label>Senha</label><input id="senha" type="password" autocomplete="current-password" placeholder="Digite sua senha" /></div>
+    <button id="entrar" class="btn red">Entrar</button><div id="loginMsg" class="msg"></div>
+  </section>
+</div>
+
+<div id="dashboardScreen" class="app hidden">
+  <header class="top"><div class="toprow"><div class="who"><strong id="nomeConsultor">Meu Painel</strong><span id="rotaConsultor"></span></div><button id="sair" class="logout">Sair</button></div></header>
+  <main class="wrap">
+    <div class="status"><div><span class="dot"></span><b>Base online ativa</b></div><span id="syncText">Dados sincronizados</span></div>
+    <div class="tabs"><button class="tab active" data-tab="meu">Meu Resultado</button><button class="tab" data-tab="equipe">Resultado da Equipe</button></div>
+    <section id="metrics" class="metrics"></section>
+    <section class="panel"><div id="teamNote" class="teamNote hidden">Aqui aparece somente a soma da Equipe Iturama. Nenhum resultado individual de outro consultor é exibido.</div><h3 id="panelTitle">Minhas categorias</h3><div id="cats"></div></section>
+  </main>
+</div>
+<script>
+const API='https://harlrfhukjvhpufwhtep.supabase.co/functions/v1/consultor-api';
+let data=null,tab='meu';
+const $=s=>document.querySelector(s);
+const fmt=n=>Number(n||0).toLocaleString('pt-BR');
+async function call(payload){const r=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});const j=await r.json();if(!r.ok)throw new Error(j.error||'Erro');return j}
+function saveToken(t){sessionStorage.setItem('iturama_consultor_token',t)}
+function token(){return sessionStorage.getItem('iturama_consultor_token')||''}
+async function login(){const b=$('#entrar'),msg=$('#loginMsg');msg.textContent='';b.disabled=true;b.innerHTML='<span class="spinner"></span>';try{const j=await call({action:'login',matricula:$('#matricula').value.trim(),senha:$('#senha').value});saveToken(j.token);await loadDashboard()}catch(e){msg.textContent=e.message}finally{b.disabled=false;b.textContent='Entrar'}}
+async function loadDashboard(){if(!token())return;try{data=await call({action:'dashboard',token:token()});$('#nomeConsultor').textContent=data.consultor.nome;$('#rotaConsultor').textContent='Matrícula: '+data.consultor.matricula;$('#loginScreen').classList.add('hidden');$('#dashboardScreen').classList.remove('hidden');render()}catch(e){sessionStorage.removeItem('iturama_consultor_token');$('#loginMsg').textContent=e.message;$('#loginScreen').classList.remove('hidden');$('#dashboardScreen').classList.add('hidden')}}
+function render(){const list=tab==='meu'?data.own:data.team;const atingidas=list.filter(x=>x.meta>0&&x.realizado>=x.meta).length;const total=list.length;const meta=list.reduce((a,x)=>a+Number(x.meta||0),0);const real=list.reduce((a,x)=>a+Number(x.realizado||0),0);const pct=meta?Math.round(real/meta*100):0;$('#metrics').innerHTML=`<div class="metric"><b>${fmt(total)}</b><small>Categorias</small></div><div class="metric"><b>${fmt(atingidas)}</b><small>Atingidas</small></div><div class="metric"><b>${fmt(real)}</b><small>Realizados</small></div><div class="metric"><b>${pct}%</b><small>Cobertura</small></div>`;$('#panelTitle').textContent=tab==='meu'?'Minhas categorias':'Consolidado da equipe';$('#teamNote').classList.toggle('hidden',tab!=='equipe');$('#cats').innerHTML=list.length?list.map(x=>`<div class="cat"><div class="catHead"><div><div class="catName">${x.nome}</div><div class="nums">Meta ${fmt(x.meta)} • Realizado ${fmt(x.realizado)} • Falta ${fmt(x.falta)}</div></div><b>${x.percentual}%</b></div><div class="bar"><div class="fill" style="width:${Math.min(100,x.percentual||0)}%"></div></div></div>`).join(''):'<div class="empty">Sem dados.</div>'}
+document.addEventListener('click',e=>{const t=e.target.closest('.tab');if(t){document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));t.classList.add('active');tab=t.dataset.tab;render()}});
+$('#entrar').onclick=login;$('#senha').addEventListener('keydown',e=>{if(e.key==='Enter')login()});$('#sair').onclick=()=>{sessionStorage.clear();location.reload()};if(token())loadDashboard();
+if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+</body></html>
