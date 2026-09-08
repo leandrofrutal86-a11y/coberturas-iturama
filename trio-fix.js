@@ -27,6 +27,7 @@
     const sel=document.getElementById('consultor');
     const rota=String(sel?.value||'').trim();
     const rr=rows.filter(r=>route(r)===rota);
+    // Se o cliente tiver qualquer venda no subcanal Depósito de Bebidas, ele fica fora do Trio inteiro.
     const depositClients=new Set(rr.filter(r=>sub(r)==='DEPOSITO DE BEBIDAS').map(client).filter(Boolean));
     const map=new Map();
     rr.forEach(r=>{
@@ -45,14 +46,16 @@
     return {rota,arr,depositClients,complete:arr.filter(x=>x.q===3),two:arr.filter(x=>x.q===2),one:arr.filter(x=>x.q===1)};
   }
 
+  // Localiza o bloco pelo título e sobe apenas até o primeiro ancestral que contém a tabela.
   function findCard(label,extra=''){
-    const els=[...document.querySelectorAll('div,section,article')];
-    for(const e of els){
+    const nodes=[...document.querySelectorAll('h1,h2,h3,h4,div,span,p')].filter(e=>{
       const t=(e.textContent||'').replace(/\s+/g,' ').trim();
-      if(t.includes(label)&&(!extra||t.toLowerCase().includes(extra.toLowerCase()))&&e.querySelector('table')){
-        const p=e.parentElement;
-        if(p&&p.querySelector('table')&&((p.textContent||'').includes(label)))return p;
-        return e;
+      return t.includes(label)&&(!extra||t.toLowerCase().includes(extra.toLowerCase()));
+    });
+    for(const n of nodes){
+      let p=n;
+      for(let i=0;i<8&&p;i++,p=p.parentElement){
+        if(p.querySelector&&p.querySelector('table'))return p;
       }
     }
     return null;
@@ -69,8 +72,7 @@
   }
 
   function updateAcompanhamento(d){
-    let card=findCard('Trio Pão de Queijo — acompanhamento');
-    if(!card)card=findCard('Trio Pão de Queijo','acompanhamento');
+    const card=findCard('Trio Pão de Queijo — acompanhamento','acompanhamento')||findCard('Trio Pão de Queijo','acompanhamento');
     if(!card)return;
     const rowsHtml=d.arr.map(c=>{
       const marks=c.feitos.map(x=>`<td style="font-size:18px;font-weight:800">${x?'✓':'✕'}</td>`).join('');
@@ -87,12 +89,9 @@
     if(!tr)return;
     const cells=[...tr.children];
     if(cells.length>=4){
-      // Mantém a meta zerada e atualiza o realizado com a quantidade de clientes completos.
       if(cells[2])cells[2].textContent=String(d.complete.length);
       if(cells[3])cells[3].textContent='0';
     }
-    const pct=[...tr.querySelectorAll('*')].find(e=>(e.textContent||'').trim()==='0%'||/\d+%/.test((e.textContent||'').trim()));
-    if(pct&&d.complete.length) pct.textContent='EM ANDAMENTO';
   }
 
   const esc=v=>String(v??'').replace(/[&<>\"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[m]));
