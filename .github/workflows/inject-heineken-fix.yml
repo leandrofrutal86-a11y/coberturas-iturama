@@ -1,0 +1,35 @@
+name: Inject Heineken Fix
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  inject:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inject script in index
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          s=re.sub(r'<script src="heineken-fix\.js\?v=[^"]+"></script>', '', s)
+          tag='<script src="heineken-fix.js?v=20260908-1"></script>'
+          pos=s.lower().rfind('</body>')
+          if pos >= 0:
+              s=s[:pos]+tag+'\n'+s[pos:]
+          else:
+              s+='\n'+tag+'\n'
+          p.write_text(s,encoding='utf-8')
+          PY
+      - name: Commit if changed
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git diff --cached --quiet && exit 0
+          git commit -m 'Corrige Cobertura Heineken por marca e cliente'
+          git push
