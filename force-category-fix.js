@@ -1,4 +1,4 @@
-/* Correcao final: KPI de coberturas por categoria sem depender do render interno */
+/* Correcao final: KPI de coberturas por categoria + horario da ultima atualizacao */
 (() => {
   const API='https://harlrfhukjvhpufwhtep.supabase.co/rest/v1/vendas';
   const KEY='sb_publishable_gxhN7WK6y9j_m3TJwGDHNw_x_lszXgO';
@@ -11,6 +11,27 @@
   const sub=r=>norm(r?.subcanal);
   let rows=[];
   let lastKey='';
+
+  function atualizarHorario(texto){
+    const nodes=[...document.querySelectorAll('*')].filter(e=>{
+      const t=(e.textContent||'').replace(/\s+/g,' ').trim();
+      return t.startsWith('Atualizada em ');
+    });
+    if(!nodes.length)return false;
+    const el=nodes.sort((a,b)=>a.children.length-b.children.length)[0];
+    el.textContent=`Atualizada em ${texto}`;
+    return true;
+  }
+
+  async function carregarHorario(){
+    try{
+      const r=await fetch(`data/last-update.json?v=${Date.now()}`,{cache:'no-store'});
+      if(!r.ok)throw Error('last-update '+r.status);
+      const d=await r.json();
+      if(d&&d.display)atualizarHorario(String(d.display));
+    }catch(e){console.warn('[Ultima atualizacao]',e)}
+  }
+
   async function load(){
     let from=0,out=[],size=1000;
     while(true){
@@ -22,6 +43,7 @@
     }
     rows=out; sync();
   }
+
   function calc(rota,cat){
     const rr=rows.filter(r=>route(r)===rota);
     if(cat==='COBERTURA HEINEKEN'){
@@ -38,6 +60,7 @@
     }
     return null;
   }
+
   function text(el){return (el?.textContent||'').replace(/\s+/g,' ').trim()}
   function findCard(label){
     const nodes=[...document.querySelectorAll('*')].filter(e=>text(e)===label);
@@ -51,6 +74,6 @@
     setTimeout(()=>{setCard('REALIZADO',d.realizado);setCard('FALTA',0);},80);
   }
   function install(){const s=document.getElementById('consultor'),c=document.getElementById('categoria');if(s&&!s.__forceCat){s.__forceCat=true;s.addEventListener('change',()=>{lastKey='';setTimeout(sync,120)})}if(c&&!c.__forceCat){c.__forceCat=true;c.addEventListener('change',()=>{lastKey='';setTimeout(sync,120)})}sync()}
-  function boot(){load().catch(e=>console.warn('[Category Fix]',e));setTimeout(install,300);setTimeout(sync,1000);setTimeout(sync,2000)}
+  function boot(){carregarHorario();load().catch(e=>console.warn('[Category Fix]',e));setTimeout(install,300);setTimeout(sync,1000);setTimeout(sync,2000)}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
 })();
