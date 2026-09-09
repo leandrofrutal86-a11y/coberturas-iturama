@@ -9,27 +9,48 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Inject script in index
+      - name: Inject scripts in index
         run: |
           python - <<'PY'
           from pathlib import Path
           import re
+
+          # Mantem os scripts de correcao e sincronizacao sempre na versao atual.
           p=Path('index.html')
           s=p.read_text(encoding='utf-8')
           s=re.sub(r'\s*<script\s+src=["\']force-category-fix\.js(?:\?[^"\']*)?["\']\s*></script>', '', s, flags=re.I)
-          tag='<script src="force-category-fix.js?v=20260908-final3"></script>'
+          s=re.sub(r'\s*<script\s+src=["\']live-sync\.js(?:\?[^"\']*)?["\']\s*></script>', '', s, flags=re.I)
+          tag='<script src="force-category-fix.js?v=20260908-final3"></script>\n<script src="live-sync.js?v=20260908-live1"></script>'
           pos=s.lower().rfind('</body>')
           if pos >= 0:
               s=s[:pos]+tag+'\n'+s[pos:]
           else:
               s+='\n'+tag+'\n'
           p.write_text(s,encoding='utf-8')
+
+          # Expoe a recarga da base Supabase para o live-sync executar sem F5.
+          sp=Path('supabase-online.js')
+          js=sp.read_text(encoding='utf-8')
+          if 'window.__ituramaSyncNow=carregar;' not in js:
+              needle="function iniciar(){corrigir();zerarMetas();garantirParametros();carregar()}"
+              repl="window.__ituramaSyncNow=carregar;\n  function iniciar(){corrigir();zerarMetas();garantirParametros();carregar()}"
+              if needle not in js:
+                  raise SystemExit('Inicializacao do supabase-online.js nao encontrada')
+              js=js.replace(needle,repl,1)
+          # Evita resposta em cache ao buscar as vendas.
+          js=js.replace("{headers:{...headers,Range:`${from}-${from+size-1}`}})","{headers:{...headers,Range:`${from}-${from+size-1}`},cache:'no-store'})",1)
+          sp.write_text(js,encoding='utf-8')
           PY
+      - name: Validate live sync
+        run: |
+          grep -q 'live-sync.js?v=20260908-live1' index.html
+          grep -q 'window.__ituramaSyncNow=carregar' supabase-online.js
+          echo 'OK - sincronizacao automatica ativada'
       - name: Commit injection
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add index.html
+          git add index.html supabase-online.js
           git diff --cached --quiet && exit 0
-          git commit -m 'Ativa correcao final geral individual'
+          git commit -m 'Ativa sincronizacao automatica sem F5'
           git push
