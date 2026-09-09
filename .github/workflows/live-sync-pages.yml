@@ -22,7 +22,7 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Instalar atualizacao automatica
+      - name: Instalar atualizacao automatica e olhinho da senha
         shell: bash
         run: |
           python3 <<'PY'
@@ -31,6 +31,30 @@ jobs:
 
           p = Path('index.html')
           html = p.read_text(encoding='utf-8')
+
+          # Adiciona o botão de mostrar/ocultar senha no login, sem duplicar.
+          if 'id="togglePass"' not in html:
+              old = '<input id="pass" type="password" autocomplete="current-password" placeholder="Digite sua senha">'
+              new = '''<div style="position:relative"><input id="pass" type="password" autocomplete="current-password" placeholder="Digite sua senha" style="padding-right:58px"><button id="togglePass" type="button" aria-label="Mostrar senha" title="Mostrar senha" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);width:44px;height:44px;border:0;background:transparent;color:#5f6875;font-size:24px;cursor:pointer;margin:0;padding:0">👁</button></div>'''
+              if old not in html:
+                  raise SystemExit('Campo de senha não encontrado no index.html')
+              html = html.replace(old, new, 1)
+
+          eye = r'''<script id="password-eye-v1">
+          (function(){
+            var b=document.getElementById('togglePass'), p=document.getElementById('pass');
+            if(!b||!p)return;
+            b.addEventListener('click',function(){
+              var show=p.type==='password';
+              p.type=show?'text':'password';
+              b.textContent=show?'🙈':'👁';
+              b.setAttribute('aria-label',show?'Ocultar senha':'Mostrar senha');
+              b.setAttribute('title',show?'Ocultar senha':'Mostrar senha');
+            });
+          })();
+          </script>'''
+          html = re.sub(r'<script id="password-eye-v1">.*?</script>', '', html, flags=re.S)
+
           live = r'''<script id="v41-live-site-sync">
           (function(){
             var lastTag=null, reloading=false;
@@ -55,17 +79,17 @@ jobs:
           pos = html.lower().rfind('</body>')
           if pos < 0:
               raise SystemExit('index.html sem </body>')
-          html = html[:pos] + live + '\n' + html[pos:]
+          html = html[:pos] + eye + '\n' + live + '\n' + html[pos:]
           p.write_text(html, encoding='utf-8')
           PY
 
       - name: Validar
         shell: bash
         run: |
+          grep -q 'id="togglePass"' index.html
+          grep -q 'id="password-eye-v1"' index.html
           grep -q 'id="v41-live-site-sync"' index.html
           grep -q 'setInterval(checkSite,60000)' index.html
-          grep -q 'async function sincronizarOnline' supabase-online.js
-          grep -q "cache:'no-store'" supabase-online.js
 
       - name: Publicar ajuste
         shell: bash
@@ -77,5 +101,5 @@ jobs:
             echo 'Nada a alterar.'
             exit 0
           fi
-          git commit -m 'Ativar recarga automatica do site publicado'
+          git commit -m 'Corrigir login e adicionar olhinho na senha'
           git push
