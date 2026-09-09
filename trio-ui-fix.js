@@ -1,27 +1,35 @@
-/* Ajuste final da interface do Trio Pao de Queijo: usa somente o painel Clientes realizados. */
+/* Trio Pão de Queijo — exibe os códigos dos materiais de cada grupo. */
 (() => {
-  const wantedTitle = 'Clientes realizados — TRIO PÃO DE QUEIJO — clientes com venda parcial ou completa';
+  const codes = {
+    '1': '1918 ou 1919',
+    '2': '1916 ou 1917',
+    '3': '1827'
+  };
 
   function norm(v){ return String(v ?? '').replace(/\s+/g,' ').trim().toUpperCase(); }
 
-  function hideDuplicateTrioPanel(){
-    document.querySelectorAll('.panel').forEach(panel => {
-      const heading = panel.querySelector('h1,h2,h3,h4,h5,h6,.panel-title,.title');
-      const t = norm(heading?.textContent || '');
-      if(t === 'TRIO PÃO DE QUEIJO — ACOMPANHAMENTO'){
-        panel.style.setProperty('display','none','important');
-      }
-    });
+  function groupLabel(g){
+    const n=String(g?.grupo ?? '');
+    return `Grupo ${n}${codes[n] ? ` (${codes[n]})` : ''}`;
   }
 
-  function fixClientsPanel(){
-    hideDuplicateTrioPanel();
+  function enhanceCurrentDashboard(){
+    /* Painel atual: sobrescreve a função que monta os badges dos grupos. */
+    if(typeof window.groupBadges === 'function' && !window.groupBadges.__codesTrio){
+      const wrapped=function(c){
+        const gs=c?.grupos||[];
+        return `<div class="groupStatus">${gs.map(g=>`<span class="${g.vendido?'gok':'gno'}">${groupLabel(g)} ${g.vendido?'✓':'✕'}</span>`).join('')}</div>${c?.completo?'':`<div class="faltando">Faltam ${Number(c?.faltam||0)} grupo(s)</div>`}`;
+      };
+      wrapped.__codesTrio=true;
+      window.groupBadges=wrapped;
+      try{ if(typeof window.render==='function') window.render(); }catch(e){}
+    }
+  }
+
+  function enhanceLegacyDashboard(){
+    /* Compatibilidade com a tela antiga, caso volte a ser usada. */
     const cat = document.querySelector('#categoria')?.value;
-    if(cat !== 'TRIO PÃO DE QUEIJO') return;
-
-    const title = document.querySelector('#clientsCategory');
-    if(title) title.textContent = wantedTitle;
-
+    if(norm(cat) !== 'TRIO PÃO DE QUEIJO') return;
     const body = document.querySelector('#tbody');
     const table = body?.closest('table');
     const thead = table?.querySelector('thead');
@@ -36,43 +44,14 @@
     }
   }
 
-  function install(){
-    const c=document.querySelector('#categoria');
-    if(c && !c.__trioUiFix){
-      c.__trioUiFix=true;
-      c.addEventListener('change',()=>setTimeout(fixClientsPanel,60));
-    }
-    if(typeof window.render==='function' && !window.render.__trioUiFix){
-      const old=window.render;
-      const wrapped=function(){
-        const r=old.apply(this,arguments);
-        setTimeout(fixClientsPanel,40);
-        setTimeout(fixClientsPanel,180);
-        return r;
-      };
-      wrapped.__trioUiFix=true;
-      window.render=wrapped;
-    }
-    if(typeof window.refreshMainData==='function' && !window.refreshMainData.__trioUiFix){
-      const old=window.refreshMainData;
-      const wrapped=function(){
-        const r=old.apply(this,arguments);
-        setTimeout(fixClientsPanel,60);
-        setTimeout(fixClientsPanel,220);
-        return r;
-      };
-      wrapped.__trioUiFix=true;
-      window.refreshMainData=wrapped;
-    }
-    fixClientsPanel();
-  }
-
   function boot(){
-    install();
+    enhanceCurrentDashboard();
+    enhanceLegacyDashboard();
     let n=0;
-    const timer=setInterval(()=>{
-      install();
-      if(++n>=35) clearInterval(timer);
+    const t=setInterval(()=>{
+      enhanceCurrentDashboard();
+      enhanceLegacyDashboard();
+      if(++n>=30) clearInterval(t);
     },200);
   }
 
