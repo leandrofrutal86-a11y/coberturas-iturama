@@ -10,6 +10,7 @@ on:
 permissions:
   contents: write
 
+# Mantem o GitHub Pages e a base Supabase sincronizados sem exigir F5.
 jobs:
   sync:
     runs-on: ubuntu-latest
