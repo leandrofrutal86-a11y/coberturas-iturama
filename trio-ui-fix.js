@@ -1,57 +1,46 @@
-/* Trio Pão de Queijo — grupos separados por colunas. */
+/* Trio Pão de Queijo — renderização direta e leve, sem MutationObserver. */
 (() => {
-  const codes={1:'1918 ou 1919',2:'1916 ou 1917',3:'1827'};
   const norm=v=>String(v??'').replace(/\s+/g,' ').trim().toUpperCase();
+  const codeHead={1:'(1918 ou 1919)',2:'(1916 ou 1917)',3:'(1827)'};
 
-  function splitTrioTables(){
-    const cat=document.querySelector('#cat')?.value;
-    if(norm(cat)!=='TRIO PÃO DE QUEIJO') return;
-    const root=document.querySelector('#clients');
-    if(!root) return;
-    root.querySelectorAll('table').forEach(table=>{
-      const head=table.querySelector('thead tr');
-      if(!head) return;
-      const hs=[...head.querySelectorAll('th')];
-      const gi=hs.findIndex(th=>norm(th.textContent)==='GRUPOS');
-      if(gi<0 && head.dataset.trioCols==='1'){
-        const ths=head.querySelectorAll('th');
-        if(ths.length>=6){
-          ths[3].innerHTML='Grupo 1<br><small>(1918 ou 1919)</small>';
-          ths[4].innerHTML='Grupo 2<br><small>(1916 ou 1917)</small>';
-          ths[5].innerHTML='Grupo 3<br><small>(1827)</small>';
-        }
-        return;
-      }
-      if(gi<0) return;
-      head.innerHTML='<th>#</th><th>Código PV</th><th>Razão Social</th>'+
-        '<th>Grupo 1<br><small>(1918 ou 1919)</small></th>'+
-        '<th>Grupo 2<br><small>(1916 ou 1917)</small></th>'+
-        '<th>Grupo 3<br><small>(1827)</small></th>';
-      head.dataset.trioCols='1';
-      table.querySelectorAll('tbody tr').forEach(tr=>{
-        const tds=[...tr.children];
-        if(tds.length!==4) return;
-        const status=tds[3].textContent;
-        const cell=n=>{
-          const m=status.match(new RegExp('Grupo\\s*'+n+'[^✓✕]*([✓✕])','i'));
-          const ok=m?.[1]==='✓';
-          return `<td><span class="${ok?'gok':'gno'}">${ok?'✓ Vendeu':'✕ Falta'}</span></td>`;
-        };
-        tds[3].outerHTML=cell(1)+cell(2)+cell(3);
-      });
-    });
+  function sold(c,n){
+    const g=(c?.grupos||[]).find(x=>String(x?.grupo)===String(n));
+    return !!g?.vendido;
+  }
+  function cell(c,n){
+    const ok=sold(c,n);
+    return `<td><span class="${ok?'gok':'gno'}">${ok?'✓ Vendeu':'✕ Falta'}</span></td>`;
+  }
+  function head(){
+    return '<thead><tr><th>#</th><th>Código PV</th><th>Razão Social</th>'+
+      `<th>Grupo 1<br><small>${codeHead[1]}</small></th>`+
+      `<th>Grupo 2<br><small>${codeHead[2]}</small></th>`+
+      `<th>Grupo 3<br><small>${codeHead[3]}</small></th>`+
+      '</tr></thead>';
+  }
+  function rows(list){
+    if(!list.length)return '<tr><td colspan="6" class="empty">Nenhum cliente nesta situação.</td></tr>';
+    return list.map((c,i)=>`<tr><td>${i+1}</td><td><b>${esc(c.cliente)}</b></td><td>${esc(c.razao)}</td>${cell(c,1)}${cell(c,2)}${cell(c,3)}</tr>`).join('');
   }
 
   function install(){
-    const cat=document.querySelector('#cat');
-    if(cat&&!cat.__trioColumns){cat.__trioColumns=true;cat.addEventListener('change',()=>setTimeout(splitTrioTables,30));}
-    const root=document.querySelector('#clients');
-    if(root&&!root.__trioColumns){
-      root.__trioColumns=true;
-      new MutationObserver(()=>splitTrioTables()).observe(root,{childList:true,subtree:true});
-    }
-    splitTrioTables();
+    if(typeof window.renderClients!=='function' || window.renderClients.__trioFastFix)return;
+    const original=window.renderClients;
+    const fast=function(cat){
+      if(TAB!=='meu' || norm(cat)!=='TRIO PÃO DE QUEIJO') return original(cat);
+      const row=(DATA?.own||[]).find(x=>norm(x.nome)==='TRIO PÃO DE QUEIJO');
+      const all=row?.clientes||[];
+      const complete=all.filter(x=>x.completo);
+      const partial=all.filter(x=>!x.completo);
+      $('clients').innerHTML=
+        `<h3 class="clientsTitle">👥 Clientes cobertos (${complete.length})</h3>`+
+        `<div class="tableWrap"><table>${head()}<tbody>${rows(complete)}</tbody></table></div>`+
+        `<h3 class="clientsTitle">🟡 Clientes em andamento (${partial.length})</h3>`+
+        `<div class="tableWrap"><table>${head()}<tbody>${rows(partial)}</tbody></table></div>`;
+    };
+    fast.__trioFastFix=true;
+    window.renderClients=fast;
   }
+
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install);else install();
-  setTimeout(install,500);setTimeout(install,1500);
 })();
