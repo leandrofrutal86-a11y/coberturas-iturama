@@ -10,14 +10,23 @@
     if(!root) return;
     root.querySelectorAll('table').forEach(table=>{
       const head=table.querySelector('thead tr');
-      if(!head || head.dataset.trioCols==='1') return;
+      if(!head) return;
       const hs=[...head.querySelectorAll('th')];
       const gi=hs.findIndex(th=>norm(th.textContent)==='GRUPOS');
+      if(gi<0 && head.dataset.trioCols==='1'){
+        const ths=head.querySelectorAll('th');
+        if(ths.length>=6){
+          ths[3].innerHTML='Grupo 1<br><small>(1918 ou 1919)</small>';
+          ths[4].innerHTML='Grupo 2<br><small>(1916 ou 1917)</small>';
+          ths[5].innerHTML='Grupo 3<br><small>(1827)</small>';
+        }
+        return;
+      }
       if(gi<0) return;
       head.innerHTML='<th>#</th><th>Código PV</th><th>Razão Social</th>'+
-        '<th>Grupo 1<br><small>1918 ou 1919</small></th>'+
-        '<th>Grupo 2<br><small>1916 ou 1917</small></th>'+
-        '<th>Grupo 3<br><small>1827</small></th>';
+        '<th>Grupo 1<br><small>(1918 ou 1919)</small></th>'+
+        '<th>Grupo 2<br><small>(1916 ou 1917)</small></th>'+
+        '<th>Grupo 3<br><small>(1827)</small></th>';
       head.dataset.trioCols='1';
       table.querySelectorAll('tbody tr').forEach(tr=>{
         const tds=[...tr.children];
