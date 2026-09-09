@@ -1,60 +1,48 @@
-/* Trio Pão de Queijo — exibe os códigos dos materiais de cada grupo. */
+/* Trio Pão de Queijo — grupos separados por colunas. */
 (() => {
-  const codes = {
-    '1': '1918 ou 1919',
-    '2': '1916 ou 1917',
-    '3': '1827'
-  };
+  const codes={1:'1918 ou 1919',2:'1916 ou 1917',3:'1827'};
+  const norm=v=>String(v??'').replace(/\s+/g,' ').trim().toUpperCase();
 
-  function norm(v){ return String(v ?? '').replace(/\s+/g,' ').trim().toUpperCase(); }
-
-  function groupLabel(g){
-    const n=String(g?.grupo ?? '');
-    return `Grupo ${n}${codes[n] ? ` (${codes[n]})` : ''}`;
+  function splitTrioTables(){
+    const cat=document.querySelector('#cat')?.value;
+    if(norm(cat)!=='TRIO PÃO DE QUEIJO') return;
+    const root=document.querySelector('#clients');
+    if(!root) return;
+    root.querySelectorAll('table').forEach(table=>{
+      const head=table.querySelector('thead tr');
+      if(!head || head.dataset.trioCols==='1') return;
+      const hs=[...head.querySelectorAll('th')];
+      const gi=hs.findIndex(th=>norm(th.textContent)==='GRUPOS');
+      if(gi<0) return;
+      head.innerHTML='<th>#</th><th>Código PV</th><th>Razão Social</th>'+
+        '<th>Grupo 1<br><small>1918 ou 1919</small></th>'+
+        '<th>Grupo 2<br><small>1916 ou 1917</small></th>'+
+        '<th>Grupo 3<br><small>1827</small></th>';
+      head.dataset.trioCols='1';
+      table.querySelectorAll('tbody tr').forEach(tr=>{
+        const tds=[...tr.children];
+        if(tds.length!==4) return;
+        const status=tds[3].textContent;
+        const cell=n=>{
+          const m=status.match(new RegExp('Grupo\\s*'+n+'[^✓✕]*([✓✕])','i'));
+          const ok=m?.[1]==='✓';
+          return `<td><span class="${ok?'gok':'gno'}">${ok?'✓ Vendeu':'✕ Falta'}</span></td>`;
+        };
+        tds[3].outerHTML=cell(1)+cell(2)+cell(3);
+      });
+    });
   }
 
-  function enhanceCurrentDashboard(){
-    /* Painel atual: sobrescreve a função que monta os badges dos grupos. */
-    if(typeof window.groupBadges === 'function' && !window.groupBadges.__codesTrio){
-      const wrapped=function(c){
-        const gs=c?.grupos||[];
-        return `<div class="groupStatus">${gs.map(g=>`<span class="${g.vendido?'gok':'gno'}">${groupLabel(g)} ${g.vendido?'✓':'✕'}</span>`).join('')}</div>${c?.completo?'':`<div class="faltando">Faltam ${Number(c?.faltam||0)} grupo(s)</div>`}`;
-      };
-      wrapped.__codesTrio=true;
-      window.groupBadges=wrapped;
-      try{ if(typeof window.render==='function') window.render(); }catch(e){}
+  function install(){
+    const cat=document.querySelector('#cat');
+    if(cat&&!cat.__trioColumns){cat.__trioColumns=true;cat.addEventListener('change',()=>setTimeout(splitTrioTables,30));}
+    const root=document.querySelector('#clients');
+    if(root&&!root.__trioColumns){
+      root.__trioColumns=true;
+      new MutationObserver(()=>splitTrioTables()).observe(root,{childList:true,subtree:true});
     }
+    splitTrioTables();
   }
-
-  function enhanceLegacyDashboard(){
-    /* Compatibilidade com a tela antiga, caso volte a ser usada. */
-    const cat = document.querySelector('#categoria')?.value;
-    if(norm(cat) !== 'TRIO PÃO DE QUEIJO') return;
-    const body = document.querySelector('#tbody');
-    const table = body?.closest('table');
-    const thead = table?.querySelector('thead');
-    if(thead){
-      thead.innerHTML = '<tr>'+
-        '<th>Nº</th><th>PV</th><th>Razão Social</th>'+
-        '<th>Grupo 1<br><b>(1918 ou 1919)</b></th>'+
-        '<th>Grupo 2<br><b>(1916 ou 1917)</b></th>'+
-        '<th>Grupo 3<br><b>(1827)</b></th>'+
-        '<th>Realizado</th><th>Falta</th>'+
-        '</tr>';
-    }
-  }
-
-  function boot(){
-    enhanceCurrentDashboard();
-    enhanceLegacyDashboard();
-    let n=0;
-    const t=setInterval(()=>{
-      enhanceCurrentDashboard();
-      enhanceLegacyDashboard();
-      if(++n>=30) clearInterval(t);
-    },200);
-  }
-
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot);
-  else boot();
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install);else install();
+  setTimeout(install,500);setTimeout(install,1500);
 })();
