@@ -1,0 +1,103 @@
+name: Sincronizacao automatica do site
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - 'site-version.json'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Ativar sincronizacao online e controle de versao
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re, json, os
+          from datetime import datetime, timezone
+
+          # 1) A base de vendas passa a ser consultada novamente a cada 30s,
+          #    ao voltar para a aba e ao receber foco. Mantem o layout atual.
+          p=Path('supabase-online.js')
+          s=p.read_text(encoding='utf-8')
+          old="function iniciar(){corrigir();zerarMetas();garantirParametros();carregar()}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',iniciar);else iniciar();"
+          new="""let __syncOnline=false;
+  async function sincronizarOnline(){if(__syncOnline)return;__syncOnline=true;try{await carregar()}finally{__syncOnline=false}}
+  function iniciar(){corrigir();zerarMetas();garantirParametros();sincronizarOnline();setInterval(sincronizarOnline,30000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)sincronizarOnline()});window.addEventListener('focus',sincronizarOnline)}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',iniciar);else iniciar();"""
+          if old in s:
+              s=s.replace(old,new,1)
+          elif 'async function sincronizarOnline()' not in s:
+              raise SystemExit('Ponto de inicializacao do supabase-online.js nao encontrado')
+          # Forca o navegador a consultar a rede, sem reaproveitar resposta HTTP antiga.
+          s=s.replace("const r=await fetch(`${API}?select=cliente,rota,razao,material,marca,descricao,subcanal,data_nota_fiscal,origem`,{headers:{...headers,Range:`${from}-${from+size-1}`}});",
+                      "const r=await fetch(`${API}?select=cliente,rota,razao,material,marca,descricao,subcanal,data_nota_fiscal,origem`,{headers:{...headers,Range:`${from}-${from+size-1}`},cache:'no-store'});",1)
+          p.write_text(s,encoding='utf-8')
+
+          # 2) Pagina aberta verifica se houve uma nova publicacao no GitHub.
+          #    Se houver, recarrega sozinha uma unica vez, sem o usuario apertar F5.
+          idx=Path('index.html')
+          html=idx.read_text(encoding='utf-8')
+          live=r'''<script id="v40-live-site-sync">
+          (function(){
+            var current=null,reloading=false;
+            async function check(){
+              try{
+                var r=await fetch('site-version.json?t='+Date.now(),{cache:'no-store'});
+                if(!r.ok)return;
+                var j=await r.json(),v=String(j.version||'');
+                if(!v)return;
+                if(current===null){current=v;return;}
+                if(v!==current&&!reloading){
+                  reloading=true;
+                  var u=new URL(location.href);u.searchParams.set('_v',v.slice(0,12));
+                  location.replace(u.toString());
+                }
+              }catch(e){}
+            }
+            check();setInterval(check,20000);
+            document.addEventListener('visibilitychange',function(){if(!document.hidden)check()});
+            window.addEventListener('focus',check);
+          })();
+          </script>'''
+          if re.search(r'<script id="v40-live-site-sync">.*?</script>',html,flags=re.S):
+              html=re.sub(r'<script id="v40-live-site-sync">.*?</script>',live,html,count=1,flags=re.S)
+          else:
+              pos=html.lower().rfind('</body>')
+              if pos<0: raise SystemExit('index.html sem </body>')
+              html=html[:pos]+live+'\n'+html[pos:]
+          idx.write_text(html,encoding='utf-8')
+
+          # 3) Marca a versao publicada. O proprio arquivo e ignorado no gatilho
+          #    para nao criar loop de commits.
+          version={
+            'version': os.environ.get('GITHUB_SHA','manual'),
+            'updated_at': datetime.now(timezone.utc).isoformat(timespec='seconds')
+          }
+          Path('site-version.json').write_text(json.dumps(version,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          PY
+
+      - name: Validar alteracoes
+        run: |
+          grep -q 'async function sincronizarOnline' supabase-online.js
+          grep -q 'cache:'"'"'no-store'"'"'' supabase-online.js
+          grep -q 'id="v40-live-site-sync"' index.html
+          test -s site-version.json
+          echo 'OK - Supabase sincroniza automaticamente e pagina detecta nova publicacao.'
+
+      - name: Publicar no main
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add supabase-online.js index.html site-version.json
+          git diff --cached --quiet && exit 0
+          git commit -m 'Ativar atualizacao automatica sem F5'
+          git push
