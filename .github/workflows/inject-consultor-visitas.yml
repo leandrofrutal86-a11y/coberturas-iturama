@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - 'consultor-visitas.js'
+      - 'consultor-layout-clean.js'
       - '.github/workflows/inject-consultor-visitas.yml'
 permissions:
   contents: write
@@ -12,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Inject script
+      - name: Inject scripts
         run: |
           python - <<'PY'
           from pathlib import Path
@@ -20,8 +21,9 @@ jobs:
           s=p.read_text(encoding='utf-8')
           import re
           s=re.sub(r'<script src="consultor-visitas\.js\?v=[^"]+"></script>','',s)
-          tag='<script src="consultor-visitas.js?v=20260909-04"></script>'
-          s=s.replace('</body></html>',tag+'</body></html>')
+          s=re.sub(r'<script src="consultor-layout-clean\.js\?v=[^"]+"></script>','',s)
+          tags='<script src="consultor-visitas.js?v=20260909-05"></script><script src="consultor-layout-clean.js?v=20260909-01"></script>'
+          s=s.replace('</body></html>',tags+'</body></html>')
           p.write_text(s,encoding='utf-8')
           PY
       - name: Commit
@@ -29,4 +31,4 @@ jobs:
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add index.html
-          git diff --cached --quiet || (git commit -m 'Ativa visitas e subcanais dos consultores' && git push)
+          git diff --cached --quiet || (git commit -m 'Ativa novo layout limpo dos consultores' && git push)
