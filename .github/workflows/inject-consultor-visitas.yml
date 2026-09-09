@@ -20,7 +20,7 @@ jobs:
           s=p.read_text(encoding='utf-8')
           import re
           s=re.sub(r'<script src="consultor-visitas\.js\?v=[^"]+"></script>','',s)
-          tag='<script src="consultor-visitas.js?v=20260909-01"></script>'
+          tag='<script src="consultor-visitas.js?v=20260909-04"></script>'
           s=s.replace('</body></html>',tag+'</body></html>')
           p.write_text(s,encoding='utf-8')
           PY
