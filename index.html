@@ -43,6 +43,25 @@ function trioDetails(c){if(c.tipo_regra!=='grupos')return'';return `<div class="
 async function searchPv(){const pv=$('#pvInput').value.trim();if(!pv)return;$('#pvResult').innerHTML='<div class="pvCard">Pesquisando...</div>';try{const r=await call({action:'search_pv',token:tok(),pv});if(!r.found){$('#pvResult').innerHTML='<div class="pvCard"><div class="statusBad">PV não encontrado na sua rota/base de vendas.</div></div>';return}const realizados=r.categorias.filter(c=>c.realizado).length;$('#pvResult').innerHTML=`<div class="clientHead"><h3>${esc(r.cliente.pv)} - ${esc(r.cliente.razao)}</h3><div><b>Rota:</b> ${esc(r.cliente.rota)} &nbsp; <b>Subcanal:</b> ${esc(r.cliente.subcanal||'-')}</div><div class="${realizados?'statusGood':'statusBad'}">${realizados?'✓ Cliente possui '+realizados+' cobertura(s) realizada(s)':'✕ Cliente ainda não possui coberturas realizadas'}</div></div><div class="tableWrap"><table class="pvTable"><thead><tr><th>Categoria / Produto</th><th>Situação</th></tr></thead><tbody>${r.categorias.map(c=>`<tr><td><b>${esc(c.nome)}</b>${trioDetails(c)}</td><td><span class="mark ${c.realizado?'ok':'no'}">${c.realizado?'✓ REALIZADO':'✕ FALTA'}</span>${c.tipo_regra==='grupos'&&!c.realizado?`<div class="groupMini">${c.faltam===1?'Falta 1 grupo':'Faltam '+c.faltam+' grupos'}</div>`:''}</td></tr>`).join('')}</tbody></table></div>`}catch(e){$('#pvResult').innerHTML=`<div class="pvCard"><div class="statusBad">${esc(e.message)}</div></div>`}}
 document.addEventListener('click',e=>{const t=e.target.closest('.tab');if(t)goTab(t.dataset.tab);if(e.target.id==='contentOverlay')closeContent();if(e.target.id==='pvOverlay')closePvSearch()});$('#categoryFilter').addEventListener('change',e=>{selected=e.target.value;render()});$('#enter').onclick=login;$('#mat').onkeydown=e=>{if(e.key==='Enter')login()};$('#pass').onkeydown=e=>{if(e.key==='Enter')login()};$('#logout').onclick=()=>{sessionStorage.clear();location.reload()};if(tok())load();setInterval(()=>{if(tok()&&!document.hidden)load()},30000);document.addEventListener('visibilitychange',()=>{if(!document.hidden&&tok())load()});window.addEventListener('focus',()=>{if(tok())load()});
 </script>
-<script id="v41-live-site-sync">(function(){var lastTag=null,reloading=false;async function checkSite(){try{var r=await fetch(location.pathname+'?__check='+Date.now(),{method:'HEAD',cache:'no-store'});if(!r.ok)return;var tag=r.headers.get('etag')||r.headers.get('last-modified')||'';if(!tag)return;if(lastTag===null){lastTag=tag;return}if(tag!==lastTag&&!reloading){reloading=true;location.reload()}}catch(e){}}checkSite();setInterval(checkSite,60000);document.addEventListener('visibilitychange',function(){if(!document.hidden)checkSite()});window.addEventListener('focus',checkSite)})();</script>
+
 <script src="trio-ui-fix.js?v=20260908-01"></script>
+<script id="v41-live-site-sync">
+(function(){
+  var lastTag=null, reloading=false;
+  async function checkSite(){
+    try{
+      var r=await fetch(location.pathname+'?__check='+Date.now(),{method:'HEAD',cache:'no-store'});
+      if(!r.ok)return;
+      var tag=r.headers.get('etag')||r.headers.get('last-modified')||'';
+      if(!tag)return;
+      if(lastTag===null){lastTag=tag;return;}
+      if(tag!==lastTag&&!reloading){reloading=true;location.reload();}
+    }catch(e){}
+  }
+  checkSite();
+  setInterval(checkSite,60000);
+  document.addEventListener('visibilitychange',function(){if(!document.hidden)checkSite();});
+  window.addEventListener('focus',checkSite);
+})();
+</script>
 </body></html>
