@@ -9,13 +9,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Inject Trio UI script
+      - name: Inject Trio UI script and labels
         run: |
           python - <<'PY'
           from pathlib import Path
           import re
           p=Path('index.html')
           s=p.read_text(encoding='utf-8')
+          s=s.replace('▥ APLICATIVOS','▥ LINK DOS INCENTIVOS')
+          s=s.replace('▦ APLICATIVOS','▦ LINK DOS INCENTIVOS')
           s=re.sub(r'\s*<script\s+src=["\']trio-ui-fix\.js(?:\?[^"\']*)?["\']\s*></script>', '', s, flags=re.I)
           tag='<script src="trio-ui-fix.js?v=20260909-02"></script>'
           pos=s.lower().rfind('</body>')
@@ -31,5 +33,5 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add index.html
           git diff --cached --quiet && exit 0
-          git commit -m 'Atualiza exibição dos códigos do Trio'
+          git commit -m 'Renomeia Aplicativos para Link dos Incentivos'
           git push
