@@ -28,7 +28,7 @@ jobs:
             '<script src="consultor-visitas.js?v=20260909-05"></script>'
             '<script src="consultor-layout-clean.js?v=20260909-01"></script>'
             '<script src="consultor-header-actions.js?v=20260910-02"></script>'
-            '<script src="consultor-bottom-menu.js?v=20260910-bottom-01"></script>'
+            '<script src="consultor-bottom-menu.js?v=20260910-bottom-02"></script>'
           )
           s=s.replace('</body></html>',tags+'</body></html>')
           p.write_text(s,encoding='utf-8')
@@ -38,4 +38,4 @@ jobs:
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add index.html
-          git diff --cached --quiet || (git commit -m 'Ativa menu inferior dos consultores' && git push)
+          git diff --cached --quiet || (git commit -m 'Atualiza menu inferior dos consultores' && git push)
