@@ -10,6 +10,7 @@ on:
       - 'b2b-dashboard-fix.js'
       - 'consultor-results-style.js'
       - 'consultor-pv-dia.js'
+      - 'consultor-imperdoaveis.js'
       - '.github/workflows/inject-consultor-visitas.yml'
 permissions:
   contents: write
@@ -25,7 +26,7 @@ jobs:
           p=Path('index.html')
           s=p.read_text(encoding='utf-8')
           import re
-          for name in ['consultor-visitas','consultor-layout-clean','consultor-header-actions','consultor-bottom-menu','b2b-dashboard-fix','consultor-results-style','consultor-pv-dia']:
+          for name in ['consultor-visitas','consultor-layout-clean','consultor-header-actions','consultor-bottom-menu','b2b-dashboard-fix','consultor-results-style','consultor-pv-dia','consultor-imperdoaveis']:
               s=re.sub(r'<script src="'+re.escape(name)+r'\.js\?v=[^"]+"></script>','',s)
           tags=(
             '<script src="consultor-visitas.js?v=20260909-05"></script>'
@@ -35,6 +36,7 @@ jobs:
             '<script src="b2b-dashboard-fix.js?v=20260910-b2b-03"></script>'
             '<script src="consultor-results-style.js?v=20260910-results-01"></script>'
             '<script src="consultor-pv-dia.js?v=20260910-pvdia-02"></script>'
+            '<script src="consultor-imperdoaveis.js?v=20260910-imp-01"></script>'
           )
           s=s.replace('</body></html>',tags+'</body></html>')
           p.write_text(s,encoding='utf-8')
@@ -44,4 +46,4 @@ jobs:
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add index.html
-          git diff --cached --quiet || (git commit -m 'Corrige pesquisa de clientes sem compra na rota' && git push)
+          git diff --cached --quiet || (git commit -m 'Ativa painel Imperdoáveis dos consultores' && git push)
