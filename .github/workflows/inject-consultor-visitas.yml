@@ -7,6 +7,7 @@ on:
       - 'consultor-layout-clean.js'
       - 'consultor-header-actions.js'
       - 'consultor-bottom-menu.js'
+      - 'b2b-dashboard-fix.js'
       - '.github/workflows/inject-consultor-visitas.yml'
 permissions:
   contents: write
@@ -22,13 +23,14 @@ jobs:
           p=Path('index.html')
           s=p.read_text(encoding='utf-8')
           import re
-          for name in ['consultor-visitas','consultor-layout-clean','consultor-header-actions','consultor-bottom-menu']:
+          for name in ['consultor-visitas','consultor-layout-clean','consultor-header-actions','consultor-bottom-menu','b2b-dashboard-fix']:
               s=re.sub(r'<script src="'+re.escape(name)+r'\.js\?v=[^"]+"></script>','',s)
           tags=(
             '<script src="consultor-visitas.js?v=20260909-05"></script>'
             '<script src="consultor-layout-clean.js?v=20260909-01"></script>'
             '<script src="consultor-header-actions.js?v=20260910-02"></script>'
             '<script src="consultor-bottom-menu.js?v=20260910-bottom-02"></script>'
+            '<script src="b2b-dashboard-fix.js?v=20260910-b2b-02"></script>'
           )
           s=s.replace('</body></html>',tags+'</body></html>')
           p.write_text(s,encoding='utf-8')
@@ -38,4 +40,4 @@ jobs:
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add index.html
-          git diff --cached --quiet || (git commit -m 'Atualiza menu inferior dos consultores' && git push)
+          git diff --cached --quiet || (git commit -m 'Ativa Compra e Recompra B2B nos consultores' && git push)
