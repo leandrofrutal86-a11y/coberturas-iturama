@@ -1,8 +1,8 @@
 (()=>{
   const norm=v=>String(v||'').replace(/\s+/g,' ').trim().toUpperCase();
-  const hideIds=['visao','equipe','acomp','pesquisa','metas','consultores','telefones','materiais','vendas','historico','visitasClientes','visitasSubcanais','subcanaisPainel'];
+  const hideIds=['visao','equipe','acomp','pesquisa','metas','consultores','telefones','materiais','vendas','historico','visitasClientes','visitasSubcanais','subcanaisPainel','imperdoaveisAdmin','adminConteudos'];
   function hiddenTab(label){return [...document.querySelectorAll('.tabs button')].find(b=>norm(b.textContent).includes(norm(label)))}
-  function card(label){return [...document.querySelectorAll('.menuCard')].find(b=>norm(b.textContent).includes(norm(label)))}
+  function card(label){return [...document.querySelectorAll('.menuCard')].find(b=>norm(b.querySelector('b')?.textContent||'')===norm(label))}
   function showSection(id){const target=document.getElementById(id);if(!target)return false;hideIds.forEach(x=>document.getElementById(x)?.classList.add('hide'));document.getElementById('cokeHome')?.classList.add('hide');target.classList.remove('hide');document.getElementById('backHome')?.remove();const wrap=document.querySelector('.wrap');if(wrap){const b=document.createElement('button');b.id='backHome';b.className='backHome';b.innerHTML='← Voltar ao menu administrativo';b.onclick=()=>{hideIds.forEach(x=>document.getElementById(x)?.classList.add('hide'));document.getElementById('cokeHome')?.classList.remove('hide');b.remove()};wrap.insertBefore(b,wrap.firstChild)}return true}
   function openWhenReady(label,id,tries=0){const t=hiddenTab(label);if(t&&typeof t.onclick==='function'){t.onclick();return}if(showSection(id))return;if(tries<30)setTimeout(()=>openWhenReady(label,id,tries+1),150)}
   function bind(){
