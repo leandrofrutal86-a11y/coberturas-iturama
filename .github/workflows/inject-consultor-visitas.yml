@@ -31,7 +31,7 @@ jobs:
             '<script src="consultor-layout-clean.js?v=20260909-01"></script>'
             '<script src="consultor-header-actions.js?v=20260910-02"></script>'
             '<script src="consultor-bottom-menu.js?v=20260910-bottom-02"></script>'
-            '<script src="b2b-dashboard-fix.js?v=20260910-b2b-02"></script>'
+            '<script src="b2b-dashboard-fix.js?v=20260910-b2b-03"></script>'
             '<script src="consultor-results-style.js?v=20260910-results-01"></script>'
           )
           s=s.replace('</body></html>',tags+'</body></html>')
@@ -42,4 +42,4 @@ jobs:
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add index.html
-          git diff --cached --quiet || (git commit -m 'Ativa novo visual da tabela dos consultores' && git push)
+          git diff --cached --quiet || (git commit -m 'Corrige realizado Compra e Recompra B2B' && git push)
