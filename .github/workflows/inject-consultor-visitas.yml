@@ -41,7 +41,7 @@ jobs:
             '<script src="consultor-pv-dia.js?v=20260910-pvdia-02"></script>'
             '<script src="consultor-imperdoaveis.js?v=20260910-imp-04"></script>'
             '<script src="consultor-imperdoaveis-ajuste.js?v=20260910-imp-pv-03"></script>'
-            '<script src="consultor-mobile-fit.js?v=20260911-mobile-03"></script>'
+            '<script src="consultor-mobile-fit.js?v=20260911-mobile-04"></script>'
             '<script src="consultor-trio-labels.js?v=20260911-trio-01"></script>'
           )
           s=s.replace('</body></html>',tags+'</body></html>')
@@ -52,4 +52,4 @@ jobs:
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add index.html
-          git diff --cached --quiet || (git commit -m 'Atualiza nomes dos grupos do Trio' && git push)
+          git diff --cached --quiet || (git commit -m 'Compacta tabela de incentivos no celular' && git push)
