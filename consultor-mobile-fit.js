@@ -18,7 +18,19 @@
     .quick{grid-template-columns:1fr 1fr!important;gap:7px}.quick .q{padding:11px;font-size:13px;min-width:0}.quick .pv{grid-column:1/-1}
     .summary{grid-template-columns:1fr 1fr!important;gap:7px;margin:8px 0}.sum{padding:10px;font-size:11px}.sum strong{font-size:19px}.sum small{display:block;clear:both}
     .tools{grid-template-columns:1fr!important;gap:8px;padding:10px}.group+.group{padding-top:8px}.gt{font-size:12px;margin-bottom:7px}.tiles{grid-template-columns:1fr 1fr!important;gap:6px}.tile{padding:9px;font-size:12px;min-width:0;overflow-wrap:anywhere}
-    .mot{margin-top:8px;padding:12px;font-size:15px}.tabs{margin-top:8px}.tab{padding:9px;font-size:12px}.panel{padding:9px;margin-top:8px}.panel h2{font-size:17px;margin:4px 0}.head{gap:6px}.head select{padding:9px}
+    .mot{margin-top:8px;padding:12px;font-size:15px}.tabs{margin-top:8px}.tab{padding:9px;font-size:12px}.panel{padding:8px;margin-top:8px}.panel h2{font-size:16px;margin:4px 0}.head{gap:6px}.head select{padding:8px;font-size:13px}
+    #results .tableWrap{margin-top:8px!important;border-radius:10px!important}
+    #results table{font-size:10px!important;line-height:1.15!important}
+    #results th,#results td{padding:6px 4px!important}
+    #results th{font-size:10px!important;line-height:1.05!important}
+    #results td{font-size:10px!important;font-weight:700!important}
+    #results td b{font-size:10px!important;line-height:1.12!important}
+    #results th:nth-child(1),#results td:nth-child(1){width:36%!important}
+    #results th:nth-child(2),#results td:nth-child(2){width:14%!important;text-align:center!important}
+    #results th:nth-child(3),#results td:nth-child(3){width:20%!important;text-align:center!important}
+    #results th:nth-child(4),#results td:nth-child(4){width:14%!important;text-align:center!important}
+    #results th:nth-child(5),#results td:nth-child(5){width:16%!important;text-align:center!important}
+    #results tbody tr{min-height:0!important}
     .overlay{padding:0!important;align-items:stretch!important;background:#f2f5f8!important}
     .sheet{width:100vw!important;max-width:100vw!important;height:100dvh!important;max-height:100dvh!important;border-radius:0!important;overflow-y:auto!important;overflow-x:hidden!important}
     .sheetTop{padding:10px 12px;align-items:center}.sheetTop h2{font-size:22px;margin:0}.sheetTop button{padding:8px 12px}
