@@ -19,7 +19,7 @@ jobs:
           s=s.replace('▥ APLICATIVOS','▥ LINK DOS INCENTIVOS')
           s=s.replace('▦ APLICATIVOS','▦ LINK DOS INCENTIVOS')
           s=re.sub(r'\s*<script\s+src=["\']trio-ui-fix\.js(?:\?[^"\']*)?["\']\s*></script>', '', s, flags=re.I)
-          tag='<script src="trio-ui-fix.js?v=20260909-03"></script>'
+          tag='<script src="trio-ui-fix.js?v=20260911-04"></script>'
           pos=s.lower().rfind('</body>')
           if pos >= 0:
               s=s[:pos]+tag+'\n'+s[pos:]
