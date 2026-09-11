@@ -27,24 +27,31 @@
     .clientHead{padding:10px;margin:8px 0}.clientHead h2,.clientHead h3{font-size:18px;overflow-wrap:anywhere}
     .tableWrap{width:100%!important;overflow-x:hidden!important;border-radius:10px}
     .tableWrap table,.sheet table{width:100%!important;min-width:0!important;table-layout:fixed!important;font-size:11px}
-    .tableWrap th,.tableWrap td,.sheet th,.sheet td{padding:7px 4px!important;white-space:normal!important;overflow-wrap:anywhere!important;word-break:break-word!important;vertical-align:top}
-    .pill{font-size:9px;padding:4px 6px;white-space:nowrap}
+    .tableWrap th,.tableWrap td,.sheet th,.sheet td{padding:8px 6px!important;white-space:normal!important;overflow-wrap:anywhere!important;word-break:normal!important;vertical-align:middle}
+    #pvout table thead th{background:#e30613!important;color:#fff!important;font-weight:900!important;text-align:left!important;border-bottom:0!important}
+    #pvout table tbody tr:nth-child(odd){background:#eef6ff!important}
+    #pvout table tbody tr:nth-child(even){background:#fff!important}
+    #pvout table th:nth-child(1),#pvout table td:nth-child(1){width:58%!important}
+    #pvout table th:nth-child(2),#pvout table td:nth-child(2){width:16%!important;text-align:center!important;white-space:nowrap!important;overflow-wrap:normal!important}
+    #pvout table th:nth-child(3),#pvout table td:nth-child(3){width:26%!important;text-align:center!important}
+    #pvout table th:nth-child(2){font-size:0!important}
+    #pvout table th:nth-child(2)::after{content:'-';font-size:12px!important;color:#fff!important}
+    .pill{font-size:9px;padding:4px 5px;white-space:nowrap}
     .footer{padding:12px;font-size:11px}
   }
   `;
   document.head.appendChild(s);
 
-  function removeSituacao(){
+  function restoreSituacaoCompacta(){
     const out=document.getElementById('pvout');
     if(!out)return;
     out.querySelectorAll('table').forEach(t=>{
       const hs=[...t.querySelectorAll('thead th')];
-      const i=hs.findIndex(h=>h.textContent.trim().toLowerCase().startsWith('situa'));
-      if(i<0)return;
-      t.querySelectorAll('tr').forEach(tr=>{const cs=tr.children;if(cs[i])cs[i].remove();});
+      const h=hs.find(x=>x.textContent.trim().toLowerCase().startsWith('situa'));
+      if(h) h.textContent='-';
     });
   }
-  const obs=new MutationObserver(removeSituacao);
-  const boot=()=>{const out=document.getElementById('pvout');if(out){obs.observe(out,{childList:true,subtree:true});removeSituacao();}else setTimeout(boot,300)};
+  const obs=new MutationObserver(restoreSituacaoCompacta);
+  const boot=()=>{const out=document.getElementById('pvout');if(out){obs.observe(out,{childList:true,subtree:true});restoreSituacaoCompacta();}else setTimeout(boot,300)};
   boot();
 })();
