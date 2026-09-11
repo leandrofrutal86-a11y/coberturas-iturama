@@ -12,6 +12,7 @@ on:
       - 'consultor-pv-dia.js'
       - 'consultor-imperdoaveis.js'
       - 'consultor-imperdoaveis-ajuste.js'
+      - 'consultor-mobile-fit.js'
       - '.github/workflows/inject-consultor-visitas.yml'
 permissions:
   contents: write
@@ -27,7 +28,7 @@ jobs:
           p=Path('index.html')
           s=p.read_text(encoding='utf-8')
           import re
-          for name in ['consultor-visitas','consultor-layout-clean','consultor-header-actions','consultor-bottom-menu','b2b-dashboard-fix','consultor-results-style','consultor-pv-dia','consultor-imperdoaveis','consultor-imperdoaveis-ajuste']:
+          for name in ['consultor-visitas','consultor-layout-clean','consultor-header-actions','consultor-bottom-menu','b2b-dashboard-fix','consultor-results-style','consultor-pv-dia','consultor-imperdoaveis','consultor-imperdoaveis-ajuste','consultor-mobile-fit']:
               s=re.sub(r'<script src="'+re.escape(name)+r'\.js\?v=[^"]+"></script>','',s)
           tags=(
             '<script src="consultor-visitas.js?v=20260909-05"></script>'
@@ -39,6 +40,7 @@ jobs:
             '<script src="consultor-pv-dia.js?v=20260910-pvdia-02"></script>'
             '<script src="consultor-imperdoaveis.js?v=20260910-imp-04"></script>'
             '<script src="consultor-imperdoaveis-ajuste.js?v=20260910-imp-pv-03"></script>'
+            '<script src="consultor-mobile-fit.js?v=20260910-mobile-01"></script>'
           )
           s=s.replace('</body></html>',tags+'</body></html>')
           p.write_text(s,encoding='utf-8')
@@ -48,4 +50,4 @@ jobs:
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add index.html
-          git diff --cached --quiet || (git commit -m 'Corrige carregamento do Imperdoaveis' && git push)
+          git diff --cached --quiet || (git commit -m 'Ajusta telas do consultor para celular' && git push)
