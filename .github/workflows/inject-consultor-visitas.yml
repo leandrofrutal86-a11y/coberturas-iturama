@@ -42,7 +42,7 @@ jobs:
             '<script src="consultor-pv-dia.js?v=20260910-pvdia-02"></script>'
             '<script src="consultor-imperdoaveis.js?v=20260910-imp-04"></script>'
             '<script src="consultor-imperdoaveis-ajuste.js?v=20260910-imp-pv-03"></script>'
-            '<script src="consultor-mobile-fit.js?v=20260911-mobile-04"></script>'
+            '<script src="consultor-mobile-fit.js?v=20260911-mobile-05"></script>'
             '<script src="consultor-trio-labels.js?v=20260911-trio-01"></script>'
             '<script src="footer-credit.js?v=20260911-credit-01"></script>'
           )
@@ -54,4 +54,4 @@ jobs:
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add index.html
-          git diff --cached --quiet || (git commit -m 'Adiciona credito no rodape' && git push)
+          git diff --cached --quiet || (git commit -m 'Atualiza layout mobile consultor' && git push)
