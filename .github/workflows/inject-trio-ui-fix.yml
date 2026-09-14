@@ -35,7 +35,7 @@ jobs:
             'consultor-pv-dia':'20260914-acomp-05',
             'consultor-imperdoaveis':'20260914-acomp-05',
             'consultor-imperdoaveis-ajuste':'20260914-acomp-05',
-            'consultor-rogerio-ui':'20260914-rogerio-stable-01',
+            'consultor-rogerio-ui':'20260914-rogerio-stable-02',
           }
           for name in versions:
               s=re.sub(r'\s*<script\s+src=["\']'+re.escape(name)+r'\.js(?:\?[^"\']*)?["\']\s*></script>', '', s, flags=re.I)
