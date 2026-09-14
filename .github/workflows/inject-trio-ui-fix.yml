@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Inject Trio UI script and labels
+      - name: Inject consultant UI scripts
         run: |
           python - <<'PY'
           from pathlib import Path
@@ -18,13 +18,24 @@ jobs:
           s=p.read_text(encoding='utf-8')
           s=s.replace('▥ APLICATIVOS','▥ LINK DOS INCENTIVOS')
           s=s.replace('▦ APLICATIVOS','▦ LINK DOS INCENTIVOS')
-          s=re.sub(r'\s*<script\s+src=["\']trio-ui-fix\.js(?:\?[^"\']*)?["\']\s*></script>', '', s, flags=re.I)
-          tag='<script src="trio-ui-fix.js?v=20260911-04"></script>'
+          versions={
+            'trio-ui-fix':'20260911-04',
+            'consultor-visitas':'20260914-acomp-04',
+            'consultor-contatos':'20260914-acomp-04',
+            'b2b-dashboard-fix':'20260914-acomp-02',
+            'consultor-pv-dia':'20260914-acomp-04',
+            'consultor-imperdoaveis':'20260914-acomp-04',
+            'consultor-imperdoaveis-ajuste':'20260914-acomp-04',
+            'consultor-acesso-geral':'20260914-acomp-04',
+          }
+          for name in versions:
+              s=re.sub(r'\s*<script\s+src=["\']'+re.escape(name)+r'\.js(?:\?[^"\']*)?["\']\s*></script>', '', s, flags=re.I)
+          tags='\n'.join(f'<script src="{name}.js?v={ver}"></script>' for name,ver in versions.items())
           pos=s.lower().rfind('</body>')
           if pos >= 0:
-              s=s[:pos]+tag+'\n'+s[pos:]
+              s=s[:pos]+tags+'\n'+s[pos:]
           else:
-              s+='\n'+tag+'\n'
+              s+='\n'+tags+'\n'
           p.write_text(s,encoding='utf-8')
           PY
       - name: Commit injection
@@ -33,5 +44,10 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add index.html
           git diff --cached --quiet && exit 0
-          git commit -m 'Atualiza Trio sem travamento'
-          git push
+          git commit -m 'Publica seletor global do acompanhamento'
+          for attempt in 1 2 3; do
+            git pull --rebase origin main || { git rebase --abort || true; }
+            if git push; then exit 0; fi
+            sleep $((attempt * 2))
+          done
+          exit 1
