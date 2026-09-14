@@ -13,7 +13,7 @@
     const vis=card('Visita de Clientes');
     if(vis&&!vis.dataset.navfix){vis.dataset.navfix='1';vis.onclick=()=>{const tabs=[...document.querySelectorAll('.tabs button')].filter(b=>norm(b.textContent).includes('VISITA DE CLIENTES'));const t=tabs[tabs.length-1];if(t&&typeof t.onclick==='function')t.onclick();else openWhenReady('Visita de Clientes','visitasSubcanais')}}
     const cont=card('Contato dos Clientes');
-    if(cont&&!cont.dataset.navfix){cont.dataset.navfix='1';cont.onclick=()=>openWhenReady('Contato dos Clientes','contatosClientes')}
+    if(cont&&!cont.dataset.navfix){cont.dataset.navfix='1';cont.onclick=()=>{if(typeof window.abrirContatosClientesAdm==='function')window.abrirContatosClientesAdm();else showSection('contatosClientes')}}
   }
-  let n=0;const timer=setInterval(()=>{bind();if(++n>60)clearInterval(timer)},250);document.addEventListener('click',e=>{if(e.target.closest('.menuCard'))setTimeout(bind,0)});
+  let n=0;const timer=setInterval(()=>{bind();if(++n>80)clearInterval(timer)},250);document.addEventListener('click',e=>{if(e.target.closest('.menuCard'))setTimeout(bind,0)});
 })();
