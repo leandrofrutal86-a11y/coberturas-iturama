@@ -1,7 +1,11 @@
 name: Inject Trio UI Fix
 on:
+  workflow_dispatch:
   push:
     branches: [main]
+    paths:
+      - 'trio-ui-fix.js'
+      - '.github/workflows/inject-trio-ui-fix.yml'
 permissions:
   contents: write
 jobs:
@@ -28,7 +32,7 @@ jobs:
             'consultor-pv-dia':'20260914-acomp-05',
             'consultor-imperdoaveis':'20260914-acomp-05',
             'consultor-imperdoaveis-ajuste':'20260914-acomp-05',
-            'consultor-acesso-geral':'20260914-acomp-05',
+            'consultor-acesso-geral':'20260914-acomp-10',
           }
           for name in versions:
               s=re.sub(r'\s*<script\s+src=["\']'+re.escape(name)+r'\.js(?:\?[^"\']*)?["\']\s*></script>', '', s, flags=re.I)
