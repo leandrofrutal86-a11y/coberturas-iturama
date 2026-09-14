@@ -1,7 +1,6 @@
 name: Inject Category KPI Fix
 on:
-  push:
-    branches: [main]
+  workflow_dispatch:
 permissions:
   contents: write
 jobs:
@@ -15,7 +14,6 @@ jobs:
           from pathlib import Path
           import re
 
-          # Mantem os scripts de correcao e sincronizacao sempre na versao atual.
           p=Path('index.html')
           s=p.read_text(encoding='utf-8')
           s=re.sub(r'\s*<script\s+src=["\']force-category-fix\.js(?:\?[^"\']*)?["\']\s*></script>', '', s, flags=re.I)
@@ -28,7 +26,6 @@ jobs:
               s+='\n'+tag+'\n'
           p.write_text(s,encoding='utf-8')
 
-          # Expoe a recarga da base Supabase para o live-sync executar sem F5.
           sp=Path('supabase-online.js')
           js=sp.read_text(encoding='utf-8')
           if 'window.__ituramaSyncNow=carregar;' not in js:
@@ -37,7 +34,6 @@ jobs:
               if needle not in js:
                   raise SystemExit('Inicializacao do supabase-online.js nao encontrada')
               js=js.replace(needle,repl,1)
-          # Evita resposta em cache ao buscar as vendas.
           js=js.replace("{headers:{...headers,Range:`${from}-${from+size-1}`}})","{headers:{...headers,Range:`${from}-${from+size-1}`},cache:'no-store'})",1)
           sp.write_text(js,encoding='utf-8')
           PY
