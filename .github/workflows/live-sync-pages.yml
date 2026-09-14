@@ -1,9 +1,6 @@
 name: Sincronizacao automatica do site
 
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
 
 permissions:
@@ -15,7 +12,6 @@ concurrency:
 
 jobs:
   sync:
-    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -32,7 +28,6 @@ jobs:
           p = Path('index.html')
           html = p.read_text(encoding='utf-8')
 
-          # Adiciona o botão de mostrar/ocultar senha no login, sem duplicar.
           if 'id="togglePass"' not in html:
               old = '<input id="pass" type="password" autocomplete="current-password" placeholder="Digite sua senha">'
               new = '''<div style="position:relative"><input id="pass" type="password" autocomplete="current-password" placeholder="Digite sua senha" style="padding-right:58px"><button id="togglePass" type="button" aria-label="Mostrar senha" title="Mostrar senha" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);width:44px;height:44px;border:0;background:transparent;color:#5f6875;font-size:24px;cursor:pointer;margin:0;padding:0">👁</button></div>'''
