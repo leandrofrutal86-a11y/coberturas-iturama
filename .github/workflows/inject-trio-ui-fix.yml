@@ -9,6 +9,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Inject consultant UI scripts
         run: |
           python - <<'PY'
@@ -20,13 +22,13 @@ jobs:
           s=s.replace('▦ APLICATIVOS','▦ LINK DOS INCENTIVOS')
           versions={
             'trio-ui-fix':'20260911-04',
-            'consultor-visitas':'20260914-acomp-04',
-            'consultor-contatos':'20260914-acomp-04',
+            'consultor-visitas':'20260914-acomp-05',
+            'consultor-contatos':'20260914-acomp-05',
             'b2b-dashboard-fix':'20260914-acomp-02',
-            'consultor-pv-dia':'20260914-acomp-04',
-            'consultor-imperdoaveis':'20260914-acomp-04',
-            'consultor-imperdoaveis-ajuste':'20260914-acomp-04',
-            'consultor-acesso-geral':'20260914-acomp-04',
+            'consultor-pv-dia':'20260914-acomp-05',
+            'consultor-imperdoaveis':'20260914-acomp-05',
+            'consultor-imperdoaveis-ajuste':'20260914-acomp-05',
+            'consultor-acesso-geral':'20260914-acomp-05',
           }
           for name in versions:
               s=re.sub(r'\s*<script\s+src=["\']'+re.escape(name)+r'\.js(?:\?[^"\']*)?["\']\s*></script>', '', s, flags=re.I)
@@ -44,10 +46,12 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add index.html
           git diff --cached --quiet && exit 0
-          git commit -m 'Publica seletor global do acompanhamento'
-          for attempt in 1 2 3; do
-            git pull --rebase origin main || { git rebase --abort || true; }
-            if git push; then exit 0; fi
+          git commit -m 'Publica acompanhamento atualizado'
+          for attempt in 1 2 3 4; do
+            if git pull --rebase origin main && git push origin HEAD:main; then
+              exit 0
+            fi
+            git rebase --abort 2>/dev/null || true
             sleep $((attempt * 2))
           done
           exit 1
