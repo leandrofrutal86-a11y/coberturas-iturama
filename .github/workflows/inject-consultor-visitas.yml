@@ -35,7 +35,7 @@ jobs:
               s=re.sub(r'<script src="'+re.escape(name)+r'\.js\?v=[^"]+"></script>','',s)
           tags=(
             '<script src="consultor-visitas.js?v=20260909-05"></script>'
-            '<script src="consultor-contatos.js?v=20260914-01"></script>'
+            '<script src="consultor-contatos.js?v=20260914-02"></script>'
             '<script src="consultor-layout-clean.js?v=20260909-01"></script>'
             '<script src="consultor-header-actions.js?v=20260910-03"></script>'
             '<script src="consultor-bottom-menu.js?v=20260910-bottom-02"></script>'
