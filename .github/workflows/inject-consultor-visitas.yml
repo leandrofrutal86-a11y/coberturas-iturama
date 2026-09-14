@@ -8,9 +8,7 @@ on:
       - 'consultor-layout-clean.js'
       - 'consultor-header-actions.js'
       - 'consultor-bottom-menu.js'
-      - 'consultor-acesso-geral.js'
-      - 'consultor-rogerio-layer-fix.js'
-      - 'consultor-rogerio-selector-fix.js'
+      - 'consultor-rogerio-ui.js'
       - 'b2b-dashboard-fix.js'
       - 'consultor-results-style.js'
       - 'consultor-pv-dia.js'
@@ -33,16 +31,17 @@ jobs:
         run: |
           python - <<'PY'
           from pathlib import Path
+          import re
           p=Path('index.html')
           s=p.read_text(encoding='utf-8')
-          import re
-          for name in ['consultor-visitas','consultor-contatos','consultor-layout-clean','consultor-header-actions','consultor-bottom-menu','consultor-acesso-geral','consultor-rogerio-layer-fix','consultor-rogerio-selector-fix','b2b-dashboard-fix','consultor-results-style','consultor-pv-dia','consultor-imperdoaveis','consultor-imperdoaveis-ajuste','consultor-mobile-fit','consultor-trio-labels','footer-credit']:
-              s=re.sub(r'<script src="'+re.escape(name)+r'\.js\?v=[^"]+"></script>','',s)
+          names=['consultor-visitas','consultor-contatos','consultor-layout-clean','consultor-header-actions','consultor-bottom-menu','consultor-acesso-geral','consultor-rogerio-layer-fix','consultor-rogerio-selector-fix','consultor-rogerio-ui','b2b-dashboard-fix','consultor-results-style','consultor-pv-dia','consultor-imperdoaveis','consultor-imperdoaveis-ajuste','consultor-mobile-fit','consultor-trio-labels','footer-credit']
+          for name in names:
+              s=re.sub(r'\s*<script\s+src=["\']'+re.escape(name)+r'\.js(?:\?[^"\']*)?["\']\s*></script>', '', s, flags=re.I)
           tags=(
             '<script src="consultor-visitas.js?v=20260914-acomp-05"></script>'
             '<script src="consultor-contatos.js?v=20260914-acomp-05"></script>'
             '<script src="consultor-layout-clean.js?v=20260909-01"></script>'
-            '<script src="consultor-header-actions.js?v=20260914-rogerio-02"></script>'
+            '<script src="consultor-header-actions.js?v=20260914-rogerio-03"></script>'
             '<script src="consultor-bottom-menu.js?v=20260910-bottom-02"></script>'
             '<script src="b2b-dashboard-fix.js?v=20260914-acomp-02"></script>'
             '<script src="consultor-results-style.js?v=20260911-results-02"></script>'
@@ -52,9 +51,7 @@ jobs:
             '<script src="consultor-mobile-fit.js?v=20260914-mobile-10"></script>'
             '<script src="consultor-trio-labels.js?v=20260911-trio-01"></script>'
             '<script src="footer-credit.js?v=20260911-credit-01"></script>'
-            '<script src="consultor-acesso-geral.js?v=20260914-acomp-10"></script>'
-            '<script src="consultor-rogerio-layer-fix.js?v=20260914-layer-01"></script>'
-            '<script src="consultor-rogerio-selector-fix.js?v=20260914-selector-01"></script>'
+            '<script src="consultor-rogerio-ui.js?v=20260914-rogerio-stable-01"></script>'
           )
           s=s.replace('</body></html>',tags+'</body></html>')
           p.write_text(s,encoding='utf-8')
