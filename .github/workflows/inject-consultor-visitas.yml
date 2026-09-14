@@ -8,6 +8,7 @@ on:
       - 'consultor-layout-clean.js'
       - 'consultor-header-actions.js'
       - 'consultor-bottom-menu.js'
+      - 'consultor-overlay-layer-fix.js'
       - 'consultor-rogerio-ui.js'
       - 'b2b-dashboard-fix.js'
       - 'consultor-results-style.js'
@@ -34,7 +35,7 @@ jobs:
           import re
           p=Path('index.html')
           s=p.read_text(encoding='utf-8')
-          names=['consultor-visitas','consultor-contatos','consultor-layout-clean','consultor-header-actions','consultor-bottom-menu','consultor-acesso-geral','consultor-rogerio-layer-fix','consultor-rogerio-selector-fix','consultor-rogerio-ui','b2b-dashboard-fix','consultor-results-style','consultor-pv-dia','consultor-imperdoaveis','consultor-imperdoaveis-ajuste','consultor-mobile-fit','consultor-trio-labels','footer-credit']
+          names=['consultor-visitas','consultor-contatos','consultor-layout-clean','consultor-header-actions','consultor-bottom-menu','consultor-overlay-layer-fix','consultor-acesso-geral','consultor-rogerio-layer-fix','consultor-rogerio-selector-fix','consultor-rogerio-ui','b2b-dashboard-fix','consultor-results-style','consultor-pv-dia','consultor-imperdoaveis','consultor-imperdoaveis-ajuste','consultor-mobile-fit','consultor-trio-labels','footer-credit']
           for name in names:
               s=re.sub(r'\s*<script\s+src=["\']'+re.escape(name)+r'\.js(?:\?[^"\']*)?["\']\s*></script>', '', s, flags=re.I)
           tags=(
@@ -52,6 +53,7 @@ jobs:
             '<script src="consultor-trio-labels.js?v=20260911-trio-01"></script>'
             '<script src="footer-credit.js?v=20260911-credit-01"></script>'
             '<script src="consultor-rogerio-ui.js?v=20260914-rogerio-stable-02"></script>'
+            '<script src="consultor-overlay-layer-fix.js?v=20260914-overlay-01"></script>'
           )
           s=s.replace('</body></html>',tags+'</body></html>')
           p.write_text(s,encoding='utf-8')
