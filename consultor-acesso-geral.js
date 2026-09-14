@@ -1,3 +1,4 @@
+// cache-refresh-20260914-06
 (()=>{
 let observer=false,activeContext='',patched=false,busy=false,fetchPatched=false,initialDone=false,choosePatched=false;
 const $=id=>document.getElementById(id),esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
