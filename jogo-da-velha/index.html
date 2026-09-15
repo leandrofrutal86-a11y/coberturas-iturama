@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#07111f">
+<title>Jogo da Velha da Família</title>
+<style>
+:root{color-scheme:dark;--bg:#07111f;--p:#111e31;--p2:#0c1727;--line:#29405f;--tx:#f7f9fc;--mut:#9eb0c8;--x:#ff5d73;--o:#4fc3ff;--ok:#55d69a;--ac:#806fff}*{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:var(--tx);background:radial-gradient(circle at 15% 0,rgba(128,111,255,.2),transparent 28rem),var(--bg)}button,input{font:inherit}.app{width:min(100%,540px);margin:auto;padding:26px 16px 40px}.brand{text-align:center;margin:8px 0 22px}.logo{display:flex;justify-content:center;gap:8px;margin-bottom:10px}.logo b{display:grid;place-items:center;width:44px;height:44px;border:1px solid var(--line);border-radius:14px;background:var(--p);font-size:28px}.logo .x{color:var(--x)}.logo .o{color:var(--o)}h1{margin:0;font-size:clamp(28px,8vw,40px);line-height:1}.brand p,.muted{color:var(--mut)}.brand p{line-height:1.45}.card{background:linear-gradient(180deg,#14243a,#101b2d);border:1px solid var(--line);border-radius:20px;padding:17px;box-shadow:0 20px 50px rgba(0,0,0,.28)}.grid{display:grid;gap:14px}.home{display:grid;gap:14px}.home h2{margin:0 0 4px;font-size:18px}.home p{margin:0 0 12px;font-size:14px}.field{display:grid;gap:6px;font-size:14px;font-weight:700}input{width:100%;min-height:50px;padding:0 13px;border-radius:13px;border:1px solid var(--line);background:var(--p2);color:var(--tx);font-size:16px;outline:none}input:focus{border-color:var(--ac);box-shadow:0 0 0 3px rgba(128,111,255,.15)}#joinCode{text-transform:uppercase;letter-spacing:.16em;font-weight:900}.btn{min-height:50px;border:0;border-radius:14px;padding:0 15px;background:linear-gradient(135deg,var(--ac),#6655e9);color:white;font-weight:900;cursor:pointer}.btn:disabled{opacity:.5}.btn.alt{background:#1e304a;border:1px solid #344e70}.btn.ghost{background:transparent;border:1px solid var(--line);color:#dce6f2}.msg{display:none;padding:10px 12px;border-radius:12px;font-size:14px;line-height:1.4}.msg.show{display:block}.err{background:#391a27;border:1px solid #703048;color:#ffd1d9}.ok{background:#153026;border:1px solid #2a654e;color:#bff4da}.game{display:none}.game.show{display:block}.top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}.chip{padding:8px 11px;border:1px solid var(--line);border-radius:13px;background:var(--p2);text-align:center}.chip small{display:block;color:var(--mut);font-size:10px}.chip b{font-size:20px;letter-spacing:.12em}.live{font-size:12px;color:var(--mut);white-space:nowrap}.live.on{color:var(--ok)}.status{text-align:center;margin-bottom:12px}.status small{color:var(--mut);font-weight:800}.status h2{margin:5px 0;font-size:22px}.score{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center;margin-bottom:12px}.player{text-align:center;background:var(--p2);border:1px solid var(--line);border-radius:15px;padding:10px;min-width:0}.player .sym{font-size:22px;font-weight:1000}.player .sym.x{color:var(--x)}.player .sym.o{color:var(--o)}.player .name{font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.player .pts{font-size:24px;font-weight:1000}.vs{color:var(--mut);font-weight:900}.draw{text-align:center;color:var(--mut);font-size:12px;margin:-5px 0 11px}.boardCard{padding:13px}.board{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.cell{aspect-ratio:1;border:1px solid #355072;border-radius:17px;background:var(--p2);font-size:clamp(44px,15vw,72px);font-weight:1000;color:var(--tx)}.cell.x{color:var(--x)}.cell.o{color:var(--o)}.cell.win{border-color:var(--ok);box-shadow:inset 0 0 0 2px rgba(85,214,154,.2)}.hint{text-align:center;color:var(--mut);font-size:13px;line-height:1.4;margin:10px 0 0}.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.actions .wide{grid-column:1/-1}.foot{text-align:center;color:#60738c;font-size:12px;margin-top:20px}@media(min-width:700px){.home{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<main class="app">
+<header class="brand"><div class="logo"><b class="x">X</b><b class="o">O</b></div><h1>Jogo da Velha<br>da Família</h1><p>Crie uma sala, mande o convite e jogue online. As jogadas aparecem no outro celular.</p></header>
+<section id="home" class="home">
+<div id="homeMsg" class="msg err" style="grid-column:1/-1"></div>
+<form id="createForm" class="card grid"><div><h2>Criar uma sala</h2><p class="muted">Você entra como X e recebe um código.</p></div><label class="field">Seu nome<input id="createName" maxlength="24" placeholder="Ex.: Leandro" required></label><button id="createBtn" class="btn">Criar sala</button></form>
+<form id="joinForm" class="card grid"><div><h2>Entrar em uma sala</h2><p class="muted">Use o código que sua família enviou.</p></div><label class="field">Seu nome<input id="joinName" maxlength="24" placeholder="Ex.: João" required></label><label class="field">Código<input id="joinCode" maxlength="6" placeholder="ABC123" required></label><button id="joinBtn" class="btn alt">Entrar na sala</button></form>
+<button id="resumeBtn" class="btn ghost" type="button" style="display:none;grid-column:1/-1"></button>
+</section>
+<section id="game" class="game">
+<div class="top"><button id="leaveBtn" class="btn ghost" type="button" style="min-height:44px">← Sair</button><div class="chip"><small>SALA</small><b id="roomCode">------</b></div><div id="live" class="live">● conectando</div></div>
+<div class="card status"><small id="round">RODADA 1</small><h2 id="status">Carregando…</h2><div id="you" class="muted"></div></div>
+<div class="score"><div class="player"><div class="sym x">X</div><div id="xName" class="name">Jogador X</div><div id="xScore" class="pts">0</div></div><div class="vs">×</div><div class="player"><div class="sym o">O</div><div id="oName" class="name">Aguardando…</div><div id="oScore" class="pts">0</div></div></div>
+<div id="draws" class="draw">Empates: 0</div>
+<div class="card boardCard"><div id="board" class="board"></div><p id="hint" class="hint"></p></div>
+<div class="actions"><button id="shareBtn" class="btn alt wide" type="button">Compartilhar convite</button><button id="copyBtn" class="btn ghost" type="button">Copiar código</button><button id="refreshBtn" class="btn ghost" type="button">Atualizar</button><button id="rematchBtn" class="btn wide" type="button" style="display:none">Jogar novamente</button></div>
+<div id="gameMsg" class="msg err" style="margin-top:12px"></div>
+</section>
+<footer class="foot">Jogue junto, mesmo cada um estando em um lugar.</footer>
+</main>
+<script>
+const API='https://harlrfhukjvhpufwhtep.supabase.co/rest/v1/rpc/';
+const KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhhcmxyZmh1a2p2aHB1ZndodGVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzNjM2MDcsImV4cCI6MjEwMzkzOTYwN30.KDqqu5uEQRKiXQ_0tfMVG5a2RmRexT6rle2W8O6U7Bo';
+const K='jvf_session_v2',$=id=>document.getElementById(id),E={home:$('home'),game:$('game'),hm:$('homeMsg'),gm:$('gameMsg'),cf:$('createForm'),jf:$('joinForm'),cn:$('createName'),jn:$('joinName'),jc:$('joinCode'),cb:$('createBtn'),jb:$('joinBtn'),resume:$('resumeBtn'),leave:$('leaveBtn'),code:$('roomCode'),live:$('live'),round:$('round'),status:$('status'),you:$('you'),xn:$('xName'),on:$('oName'),xs:$('xScore'),os:$('oScore'),draws:$('draws'),board:$('board'),hint:$('hint'),share:$('shareBtn'),copy:$('copyBtn'),refresh:$('refreshBtn'),rematch:$('rematchBtn')};
+let sess=null,room=null,poll=null,busy=false;
+const wins=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+const code=v=>String(v||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,6);
+const load=()=>{try{return JSON.parse(localStorage.getItem(K)||'null')}catch{return null}};
+const save=s=>{sess=s;localStorage.setItem(K,JSON.stringify(s))};
+const msg=(el,t='')=>{el.textContent=t;el.classList.toggle('show',!!t)};
+const err=e=>{let r=String(e?.message||e||'');for(const t of['Informe seu nome.','Código da sala inválido.','Sala não encontrada.','Essa sala já tem dois jogadores.','Partida não encontrada neste aparelho.','Você não participa desta partida.','A rodada não está em andamento.','Aguarde sua vez.','Essa casa já foi marcada.','Aguarde o segundo jogador.','A rodada atual ainda não terminou.'])if(r.includes(t))return t;return 'Falha de conexão. Confira sua internet e tente novamente.'};
+async function rpc(name,payload){
+  const r=await fetch(API+name,{method:'POST',headers:{'Content-Type':'application/json','apikey':KEY,'Authorization':'Bearer '+KEY},body:JSON.stringify(payload)});
+  const text=await r.text(); let data=null; try{data=text?JSON.parse(text):null}catch{data=text}
+  if(!r.ok){let m=(data&&typeof data==='object'&&(data.message||data.details||data.hint))||text||('Erro '+r.status);throw new Error(m)}
+  return data;
+}
+function inviteUrl(){const u=new URL(location.href);u.search='';u.searchParams.set('s',sess.code);return u.toString()}
+function showGame(){E.home.style.display='none';E.game.classList.add('show');window.scrollTo(0,0)}
+function showHome(){E.game.classList.remove('show');E.home.style.display='grid';window.scrollTo(0,0)}
+function pname(s){return s==='X'?room?.player_x_name:room?.player_o_name}
+function wline(b,w){return w?(wins.find(l=>l.every(i=>b[i]===w))||[]):[]}
+function render(){
+  if(!room||!sess)return;
+  E.code.textContent=room.code;E.round.textContent=`RODADA ${room.round}`;E.xn.textContent=room.player_x_name||'Jogador X';E.on.textContent=room.player_o_name||'Aguardando…';E.xs.textContent=room.score_x||0;E.os.textContent=room.score_o||0;E.draws.textContent=`Empates: ${room.draws||0}`;E.you.textContent=`Você joga com ${sess.symbol}`;
+  let st,h;
+  if(room.status==='waiting'){st='Aguardando outro jogador…';h='Compartilhe o convite. A partida começa quando a outra pessoa entrar.'}
+  else if(room.status==='playing'){const my=room.turn===sess.symbol;st=my?'Sua vez!':`Vez de ${pname(room.turn)||'outro jogador'}`;h=my?'Escolha uma casa livre.':'A jogada do outro jogador aparecerá automaticamente aqui.'}
+  else if(room.winner){st=room.winner===sess.symbol?'🎉 Você venceu!':`🏆 ${pname(room.winner)||'O outro jogador'} venceu!`;h='Querem mais uma? O placar continua.'}
+  else{st='🤝 Deu empate!';h='Querem mais uma? O placar continua.'}
+  E.status.textContent=st;E.hint.textContent=h;E.rematch.style.display=room.status==='finished'?'':'none';
+  const b=Array.isArray(room.board)?room.board:Array(9).fill(''),wl=new Set(wline(b,room.winner));E.board.replaceChildren();
+  b.forEach((v,i)=>{const x=document.createElement('button');x.type='button';x.className=`cell ${v?v.toLowerCase():''}${wl.has(i)?' win':''}`;x.textContent=v;const can=room.status==='playing'&&room.turn===sess.symbol&&!v;x.disabled=!can;if(can)x.addEventListener('click',()=>move(i,x));E.board.append(x)});
+}
+async function refresh(){
+  if(!sess||busy)return;busy=true;
+  try{room=await rpc('ttt_get_state',{p_code:sess.code,p_token:sess.token});render();msg(E.gm);E.live.textContent='● online';E.live.classList.add('on')}
+  catch(e){E.live.textContent='● sem conexão';E.live.classList.remove('on');msg(E.gm,err(e))}
+  finally{busy=false}
+}
+function sync(){clearInterval(poll);E.live.textContent='● conectando';E.live.classList.remove('on');poll=setInterval(()=>{if(!document.hidden)refresh()},1000)}
+async function enter(s){save(s);showGame();sync();await refresh()}
+async function move(i,b){b.disabled=true;try{room=await rpc('ttt_make_move',{p_code:sess.code,p_token:sess.token,p_cell:i});render();msg(E.gm)}catch(e){msg(E.gm,err(e));refresh()}}
+E.cf.addEventListener('submit',async e=>{e.preventDefault();msg(E.hm);const n=E.cn.value.trim();if(!n)return msg(E.hm,'Informe seu nome.');E.cb.disabled=true;try{const d=await rpc('ttt_create_room',{p_name:n});await enter({code:d.code,token:d.player_token,symbol:d.player_symbol,channel:d.channel_token})}catch(x){msg(E.hm,err(x))}finally{E.cb.disabled=false}});
+E.jf.addEventListener('submit',async e=>{e.preventDefault();msg(E.hm);const n=E.jn.value.trim(),c=code(E.jc.value);E.jc.value=c;if(!n)return msg(E.hm,'Informe seu nome.');if(c.length!==6)return msg(E.hm,'Digite o código de 6 caracteres.');E.jb.disabled=true;try{const d=await rpc('ttt_join_room',{p_code:c,p_name:n});await enter({code:d.code,token:d.player_token,symbol:d.player_symbol,channel:d.channel_token})}catch(x){msg(E.hm,err(x))}finally{E.jb.disabled=false}});
+E.jc.addEventListener('input',()=>E.jc.value=code(E.jc.value));E.refresh.addEventListener('click',refresh);
+E.copy.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(sess.code);E.copy.textContent='Copiado!';setTimeout(()=>E.copy.textContent='Copiar código',1200)}catch{window.prompt('Copie o código:',sess.code)}});
+E.share.addEventListener('click',async()=>{const text=`Vamos jogar Jogo da Velha? Sala ${sess.code}`,u=inviteUrl();try{if(navigator.share)await navigator.share({title:'Jogo da Velha da Família',text,url:u});else{await navigator.clipboard.writeText(`${text}\n${u}`);E.share.textContent='Convite copiado!';setTimeout(()=>E.share.textContent='Compartilhar convite',1400)}}catch{}});
+E.rematch.addEventListener('click',async()=>{E.rematch.disabled=true;try{room=await rpc('ttt_rematch',{p_code:sess.code,p_token:sess.token});render()}catch(e){if(err(e)==='A rodada atual ainda não terminou.')refresh();else msg(E.gm,err(e))}finally{E.rematch.disabled=false}});
+E.leave.addEventListener('click',()=>{clearInterval(poll);localStorage.removeItem(K);sess=room=null;history.replaceState({},'',location.pathname);showHome();initHome()});
+E.resume.addEventListener('click',()=>{const s=load();if(s)enter(s)});document.addEventListener('visibilitychange',()=>{if(!document.hidden&&sess)refresh()});
+function initHome(){const q=code(new URL(location.href).searchParams.get('s')),s=load();if(q)E.jc.value=q;if(s&&(!q||q===s.code)){E.resume.style.display='block';E.resume.textContent=`Continuar partida na sala ${s.code}`}else E.resume.style.display='none'}
+async function boot(){const q=code(new URL(location.href).searchParams.get('s')),s=load();if(s&&(!q||q===s.code)){try{sess=s;room=await rpc('ttt_get_state',{p_code:s.code,p_token:s.token});showGame();sync();render();E.live.textContent='● online';E.live.classList.add('on');return}catch{localStorage.removeItem(K)}}initHome()}
+boot();
+</script>
+</body></html>
