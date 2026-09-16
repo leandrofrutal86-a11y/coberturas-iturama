@@ -8,14 +8,16 @@
     .cvOverlay,
     .contOverlay,
     .impOverlay,
-    .cvContentOverlay{
+    .cvContentOverlay,
+    .recOverlay{
       z-index:10000!important;
     }
 
     #ov .sheet,
     .cvOverlay .cvSheet,
     .contOverlay .contSheet,
-    .cvContentOverlay .cvContentSheet{
+    .cvContentOverlay .cvContentSheet,
+    .recOverlay .recSheet{
       position:relative!important;
       z-index:10001!important;
     }
@@ -24,7 +26,8 @@
     #ov .sheetBody,
     .cvOverlay .cvBody,
     .contOverlay .contBody,
-    .cvContentOverlay .cvContentBody{
+    .cvContentOverlay .cvContentBody,
+    .recOverlay .recBody{
       padding-bottom:calc(110px + env(safe-area-inset-bottom))!important;
     }
 
@@ -37,7 +40,8 @@
     body:has(.cvOverlay.show) #cvBottomNav,
     body:has(.contOverlay.show) #cvBottomNav,
     body:has(.impOverlay.show) #cvBottomNav,
-    body:has(.cvContentOverlay.show) #cvBottomNav{
+    body:has(.cvContentOverlay.show) #cvBottomNav,
+    body:has(.recOverlay.show) #cvBottomNav{
       z-index:10!important;
       pointer-events:none!important;
     }
@@ -47,13 +51,15 @@
       .cvOverlay,
       .contOverlay,
       .impOverlay,
-      .cvContentOverlay{
+      .cvContentOverlay,
+      .recOverlay{
         z-index:10000!important;
       }
       #ov .sheet,
       .cvOverlay .cvSheet,
       .contOverlay .contSheet,
-      .cvContentOverlay .cvContentSheet{
+      .cvContentOverlay .cvContentSheet,
+      .recOverlay .recSheet{
         max-height:100dvh!important;
       }
     }
