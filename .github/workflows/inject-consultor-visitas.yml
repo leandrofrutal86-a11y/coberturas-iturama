@@ -13,6 +13,7 @@ on:
       - 'b2b-dashboard-fix.js'
       - 'consultor-results-style.js'
       - 'consultor-pv-dia.js'
+      - 'consultor-oportunidades-dia.js'
       - 'consultor-imperdoaveis.js'
       - 'consultor-imperdoaveis-ajuste.js'
       - 'consultor-mobile-fit.js'
@@ -35,7 +36,7 @@ jobs:
           import re
           p=Path('index.html')
           s=p.read_text(encoding='utf-8')
-          names=['consultor-visitas','consultor-contatos','consultor-layout-clean','consultor-header-actions','consultor-bottom-menu','consultor-overlay-layer-fix','consultor-acesso-geral','consultor-rogerio-layer-fix','consultor-rogerio-selector-fix','consultor-rogerio-ui','b2b-dashboard-fix','consultor-results-style','consultor-pv-dia','consultor-imperdoaveis','consultor-imperdoaveis-ajuste','consultor-mobile-fit','consultor-trio-labels','footer-credit']
+          names=['consultor-visitas','consultor-contatos','consultor-layout-clean','consultor-header-actions','consultor-bottom-menu','consultor-overlay-layer-fix','consultor-acesso-geral','consultor-rogerio-layer-fix','consultor-rogerio-selector-fix','consultor-rogerio-ui','b2b-dashboard-fix','consultor-results-style','consultor-pv-dia','consultor-oportunidades-dia','consultor-imperdoaveis','consultor-imperdoaveis-ajuste','consultor-mobile-fit','consultor-trio-labels','footer-credit']
           for name in names:
               s=re.sub(r'\s*<script\s+src=["\']'+re.escape(name)+r'\.js(?:\?[^"\']*)?["\']\s*></script>', '', s, flags=re.I)
           tags=(
@@ -47,6 +48,7 @@ jobs:
             '<script src="b2b-dashboard-fix.js?v=20260914-b2b-live-01"></script>'
             '<script src="consultor-results-style.js?v=20260911-results-02"></script>'
             '<script src="consultor-pv-dia.js?v=20260915-pv-dia-01"></script>'
+            '<script src="consultor-oportunidades-dia.js?v=20260915-op-dia-01"></script>'
             '<script src="consultor-imperdoaveis.js?v=20260914-acomp-05"></script>'
             '<script src="consultor-imperdoaveis-ajuste.js?v=20260914-acomp-05"></script>'
             '<script src="consultor-mobile-fit.js?v=20260914-mobile-10"></script>'
