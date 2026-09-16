@@ -33,6 +33,7 @@ jobs:
             'consultor-contatos':'20260914-acomp-05',
             'b2b-dashboard-fix':'20260914-b2b-live-01',
             'consultor-pv-dia':'20260915-pv-dia-01',
+            'consultor-oportunidades-dia':'20260915-op-dia-01',
             'consultor-imperdoaveis':'20260914-acomp-05',
             'consultor-imperdoaveis-ajuste':'20260914-acomp-05',
             'consultor-rogerio-ui':'20260914-rogerio-stable-02',
