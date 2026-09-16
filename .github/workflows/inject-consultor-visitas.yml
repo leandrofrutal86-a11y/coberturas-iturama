@@ -48,7 +48,7 @@ jobs:
             '<script src="b2b-dashboard-fix.js?v=20260914-b2b-live-01"></script>'
             '<script src="consultor-results-style.js?v=20260911-results-02"></script>'
             '<script src="consultor-pv-dia.js?v=20260915-pv-dia-01"></script>'
-            '<script src="consultor-oportunidades-dia.js?v=20260915-op-dia-01"></script>'
+            '<script src="consultor-oportunidades-dia.js?v=20260915-op-dia-02"></script>'
             '<script src="consultor-imperdoaveis.js?v=20260914-acomp-05"></script>'
             '<script src="consultor-imperdoaveis-ajuste.js?v=20260914-acomp-05"></script>'
             '<script src="consultor-mobile-fit.js?v=20260914-mobile-10"></script>'
