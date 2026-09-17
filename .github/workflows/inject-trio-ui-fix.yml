@@ -24,7 +24,7 @@ jobs:
           s=p.read_text(encoding='utf-8')
           s=s.replace('▥ APLICATIVOS','▥ LINK DOS INCENTIVOS')
           s=s.replace('▦ APLICATIVOS','▦ LINK DOS INCENTIVOS')
-          legacy=['consultor-acesso-geral','consultor-rogerio-layer-fix','consultor-rogerio-selector-fix','consultor-rogerio-ui']
+          legacy=['consultor-acesso-geral','consultor-rogerio-layer-fix','consultor-rogerio-selector-fix','consultor-rogerio-ui','consultor-materiais-grupos','consultor-materiais-v2','login-remember']
           for name in legacy:
               s=re.sub(r'\s*<script\s+src=["\']'+re.escape(name)+r'\.js(?:\?[^"\']*)?["\']\s*></script>', '', s, flags=re.I)
           versions={
@@ -37,6 +37,8 @@ jobs:
             'consultor-imperdoaveis':'20260914-acomp-05',
             'consultor-imperdoaveis-ajuste':'20260914-acomp-05',
             'consultor-rogerio-ui':'20260914-rogerio-stable-02',
+            'login-remember':'20260916-remember-01',
+            'consultor-materiais-v2':'20260916-materiais-v2-01',
           }
           for name in versions:
               s=re.sub(r'\s*<script\s+src=["\']'+re.escape(name)+r'\.js(?:\?[^"\']*)?["\']\s*></script>', '', s, flags=re.I)
