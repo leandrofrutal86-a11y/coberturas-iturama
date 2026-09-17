@@ -5,23 +5,20 @@ function installRobust(w){
   const project='harlrfhukjvhpufwhtep';
   const adminUrls=[`https://${project}.supabase.co/functions/v1/admin-api`,`https://${project}.functions.supabase.co/admin-api`];
   const loginUrls=[`https://${project}.supabase.co/functions/v1/admin-login-api`,`https://${project}.functions.supabase.co/admin-login-api`,...adminUrls];
-  const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-  async function once(url,payload){
-    const ctrl=new AbortController(),to=setTimeout(()=>ctrl.abort(),12000);
+  async function once(url,payload,ms=10000){
+    const ctrl=new AbortController(),to=setTimeout(()=>ctrl.abort(),ms);
     try{
       const r=await fetch(url+'?v='+Date.now(),{method:'POST',mode:'cors',cache:'no-store',credentials:'omit',headers:{'Content-Type':'text/plain;charset=UTF-8','Accept':'application/json'},body:JSON.stringify(payload),signal:ctrl.signal});
       let j={};try{j=await r.json()}catch{}
       if(r.ok)return j;
-      const e=new Error(j.error||('Erro '+r.status));
-      if(r.status===400||r.status===401||r.status===403)e.noRetry=true;
-      throw e;
+      throw new Error(j.error||('Erro '+r.status));
     }finally{clearTimeout(to)}
   }
   async function robustPost(payload){
-    const urls=payload&&payload.action==='login'?loginUrls:adminUrls;let last=null;
-    for(const wait of [0,350,900]){if(wait)await sleep(wait);for(const u of urls){try{return await once(u,payload)}catch(e){last=e;if(e&&e.noRetry)throw e}}}
-    if(last&&last.name==='AbortError')throw Error('Servidor demorou para responder. Tente novamente.');
-    throw Error('Falha de conexão com o servidor. Aguarde alguns segundos e tente novamente.');
+    const urls=payload&&payload.action==='login'?loginUrls:adminUrls;
+    let last=null;
+    for(const u of urls){try{return await once(u,payload,payload?.action==='login'?6000:18000)}catch(e){last=e}}
+    throw last||new Error('Falha de conexão com o servidor.');
   }
   w.__adminRobustPost=robustPost;w.post=robustPost;try{w.eval('post=window.__adminRobustPost')}catch(e){}
 }
@@ -30,7 +27,7 @@ frame.addEventListener('load',function(){
   installRobust(w);
   this.style.visibility='visible';
   const x=d.createElement('script');x.src='https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';d.head.appendChild(x);
-  ['admin-fetch-fix.js?v=20260916-admin-netfix-02','admin-login-remember.js?v=20260916-remember-01','category-manager.js?v=20260916-b2b-config-01','quantidade-minima.js?v=20260916-b2b-config-01','b2b-admin.js?v=20260916-b2b-config-01','b2b-config-fix.js?v=20260916-b2b-config-01','coke-home.js?v=20260914-contatos-adm-03','access-manager.js?v=20260909-admin-layout-05','acompanhante-access.js?v=20260914-acomp-access-01','visitas-subcanais.js?v=20260914-visitas-open-02','admin-layout-fix.js?v=20260911-visao-03','card-nav-fix.js?v=20260914-visitas-open-02','subcanais-admin-ui.js?v=20260909-subcanais-01','subcanais-standalone.js?v=20260909-subfix-01','material-manager-v2.js?v=20260916-materiais-v2-01','material-display-fix.js?v=20260916-materiais-menu-01','acomp-export.js?v=20260912-compact-final-01','conteudos-manager.js?v=20260910-conteudos-03','conteudos-cards-fix.js?v=20260910-conteudos-02','b2b-dashboard-fix.js?v=20260912-b2b-fix-01','imperdoaveis-manager.js?v=20260910-imp-07','imperdoaveis-hide-out.js?v=20260910-imp-06','admin-mobile-fit.js?v=20260910-mobile-01','trio-labels.js?v=20260911-trio-01','contatos-clientes.js?v=20260914-contatos-rotas-01','footer-credit.js?v=20260911-credit-01','exclusive-nav-fix.js?v=20260914-nav-01','visitas-clientes-fix.js?v=20260914-visitas-fix-03'].forEach(src=>{const s=d.createElement('script');s.src=src;d.body.appendChild(s)});
+  ['admin-fetch-fix.js?v=20260916-admin-netfix-03','admin-login-remember.js?v=20260916-remember-01','category-manager.js?v=20260916-b2b-config-01','quantidade-minima.js?v=20260916-b2b-config-01','b2b-admin.js?v=20260916-b2b-config-01','b2b-config-fix.js?v=20260916-b2b-config-01','coke-home.js?v=20260914-contatos-adm-03','access-manager.js?v=20260909-admin-layout-05','acompanhante-access.js?v=20260914-acomp-access-01','visitas-subcanais.js?v=20260914-visitas-open-02','admin-layout-fix.js?v=20260911-visao-03','card-nav-fix.js?v=20260914-visitas-open-02','subcanais-admin-ui.js?v=20260909-subcanais-01','subcanais-standalone.js?v=20260909-subfix-01','material-manager-v2.js?v=20260916-materiais-v2-01','material-display-fix.js?v=20260916-materiais-menu-01','acomp-export.js?v=20260912-compact-final-01','conteudos-manager.js?v=20260910-conteudos-03','conteudos-cards-fix.js?v=20260910-conteudos-02','b2b-dashboard-fix.js?v=20260912-b2b-fix-01','imperdoaveis-manager.js?v=20260910-imp-07','imperdoaveis-hide-out.js?v=20260910-imp-06','admin-mobile-fit.js?v=20260910-mobile-01','trio-labels.js?v=20260911-trio-01','contatos-clientes.js?v=20260914-contatos-rotas-01','footer-credit.js?v=20260911-credit-01','exclusive-nav-fix.js?v=20260914-nav-01','visitas-clientes-fix.js?v=20260914-visitas-fix-03'].forEach(src=>{const s=d.createElement('script');s.src=src;d.body.appendChild(s)});
 });
 })();
 </script><script src="shortcut-admin.js?v=20260914-admin-netfix-01"></script></body></html>
