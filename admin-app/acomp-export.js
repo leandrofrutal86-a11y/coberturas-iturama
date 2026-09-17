@@ -6,16 +6,16 @@ function getDash(){try{return typeof dash!=='undefined'&&dash?dash:(window.dash|
 
 const TABLES=[
  {id:1,title:'TABELA 1',file:'acompanhamento-geral-tabela-1-iturama',cats:[
-  {label:'Perfetti',keys:['PERFETTI']},
-  {label:'Fini',keys:['FINI']},
-  {label:'Trio Pão de Queijo',keys:['TRIO PÃO DE QUEIJO']},
-  {label:'Compra B2B',keys:['COMPRA B2B']},
+  {label:'PERFETTI',keys:['PERFETTI']},
+  {label:'FINI',keys:['FINI']},
+  {label:'TRIO PÃO DE QUEIJO',keys:['TRIO PÃO DE QUEIJO']},
+  {label:'COMPRA B2B',keys:['COMPRA B2B']},
   {label:'RECOMPRA B2B',keys:['RECOMPRA B2B']},
   {label:'COBERTURA FRUT GERAL',keys:['COBERTURA FRUT GERAL']},
   {label:'COBERTURA CERVEJA GERAL',keys:['COBERTURA CERVEJA GERAL','COBERTURA CERVEJA GERAL HEINEKEN']},
-  {label:'Imperdoáveis SSD',keys:['IMPERDOÁVEIS SSD','IMPERDOAVEIS SSD']},
-  {label:'Imperdoáveis Still',keys:['IMPERDOÁVEIS STILL','IMPERDOAVEIS STILL']},
-  {label:'Imperdoáveis ARTD',keys:['IMPERDOÁVEIS ARTD','IMPERDOAVEIS ARTD']}
+  {label:'IMPERDOÁVEIS SSD',keys:['IMPERDOÁVEIS SSD','IMPERDOAVEIS SSD']},
+  {label:'IMPERDOÁVEIS STILL',keys:['IMPERDOÁVEIS STILL','IMPERDOAVEIS STILL']},
+  {label:'IMPERDOÁVEIS ARTD',keys:['IMPERDOÁVEIS ARTD','IMPERDOAVEIS ARTD']}
  ]},
  {id:2,title:'TABELA 2',file:'acompanhamento-geral-tabela-2-iturama',cats:[
   {label:'COBERTURA CAMPARI',keys:['COBERTURA CAMPARI']},
@@ -23,10 +23,10 @@ const TABLES=[
   {label:'OLD PARR',keys:['OLD PARR','OLD PARR TODAS']},
   {label:'COBERTURA GOLD LABEL',keys:['COBERTURA GOLD LABEL']},
   {label:'SMIRNOFF RED VODKA',keys:['SMIRNOFF RED VODKA']},
-  {label:'Cobertura Smirnoff Ice lata',keys:['COBERTURA SMIRNOFF ICE LATA','SMIRNOFF ICE LATA']},
-  {label:'Estrella Geral',keys:['ESTRELLA GERAL']},
-  {label:'Estrella tostada',keys:['ESTRELLA TOSTADA','ESTRELLA 0 TOSTADA']},
-  {label:'Estrella rgb',keys:['ESTRELLA RGB']}
+  {label:'COBERTURA SMIRNOFF ICE LATA',keys:['COBERTURA SMIRNOFF ICE LATA','SMIRNOFF ICE LATA']},
+  {label:'ESTRELLA GERAL',keys:['ESTRELLA GERAL']},
+  {label:'ESTRELLA TOSTADA',keys:['ESTRELLA TOSTADA','ESTRELLA 0 TOSTADA']},
+  {label:'ESTRELLA RGB',keys:['ESTRELLA RGB']}
  ]}
 ];
 
@@ -44,11 +44,11 @@ function addStyle(){
 .acompPoster{background:#fff}
 .acompHero{min-height:64px;background:linear-gradient(180deg,#df0915,#b50008);color:#fff;display:grid;grid-template-columns:210px 1fr 150px;align-items:center;padding:8px 16px;gap:12px}
 .acompCoke{font-family:'Brush Script MT','Segoe Script',cursive;font-size:34px;font-weight:900;text-align:center;white-space:nowrap;font-style:italic}
-.acompTitle{font-size:24px;font-weight:950;text-align:center;line-height:1.02;letter-spacing:.2px}
-.acompBadge{background:#ffd31c;color:#080808;border-radius:9px;padding:8px 12px;text-align:center;font-size:22px;font-weight:950;box-shadow:inset 0 -2px 0 #d0a700}
+.acompTitle{font-size:24px;font-weight:950;text-align:center;line-height:1.02;letter-spacing:.2px;text-transform:uppercase}
+.acompBadge{background:#ffd31c;color:#080808;border-radius:9px;padding:8px 12px;text-align:center;font-size:22px;font-weight:950;box-shadow:inset 0 -2px 0 #d0a700;text-transform:uppercase}
 .acompGrid{overflow:auto;background:#fff}
-.acompGrid table{border-collapse:collapse!important;width:100%!important;min-width:1160px!important;table-layout:fixed!important;background:#fff!important}
-.acompGrid th,.acompGrid td{border:1px solid #aeb8c1!important;padding:5px 4px!important;text-align:center!important;vertical-align:middle!important;box-sizing:border-box!important}
+.acompGrid table{border-collapse:collapse!important;width:100%!important;min-width:1160px!important;table-layout:fixed!important;background:#fff!important;text-transform:uppercase!important}
+.acompGrid th,.acompGrid td{border:1px solid #aeb8c1!important;padding:5px 4px!important;text-align:center!important;vertical-align:middle!important;box-sizing:border-box!important;text-transform:uppercase!important}
 .acompGrid thead th{background:linear-gradient(#f7fafc,#e6edf2)!important;color:#151515!important;font-weight:950!important}
 .acompGrid thead tr:first-child th{font-size:12px!important;height:32px!important}
 .acompGrid thead tr:nth-child(2) th{font-size:10px!important;height:25px!important}
@@ -84,13 +84,13 @@ function ensureLayout(){
 }
 
 function headerHtml(inds){
- return '<tr><th class="catHead" rowspan="2">CATEGORIA</th>'+inds.map(i=>`<th class="sepL" colspan="2">${esc(i.rota)} ${esc(i.nome)}</th>`).join('')+'<th class="teamHead sepL" colspan="2">TOTAL EQUIPE</th></tr><tr>'+inds.map(()=>'<th class="sepL">Meta</th><th>Realizado</th>').join('')+'<th class="teamHead sepL">Meta</th><th class="teamHead">Realizado</th></tr>';
+ return '<tr><th class="catHead" rowspan="2">CATEGORIA</th>'+inds.map(i=>`<th class="sepL" colspan="2">${esc(i.rota)} ${esc(i.nome)}</th>`).join('')+'<th class="teamHead sepL" colspan="2">TOTAL EQUIPE</th></tr><tr>'+inds.map(()=>'<th class="sepL">META</th><th>REALIZADO</th>').join('')+'<th class="teamHead sepL">META</th><th class="teamHead">REALIZADO</th></tr>';
 }
 function categoryRow(def,inds){
  let teamMeta=0,teamReal=0,found=false;
  const cells=inds.map(i=>{const r=findResult(i,def);if(!r)return '<td class="metaCell sepL">—</td><td class="realCell">—</td>';found=true;const m=Number(r.meta||0),v=Number(r.realizado||0),ok=v>=m;teamMeta+=m;teamReal+=v;return `<td class="metaCell sepL">${m}</td><td class="realCell ${ok?'ok':''}">${v}</td>`}).join('');
  const teamOk=found&&teamReal>=teamMeta;
- return `<tr><td class="catCell">${esc(def.label)}</td>${cells}<td class="teamMeta sepL">${found?teamMeta:'—'}</td><td class="teamReal ${teamOk?'ok':''}">${found?teamReal:'—'}</td></tr>`;
+ return `<tr><td class="catCell">${esc(def.label).toUpperCase()}</td>${cells}<td class="teamMeta sepL">${found?teamMeta:'—'}</td><td class="teamReal ${teamOk?'ok':''}">${found?teamReal:'—'}</td></tr>`;
 }
 function renderOne(t,d){
  const inds=(d.individual||[]).slice();const th=q('thAcomp'+t.id),tb=q('tbAcomp'+t.id);if(!th||!tb)return false;
@@ -111,7 +111,7 @@ window.exportarAcompImagem=async(id=1)=>{try{const t=TABLES.find(x=>x.id===Numbe
 function printPdf(id){
  const t=TABLES.find(x=>x.id===Number(id))||TABLES[0],poster=q('acompPoster'+t.id);if(!poster)throw Error('Tabela não encontrada.');
  const w=window.open('','_blank');if(!w)throw Error('O navegador bloqueou a janela do PDF. Libere pop-ups e tente novamente.');
- w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Acompanhamento Geral - ${t.title}</title><style>@page{size:A3 landscape;margin:4mm}*{box-sizing:border-box}body{font-family:Arial,sans-serif;margin:0;color:#151515}.hero{background:#c7000b;color:#fff;height:52px;display:grid;grid-template-columns:180px 1fr 125px;align-items:center;padding:6px 12px}.logo{font-family:cursive;font-style:italic;font-size:27px;font-weight:900;text-align:center}.ttl{text-align:center;font-size:20px;font-weight:900}.badge{background:#ffd31c;color:#111;border-radius:7px;padding:7px;text-align:center;font-size:18px;font-weight:900}table{border-collapse:collapse;width:100%;table-layout:fixed;font-size:7px}th,td{border:1px solid #9aa6b0;padding:3px 2px;text-align:center}thead th{background:#edf2f5;font-weight:900}.catHead{width:19%}.catCell{text-align:left;font-weight:900;white-space:nowrap}.metaCell{color:#0562b8;font-weight:900}.realCell{color:#e30613;font-weight:900}.realCell.ok{color:#0c9148}.teamHead{background:#fff3bd}.teamMeta{background:#dff1fb;color:#141c75;font-weight:900}.teamReal{background:#fff6cf;color:#e30613;font-weight:900}.teamReal.ok{color:#0c9148}.sepL{border-left:2px solid #7f8c96}</style></head><body><div class="hero"><div class="logo">Coca-Cola</div><div class="ttl">ACOMPANHAMENTO GERAL DA EQUIPE</div><div class="badge">${t.title}</div></div>${poster.querySelector('table').outerHTML}<script>window.onload=()=>setTimeout(()=>window.print(),250)<\/script></body></html>`);w.document.close();
+ w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Acompanhamento Geral - ${t.title}</title><style>@page{size:A3 landscape;margin:4mm}*{box-sizing:border-box}body{font-family:Arial,sans-serif;margin:0;color:#151515}.hero{background:#c7000b;color:#fff;height:52px;display:grid;grid-template-columns:180px 1fr 125px;align-items:center;padding:6px 12px}.logo{font-family:cursive;font-style:italic;font-size:27px;font-weight:900;text-align:center}.ttl{text-align:center;font-size:20px;font-weight:900;text-transform:uppercase}.badge{background:#ffd31c;color:#111;border-radius:7px;padding:7px;text-align:center;font-size:18px;font-weight:900;text-transform:uppercase}table{border-collapse:collapse;width:100%;table-layout:fixed;font-size:7px;text-transform:uppercase}th,td{border:1px solid #9aa6b0;padding:3px 2px;text-align:center;text-transform:uppercase}thead th{background:#edf2f5;font-weight:900}.catHead{width:19%}.catCell{text-align:left;font-weight:900;white-space:nowrap}.metaCell{color:#0562b8;font-weight:900}.realCell{color:#e30613;font-weight:900}.realCell.ok{color:#0c9148}.teamHead{background:#fff3bd}.teamMeta{background:#dff1fb;color:#141c75;font-weight:900}.teamReal{background:#fff6cf;color:#e30613;font-weight:900}.teamReal.ok{color:#0c9148}.sepL{border-left:2px solid #7f8c96}</style></head><body><div class="hero"><div class="logo">Coca-Cola</div><div class="ttl">ACOMPANHAMENTO GERAL DA EQUIPE</div><div class="badge">${t.title}</div></div>${poster.querySelector('table').outerHTML}<script>window.onload=()=>setTimeout(()=>window.print(),250)<\/script></body></html>`);w.document.close();
 }
 window.exportarAcompPDF=id=>{try{printPdf(id)}catch(e){alert(e.message)}};
 
