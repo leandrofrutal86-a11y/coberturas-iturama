@@ -1,0 +1,5 @@
+(()=>{
+const KEY='iturama_admin_lembrar';
+function install(){const pass=document.getElementById('senha'),box=document.getElementById('login'),app=document.getElementById('app');if(!pass||!box||document.getElementById('rememberAdm'))return;let saved='';try{saved=localStorage.getItem(KEY)||''}catch{}if(saved)pass.value=saved;const btn=box.querySelector('button.red');if(!btn)return;const row=document.createElement('label');row.style.cssText='display:flex;align-items:center;gap:9px;margin:12px 0 0;font-weight:800;cursor:pointer;color:#394958';row.innerHTML=`<input id="rememberAdm" type="checkbox" style="width:18px;height:18px;margin:0" ${saved?'checked':''}><span>Lembrar dados neste aparelho</span>`;btn.parentNode.insertBefore(row,btn);const cb=document.getElementById('rememberAdm');cb.onchange=()=>{if(!cb.checked)localStorage.removeItem(KEY)};if(app)new MutationObserver(()=>{if(!app.classList.contains('hide')){if(cb.checked)localStorage.setItem(KEY,pass.value);else localStorage.removeItem(KEY)}}).observe(app,{attributes:true,attributeFilter:['class']})}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install);else install();
+})();
