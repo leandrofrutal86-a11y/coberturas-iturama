@@ -4,34 +4,25 @@ const norm=v=>String(v??'').trim().toUpperCase().normalize('NFD').replace(/[\u03
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function getDash(){try{return typeof dash!=='undefined'&&dash?dash:(window.dash||null)}catch{return window.dash||null}}
 
+// A posição nas duas tabelas é fixa pelo ID da categoria.
+// O nome exibido SEMPRE vem do cadastro atual da categoria.
 const TABLES=[
- {id:1,title:'TABELA 1',file:'acompanhamento-geral-tabela-1-iturama',cats:[
-  {label:'PERFETTI',keys:['PERFETTI']},
-  {label:'FINI',keys:['FINI']},
-  {label:'TRIO PÃO DE QUEIJO',keys:['TRIO PÃO DE QUEIJO']},
-  {label:'COMPRA B2B',keys:['COMPRA B2B']},
-  {label:'RECOMPRA B2B',keys:['RECOMPRA B2B']},
-  {label:'COBERTURA FRUT GERAL',keys:['COBERTURA FRUT GERAL']},
-  {label:'COBERTURA CERVEJA GERAL',keys:['COBERTURA CERVEJA GERAL','COBERTURA CERVEJA GERAL HEINEKEN']},
-  {label:'IMPERDOÁVEIS SSD',keys:['IMPERDOÁVEIS SSD','IMPERDOAVEIS SSD']},
-  {label:'IMPERDOÁVEIS STILL',keys:['IMPERDOÁVEIS STILL','IMPERDOAVEIS STILL']},
-  {label:'IMPERDOÁVEIS ARTD',keys:['IMPERDOÁVEIS ARTD','IMPERDOAVEIS ARTD']}
- ]},
- {id:2,title:'TABELA 2',file:'acompanhamento-geral-tabela-2-iturama',cats:[
-  {label:'COBERTURA CAMPARI',keys:['COBERTURA CAMPARI']},
-  {label:'BLACK LABEL',keys:['BLACK LABEL','BLACK LABEL TODAS']},
-  {label:'OLD PARR',keys:['OLD PARR','OLD PARR TODAS']},
-  {label:'COBERTURA GOLD LABEL',keys:['COBERTURA GOLD LABEL']},
-  {label:'SMIRNOFF RED VODKA',keys:['SMIRNOFF RED VODKA']},
-  {label:'COBERTURA SMIRNOFF ICE LATA',keys:['COBERTURA SMIRNOFF ICE LATA','SMIRNOFF ICE LATA']},
-  {label:'ESTRELLA GERAL',keys:['ESTRELLA GERAL']},
-  {label:'ESTRELLA TOSTADA',keys:['ESTRELLA TOSTADA','ESTRELLA 0 TOSTADA']},
-  {label:'ESTRELLA RGB',keys:['ESTRELLA RGB']}
- ]}
+ {id:1,title:'TABELA 1',file:'acompanhamento-geral-tabela-1-iturama',catIds:[1,2,12,16,17,21,13,18,19,20]},
+ {id:2,title:'TABELA 2',file:'acompanhamento-geral-tabela-2-iturama',catIds:[4,6,7,15,14,8,9,10,11]}
 ];
 
-function matches(name,def){const n=norm(name);return def.keys.some(k=>norm(k)===n)}
-function findResult(ind,def){return (ind?.resultados||[]).find(r=>matches(r?.nome,def))||null}
+function catEntries(d,t){
+ const cats=d?.categorias||[];
+ return t.catIds.map(id=>{
+  const idx=cats.findIndex(c=>Number(c.id)===Number(id));
+  return idx>=0?{cat:cats[idx],idx}:null;
+ }).filter(Boolean);
+}
+function findResult(ind,entry){
+ const arr=ind?.resultados||[];
+ const byName=arr.find(r=>norm(r?.nome)===norm(entry.cat?.nome));
+ return byName||arr[entry.idx]||null;
+}
 
 function addStyle(){
  let s=q('acompExportStyle');if(!s){s=document.createElement('style');s.id='acompExportStyle';document.head.appendChild(s)}
@@ -86,15 +77,16 @@ function ensureLayout(){
 function headerHtml(inds){
  return '<tr><th class="catHead" rowspan="2">CATEGORIA</th>'+inds.map(i=>`<th class="sepL" colspan="2">${esc(i.rota)} ${esc(i.nome)}</th>`).join('')+'<th class="teamHead sepL" colspan="2">TOTAL EQUIPE</th></tr><tr>'+inds.map(()=>'<th class="sepL">META</th><th>REALIZADO</th>').join('')+'<th class="teamHead sepL">META</th><th class="teamHead">REALIZADO</th></tr>';
 }
-function categoryRow(def,inds){
+function categoryRow(entry,inds){
  let teamMeta=0,teamReal=0,found=false;
- const cells=inds.map(i=>{const r=findResult(i,def);if(!r)return '<td class="metaCell sepL">—</td><td class="realCell">—</td>';found=true;const m=Number(r.meta||0),v=Number(r.realizado||0),ok=v>=m;teamMeta+=m;teamReal+=v;return `<td class="metaCell sepL">${m}</td><td class="realCell ${ok?'ok':''}">${v}</td>`}).join('');
+ const cells=inds.map(i=>{const r=findResult(i,entry);if(!r)return '<td class="metaCell sepL">—</td><td class="realCell">—</td>';found=true;const m=Number(r.meta||0),v=Number(r.realizado||0),ok=v>=m;teamMeta+=m;teamReal+=v;return `<td class="metaCell sepL">${m}</td><td class="realCell ${ok?'ok':''}">${v}</td>`}).join('');
  const teamOk=found&&teamReal>=teamMeta;
- return `<tr><td class="catCell">${esc(def.label).toUpperCase()}</td>${cells}<td class="teamMeta sepL">${found?teamMeta:'—'}</td><td class="teamReal ${teamOk?'ok':''}">${found?teamReal:'—'}</td></tr>`;
+ const nome=String(entry.cat?.nome||'').toUpperCase();
+ return `<tr><td class="catCell">${esc(nome)}</td>${cells}<td class="teamMeta sepL">${found?teamMeta:'—'}</td><td class="teamReal ${teamOk?'ok':''}">${found?teamReal:'—'}</td></tr>`;
 }
 function renderOne(t,d){
- const inds=(d.individual||[]).slice();const th=q('thAcomp'+t.id),tb=q('tbAcomp'+t.id);if(!th||!tb)return false;
- th.innerHTML=headerHtml(inds);tb.innerHTML=t.cats.map(c=>categoryRow(c,inds)).join('');return true;
+ const inds=(d.individual||[]).slice(),entries=catEntries(d,t),th=q('thAcomp'+t.id),tb=q('tbAcomp'+t.id);if(!th||!tb)return false;
+ th.innerHTML=headerHtml(inds);tb.innerHTML=entries.map(e=>categoryRow(e,inds)).join('');return true;
 }
 function render(){const d=getDash();if(!d)return false;addStyle();ensureLayout();let ok=true;TABLES.forEach(t=>{if(!renderOne(t,d))ok=false});return ok}
 
