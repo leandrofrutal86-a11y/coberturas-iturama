@@ -35,6 +35,47 @@
     #login .loginCard>p{font-size:15px!important}
     #login .field input{min-height:49px!important;padding:11px 12px!important}
     #login .enter{min-height:50px!important}
-  }`;
+  }
+  #consultorLoadingAccess{margin:18px 0;padding:18px;border-radius:16px;background:#fff;color:#142236;font-weight:900;text-align:center;box-shadow:0 4px 16px #0001}
+  #consultorLoadingAccess small{display:block;margin-top:6px;color:#68778a;font-weight:700}
+  `;
   document.head.appendChild(st);
+
+  function byId(id){return document.getElementById(id)}
+  function showLoading(){
+    const results=byId('results');
+    if(results)results.innerHTML='<div id="consultorLoadingAccess">Carregando seu acompanhamento...<small>Aguarde enquanto atualizamos metas e realizados.</small></div>';
+    const clients=byId('clients');if(clients)clients.innerHTML='';
+  }
+  function patchLogin(){
+    const btn=byId('enter');
+    if(!btn||btn.dataset.fastLogin==='1'||typeof api!=='function'||typeof loginView!=='function'||typeof load!=='function')return false;
+    btn.dataset.fastLogin='1';
+    btn.onclick=async()=>{
+      if(btn.disabled)return;
+      const msg=byId('msg');
+      const matricula=String(byId('mat')?.value||'').trim();
+      const senha=String(byId('pass')?.value||'');
+      if(!matricula||!senha){if(msg)msg.textContent='Informe matrícula e senha.';return}
+      btn.disabled=true;const old=btn.textContent;btn.textContent='ENTRANDO...';if(msg)msg.textContent='Validando acesso...';
+      try{
+        const j=await api('login',{matricula,senha});
+        TOKEN=j.token;sessionStorage.setItem('iturama_token',TOKEN);
+        if(msg)msg.textContent='';
+        loginView(false);
+        if(byId('name'))byId('name').textContent=j.consultor?.nome||j.acesso?.nome||'';
+        if(byId('route'))byId('route').textContent=j.consultor?.rota||'';
+        showLoading();
+        await new Promise(r=>setTimeout(r,50));
+        await load();
+      }catch(e){
+        loginView(true);
+        if(msg)msg.textContent=e?.message||'Não foi possível entrar. Tente novamente.';
+      }finally{
+        btn.disabled=false;btn.textContent=old;
+      }
+    };
+    return true;
+  }
+  let n=0;const t=setInterval(()=>{if(patchLogin()||++n>80)clearInterval(t)},100);
 })();
