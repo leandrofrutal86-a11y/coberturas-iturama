@@ -2,8 +2,25 @@
 const API='https://harlrfhukjvhpufwhtep.supabase.co/functions/v1/imperdoaveis-api';
 const $=id=>document.getElementById(id);let base=[],dados=[],loaded=false,loading=false;
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const mat=v=>String(v??'').trim().replace(/^0+(?=\d)/,'');
+function auditClient(c){
+ if(!c)return c;
+ const sold=new Set((c.soldMaterials||[]).map(mat));
+ for(const cat of (c.categorias||[])){
+  for(const s of (cat.slots||[])){
+   const vals=Array.isArray(s.valores)?s.valores.map(mat):[];
+   if(s.campo==='material'&&s.operador==='IN'&&vals.some(v=>sold.has(v)))s.vendido=true;
+   if(Array.isArray(s.matchedCodes)&&s.matchedCodes.length)s.vendido=true;
+  }
+  cat.vendidos=(cat.slots||[]).filter(s=>s.vendido).length;
+  cat.faltam=(cat.slots||[]).filter(s=>!s.vendido).length;
+ }
+ c.faltam=(c.categorias||[]).reduce((n,x)=>n+Number(x.faltam||0),0);
+ c.status=c.faltam===0?'coberto':c.faltam===1?'resta1':c.faltam===2?'resta2':'resta3';
+ return c;
+}
 function parse(t){const ls=t.trim().split(/\r?\n/);if(!ls.length)return[];const h=ls.shift().split(';');return ls.filter(Boolean).map(l=>{const a=l.split(';'),o={};h.forEach((k,i)=>o[k]=a[i]||'');return o})}
-async function post(b){const token=sessionStorage.getItem('admToken')||'';const r=await fetch(API,{method:'POST',cache:'no-store',headers:{'Content-Type':'application/json'},body:JSON.stringify({...b,token})}),j=await r.json().catch(()=>({}));if(!r.ok||j.error)throw Error(j.error||'Erro ao carregar relatório');return j}
+async function post(b){const token=sessionStorage.getItem('admToken')||'';const r=await fetch(API+'?_v='+Date.now(),{method:'POST',cache:'no-store',headers:{'Content-Type':'application/json','Cache-Control':'no-cache'},body:JSON.stringify({...b,token})}),j=await r.json().catch(()=>({}));if(!r.ok||j.error)throw Error(j.error||'Erro ao carregar relatório');if(Array.isArray(j.clients))j.clients=j.clients.map(auditClient);return j}
 async function loadBase(){if(loaded)return;const fs=[0,1,2,3,4].map(i=>`visitas_full_part${i}.csv?v=20260917-relatorio-imp-01`);const ts=await Promise.all(fs.map(f=>fetch(f,{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('Falha ao carregar base de clientes');return r.text()})));const all=ts.flatMap(parse),seen=new Set();base=all.filter(x=>{const rota=String(x.Rota||'').trim(),pv=String(x.Cliente||'').trim(),k=rota+'|'+pv;if(!pv||seen.has(k))return false;seen.add(k);return true}).map(x=>({pv:String(x.Cliente||'').trim(),razao:x['Razão Social']||'',subcanal:x.SubCanal||'',rota:String(x.Rota||'').trim(),seq:0}));loaded=true}
 function css(){if($('impReportStyle'))return;const s=document.createElement('style');s.id='impReportStyle';s.textContent=`
 .impReportFilters{display:grid;grid-template-columns:1fr 1fr 1.2fr auto;gap:9px;align-items:end;margin:12px 0}.impReportFilters label{font-size:12px;font-weight:900;color:#475569}.impReportFilters select{width:100%;padding:10px;border:1px solid #cbd5df;border-radius:10px;background:#fff;margin-top:5px}.impRestaGroup{display:flex;gap:6px;flex-wrap:wrap;margin-top:5px}.impRestaOpt{display:flex!important;align-items:center;gap:5px;border:1px solid #cbd5df;border-radius:10px;padding:9px 10px;background:#fff;color:#263746!important;font-size:11px!important;font-weight:900!important;cursor:pointer}.impRestaOpt input{width:16px!important;height:16px!important;margin:0!important}.impReportBtns{display:flex;gap:8px}.impReportBtns button{padding:10px 14px;border-radius:10px;font-weight:900}.impReportSummary{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}.impReportChip{background:#f2f5f7;border:1px solid #dce3e8;border-radius:999px;padding:7px 11px;font-size:12px;font-weight:900}.impReportTableWrap{overflow:auto;border:1px solid #dde4e9;border-radius:12px}.impReportTable{width:100%;min-width:900px;border-collapse:collapse}.impReportTable th{background:#c90b13!important;color:#fff!important;position:static!important;font-size:11px;padding:9px}.impReportTable td{padding:8px;border-bottom:1px solid #e1e6ea;font-size:11px;vertical-align:top}.impReportTable tr:nth-child(even) td{background:#f7fafc}.impReportMissing{color:#b20f18;font-weight:800;line-height:1.35}.impReportEmpty{padding:20px;text-align:center;color:#64748b}.impReportStatus{font-size:12px;font-weight:800;margin:8px 0}.impReportResta{white-space:nowrap;font-weight:950;color:#b20f18}
