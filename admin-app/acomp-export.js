@@ -4,17 +4,25 @@ const norm=v=>String(v??'').trim().toUpperCase().normalize('NFD').replace(/[\u03
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function getDash(){try{return typeof dash!=='undefined'&&dash?dash:(window.dash||null)}catch{return window.dash||null}}
 
-// A posição nas duas tabelas é fixa pelo ID da categoria.
-// O nome exibido SEMPRE vem do cadastro atual da categoria.
+// Mantém a ordem histórica das categorias já existentes.
+// Toda categoria nova cadastrada é acrescentada automaticamente à TABELA 2.
+const TABLE1_IDS=[1,2,12,16,17,21,13,18,19,20];
+const TABLE2_BASE_IDS=[4,6,7,15,14,8,9,10,11];
 const TABLES=[
- {id:1,title:'TABELA 1',file:'acompanhamento-geral-tabela-1-iturama',catIds:[1,2,12,16,17,21,13,18,19,20]},
- {id:2,title:'TABELA 2',file:'acompanhamento-geral-tabela-2-iturama',catIds:[4,6,7,15,14,8,9,10,11]}
+ {id:1,title:'TABELA 1',file:'acompanhamento-geral-tabela-1-iturama'},
+ {id:2,title:'TABELA 2',file:'acompanhamento-geral-tabela-2-iturama'}
 ];
 
 function catEntries(d,t){
  const cats=d?.categorias||[];
- return t.catIds.map(id=>{
-  const idx=cats.findIndex(c=>Number(c.id)===Number(id));
+ const fixed=t.id===1?TABLE1_IDS:TABLE2_BASE_IDS;
+ const fixedSet=new Set(fixed.map(Number));
+ const usedSet=new Set([...TABLE1_IDS,...TABLE2_BASE_IDS].map(Number));
+ const ids=t.id===1
+   ? fixed
+   : [...fixed,...cats.filter(cat=>!usedSet.has(Number(cat.id))).map(cat=>Number(cat.id))];
+ return ids.map(id=>{
+  const idx=cats.findIndex(cat=>Number(cat.id)===Number(id));
   return idx>=0?{cat:cats[idx],idx}:null;
  }).filter(Boolean);
 }
@@ -33,8 +41,7 @@ function addStyle(){
 #acompSplitRoot{display:grid;gap:16px;width:100%;min-width:0}
 .acompPanel{border-radius:18px;overflow:hidden;background:#be0009;box-shadow:0 8px 24px #0002;border:1px solid #a80008;width:100%;min-width:0}
 .acompPoster{background:#fff;width:100%;min-width:0}
-.acompHero{min-height:64px;background:linear-gradient(180deg,#df0915,#b50008);color:#fff;display:grid;grid-template-columns:210px 1fr 150px;align-items:center;padding:8px 16px;gap:12px}
-.acompCoke{font-family:'Brush Script MT','Segoe Script',cursive;font-size:34px;font-weight:900;text-align:center;white-space:nowrap;font-style:italic}
+.acompHero{min-height:64px;background:linear-gradient(180deg,#df0915,#b50008);color:#fff;display:grid;grid-template-columns:1fr 150px;align-items:center;padding:8px 16px;gap:12px}
 .acompTitle{font-size:24px;font-weight:950;text-align:center;line-height:1.02;letter-spacing:.2px;text-transform:uppercase}
 .acompBadge{background:#ffd31c;color:#080808;border-radius:9px;padding:8px 12px;text-align:center;font-size:22px;font-weight:950;box-shadow:inset 0 -2px 0 #d0a700;text-transform:uppercase}
 .acompGrid{overflow:auto;background:#fff;width:100%;min-width:0}
@@ -72,8 +79,7 @@ function addStyle(){
  #acomp .box{padding:2px!important}
  #acompSplitRoot{gap:10px}
  .acompPanel{border-radius:11px;box-shadow:0 3px 10px #0002}
- .acompHero{grid-template-columns:72px 1fr 58px;min-height:43px;padding:5px 5px;gap:3px}
- .acompCoke{font-size:15px;white-space:normal;line-height:.95}
+ .acompHero{grid-template-columns:1fr 58px;min-height:43px;padding:5px 5px;gap:3px}
  .acompTitle{font-size:9px;line-height:1.03;letter-spacing:0}
  .acompBadge{font-size:9px;padding:5px 2px;border-radius:6px}
  .acompGrid{overflow:hidden!important;width:100%!important}
@@ -93,8 +99,8 @@ function addStyle(){
 }
 
 @media(max-width:390px){
- .acompHero{grid-template-columns:58px 1fr 48px;padding:4px 3px}
- .acompCoke{font-size:12px}.acompTitle{font-size:7.8px}.acompBadge{font-size:7.8px;padding:4px 1px}
+ .acompHero{grid-template-columns:1fr 48px;padding:4px 3px}
+ .acompTitle{font-size:7.8px}.acompBadge{font-size:7.8px;padding:4px 1px}
  .acompGrid .catHead,.acompGrid .catCell{width:29%!important;max-width:29%!important}
  .acompGrid thead tr:first-child th{font-size:5.4px!important}
  .acompGrid thead tr:nth-child(2) th{font-size:5px!important}
@@ -109,7 +115,7 @@ function ensureLayout(){
  const legacy=box.querySelector('table.wide')||box.querySelector('table');if(legacy)legacy.classList.add('acompLegacyTable');
  let root=q('acompSplitRoot');if(root)return root;
  root=document.createElement('div');root.id='acompSplitRoot';
- root.innerHTML=TABLES.map(t=>`<section class="acompPanel"><div id="acompPoster${t.id}" class="acompPoster"><div class="acompHero"><div class="acompCoke">Coca-Cola</div><div class="acompTitle">ACOMPANHAMENTO GERAL DA EQUIPE</div><div class="acompBadge">${t.title}</div></div><div class="acompGrid"><table><thead id="thAcomp${t.id}"></thead><tbody id="tbAcomp${t.id}"></tbody></table></div></div><div class="acompFooter"><button class="acompBtn img" onclick="exportarAcompImagem(${t.id})">🖼️ BAIXAR IMAGEM <small>(ALTA RESOLUÇÃO)</small></button><button class="acompBtn pdf" onclick="exportarAcompPDF(${t.id})">📄 BAIXAR PDF <small>(ALTA RESOLUÇÃO)</small></button></div></section>`).join('');
+ root.innerHTML=TABLES.map(t=>`<section class="acompPanel"><div id="acompPoster${t.id}" class="acompPoster"><div class="acompHero"><div class="acompTitle">ACOMPANHAMENTO GERAL DA EQUIPE</div><div class="acompBadge">${t.title}</div></div><div class="acompGrid"><table><thead id="thAcomp${t.id}"></thead><tbody id="tbAcomp${t.id}"></tbody></table></div></div><div class="acompFooter"><button class="acompBtn img" onclick="exportarAcompImagem(${t.id})">🖼️ BAIXAR IMAGEM <small>(ALTA RESOLUÇÃO)</small></button><button class="acompBtn pdf" onclick="exportarAcompPDF(${t.id})">📄 BAIXAR PDF <small>(ALTA RESOLUÇÃO)</small></button></div></section>`).join('');
  if(legacy)legacy.insertAdjacentElement('afterend',root);else box.appendChild(root);return root;
 }
 
@@ -142,7 +148,7 @@ window.exportarAcompImagem=async(id=1)=>{try{const t=TABLES.find(x=>x.id===Numbe
 function printPdf(id){
  const t=TABLES.find(x=>x.id===Number(id))||TABLES[0],poster=q('acompPoster'+t.id);if(!poster)throw Error('Tabela não encontrada.');
  const w=window.open('','_blank');if(!w)throw Error('O navegador bloqueou a janela do PDF. Libere pop-ups e tente novamente.');
- w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Acompanhamento Geral - ${t.title}</title><style>@page{size:A3 landscape;margin:4mm}*{box-sizing:border-box}body{font-family:Arial,sans-serif;margin:0;color:#151515}.hero{background:#c7000b;color:#fff;height:52px;display:grid;grid-template-columns:180px 1fr 125px;align-items:center;padding:6px 12px}.logo{font-family:cursive;font-style:italic;font-size:27px;font-weight:900;text-align:center}.ttl{text-align:center;font-size:20px;font-weight:900;text-transform:uppercase}.badge{background:#ffd31c;color:#111;border-radius:7px;padding:7px;text-align:center;font-size:18px;font-weight:900;text-transform:uppercase}table{border-collapse:collapse;width:100%;table-layout:fixed;font-size:7px;text-transform:uppercase}th,td{border:1px solid #9aa6b0;padding:3px 2px;text-align:center;text-transform:uppercase;white-space:normal;overflow-wrap:anywhere}thead th{background:#edf2f5;font-weight:900}.catHead{width:19%}.catCell{text-align:left;font-weight:900;white-space:normal}.metaCell{color:#0562b8;font-weight:900}.realCell{color:#e30613;font-weight:900}.realCell.ok{color:#0c9148}.teamHead{background:#fff3bd}.teamMeta{background:#dff1fb;color:#141c75;font-weight:900}.teamReal{background:#fff6cf;color:#e30613;font-weight:900}.teamReal.ok{color:#0c9148}.sepL{border-left:2px solid #7f8c96}.mobileLabel{display:none}</style></head><body><div class="hero"><div class="logo">Coca-Cola</div><div class="ttl">ACOMPANHAMENTO GERAL DA EQUIPE</div><div class="badge">${t.title}</div></div>${poster.querySelector('table').outerHTML}<script>window.onload=()=>setTimeout(()=>window.print(),250)<\/script></body></html>`);w.document.close();
+ w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Acompanhamento Geral - ${t.title}</title><style>@page{size:A3 landscape;margin:4mm}*{box-sizing:border-box}body{font-family:Arial,sans-serif;margin:0;color:#151515}.hero{background:#c7000b;color:#fff;height:52px;display:grid;grid-template-columns:1fr 125px;align-items:center;padding:6px 12px}.ttl{text-align:center;font-size:20px;font-weight:900;text-transform:uppercase}.badge{background:#ffd31c;color:#111;border-radius:7px;padding:7px;text-align:center;font-size:18px;font-weight:900;text-transform:uppercase}table{border-collapse:collapse;width:100%;table-layout:fixed;font-size:7px;text-transform:uppercase}th,td{border:1px solid #9aa6b0;padding:3px 2px;text-align:center;text-transform:uppercase;white-space:normal;overflow-wrap:anywhere}thead th{background:#edf2f5;font-weight:900}.catHead{width:19%}.catCell{text-align:left;font-weight:900;white-space:normal}.metaCell{color:#0562b8;font-weight:900}.realCell{color:#e30613;font-weight:900}.realCell.ok{color:#0c9148}.teamHead{background:#fff3bd}.teamMeta{background:#dff1fb;color:#141c75;font-weight:900}.teamReal{background:#fff6cf;color:#e30613;font-weight:900}.teamReal.ok{color:#0c9148}.sepL{border-left:2px solid #7f8c96}.mobileLabel{display:none}</style></head><body><div class="hero"><div class="ttl">ACOMPANHAMENTO GERAL DA EQUIPE</div><div class="badge">${t.title}</div></div>${poster.querySelector('table').outerHTML}<script>window.onload=()=>setTimeout(()=>window.print(),250)<\/script></body></html>`);w.document.close();
 }
 window.exportarAcompPDF=id=>{try{printPdf(id)}catch(e){alert(e.message)}};
 
