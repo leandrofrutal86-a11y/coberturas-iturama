@@ -70,19 +70,20 @@ function situationMatch(c,s){
  if(s==='TODOS')return true;if(s==='VENDIDOS')return !!c.completo;if(s==='OPORTUNIDADES')return !c.completo;
  if(s==='F1')return Number(c.faltam)===1;if(s==='F2')return Number(c.faltam)===2;if(s==='F3')return Number(c.faltam)>=3;return true;
 }
+const GROUP_NAMES={1:'Coca RefPet',2:'Coca LS',3:'Fanta RefPet'};
 function missing(c){
- return (c.grupos||[]).filter(g=>!g.vendido).map(g=>`G${g.grupo} (${(g.codigos||[]).join('/')})`).join(' • ')||'—';
+ return (c.grupos||[]).filter(g=>!g.vendido).map(g=>`${GROUP_NAMES[Number(g.grupo)]||('Grupo '+g.grupo)} (${(g.codigos||[]).join('/')})`).join(' • ')||'—';
 }
 function render(){
  if(!lastData)return;
  const sit=$('trioSituation').value||'OPORTUNIDADES';
  const rows=(lastData.clientes||[]).filter(c=>situationMatch(c,sit));lastRows=rows;
  const all=lastData.clientes||[],vend=all.filter(c=>c.completo).length,opp=all.length-vend;
- $('trioSummary').innerHTML=`<span class="trioChip">CLIENTES: ${all.length}</span><span class="trioChip">VENDIDOS: ${vend}</span><span class="trioChip">OPORTUNIDADES: ${opp}</span><span class="trioChip">EXIBIDOS: ${rows.length}</span><span class="trioChip">G1: 1918/1919</span><span class="trioChip">G2: 1916/1917</span><span class="trioChip">G3: 1827/1828</span>`;
+ $('trioSummary').innerHTML=`<span class="trioChip">CLIENTES: ${all.length}</span><span class="trioChip">VENDIDOS: ${vend}</span><span class="trioChip">OPORTUNIDADES: ${opp}</span><span class="trioChip">EXIBIDOS: ${rows.length}</span><span class="trioChip">COCA REFPET: 1918/1919</span><span class="trioChip">COCA LS: 1916/1917</span><span class="trioChip">FANTA REFPET: 1827/1828</span>`;
  $('trioPdf').disabled=!rows.length;
  if(!rows.length){$('trioResult').innerHTML='<div class="trioEmpty">Nenhum cliente neste filtro.</div>';return}
  const html=rows.map(c=>`<tr><td>${esc(c.pv)}</td><td>${esc(c.razao||'Cliente')}</td><td>${esc(c.rota)}<br><small>${esc(c.consultor||'')}</small></td><td>${esc((c.dias||[]).join(', ')||'—')}</td><td>${esc(c.subcanal||'')}</td>${(c.grupos||[]).map(g=>`<td class="${g.vendido?'trioOk':'trioBad'}">${g.vendido?'✓':'✕'}<br><small>${esc((g.codigos||[]).join('/'))}</small></td>`).join('')}<td class="${c.completo?'trioOk':'trioBad'}">${esc(c.situacao)}</td><td class="trioMissing">${esc(missing(c))}</td></tr>`).join('');
- $('trioResult').innerHTML=`<div class="trioTableWrap"><table class="trioTable"><thead><tr><th>PV</th><th>CLIENTE</th><th>ROTA / CONSULTOR</th><th>DIA VISITA</th><th>SUBCANAL</th><th>GRUPO 1</th><th>GRUPO 2</th><th>GRUPO 3</th><th>SITUAÇÃO</th><th>O QUE FALTA</th></tr></thead><tbody>${html}</tbody></table></div>`;
+ $('trioResult').innerHTML=`<div class="trioTableWrap"><table class="trioTable"><thead><tr><th>PV</th><th>CLIENTE</th><th>ROTA / CONSULTOR</th><th>DIA VISITA</th><th>SUBCANAL</th><th>COCA REFPET</th><th>COCA LS</th><th>FANTA REFPET</th><th>SITUAÇÃO</th><th>O QUE FALTA</th></tr></thead><tbody>${html}</tbody></table></div>`;
 }
 async function generate(){
  if(!ensure())return;const btn=$('trioGenerate');btn.disabled=true;$('trioPdf').disabled=true;$('trioStatus').textContent='Calculando Trio Pão de Queijo...';$('trioResult').innerHTML='';
@@ -107,7 +108,7 @@ async function pdf(){
   const rt=$('trioRoute').selectedOptions[0]?.textContent||'TODAS AS ROTAS',dy=$('trioDay').selectedOptions[0]?.textContent||'TODOS OS DIAS',sit=$('trioSituation').selectedOptions[0]?.textContent||'';
   doc.setFillColor(198,0,10);doc.rect(0,0,297,23,'F');doc.setTextColor(255,255,255);doc.setFontSize(16);doc.setFont(undefined,'bold');doc.text('TRIO PÃO DE QUEIJO - EQUIPE ITURAMA',12,10);doc.setFontSize(8.5);doc.text(`ROTA: ${rt}   DIA: ${dy}   FILTRO: ${sit}`,12,17);
   doc.setTextColor(25,25,25);
-  doc.autoTable({startY:28,head:[['PV','CLIENTE','ROTA','DIA','SUBCANAL','G1','G2','G3','SITUAÇÃO','O QUE FALTA']],body:lastRows.map(c=>[c.pv,c.razao||'Cliente',c.rota,(c.dias||[]).join(', '),c.subcanal||'',c.grupos?.[0]?.vendido?'OK':'FALTA',c.grupos?.[1]?.vendido?'OK':'FALTA',c.grupos?.[2]?.vendido?'OK':'FALTA',c.situacao,missing(c)]),styles:{fontSize:6.5,cellPadding:1.7,overflow:'linebreak'},headStyles:{fillColor:[198,0,10],textColor:255,fontStyle:'bold'},columnStyles:{0:{cellWidth:17},1:{cellWidth:55},2:{cellWidth:14},3:{cellWidth:25},4:{cellWidth:30},5:{cellWidth:13},6:{cellWidth:13},7:{cellWidth:13},8:{cellWidth:25},9:{cellWidth:55}},margin:{left:7,right:7}});
+  doc.autoTable({startY:28,head:[['PV','CLIENTE','ROTA','DIA','SUBCANAL','COCA REFPET','COCA LS','FANTA REFPET','SITUAÇÃO','O QUE FALTA']],body:lastRows.map(c=>[c.pv,c.razao||'Cliente',c.rota,(c.dias||[]).join(', '),c.subcanal||'',c.grupos?.[0]?.vendido?'OK':'FALTA',c.grupos?.[1]?.vendido?'OK':'FALTA',c.grupos?.[2]?.vendido?'OK':'FALTA',c.situacao,missing(c)]),styles:{fontSize:6.5,cellPadding:1.7,overflow:'linebreak'},headStyles:{fillColor:[198,0,10],textColor:255,fontStyle:'bold'},columnStyles:{0:{cellWidth:17},1:{cellWidth:55},2:{cellWidth:14},3:{cellWidth:25},4:{cellWidth:30},5:{cellWidth:13},6:{cellWidth:13},7:{cellWidth:13},8:{cellWidth:25},9:{cellWidth:55}},margin:{left:7,right:7}});
   const safe=($('trioRoute').value||'todas').replace(/[^a-z0-9_-]/gi,'_');doc.save(`trio_pao_de_queijo_${safe}_${new Date().toISOString().slice(0,10)}.pdf`);$('trioStatus').textContent='Relatório baixado.';
  }catch(e){$('trioStatus').textContent='Erro ao baixar relatório: '+e.message}
  finally{btn.disabled=false}
