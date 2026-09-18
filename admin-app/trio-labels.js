@@ -1,8 +1,8 @@
 (()=>{
   const MAP={
-    'Grupo 1':'Coca Ref',
+    'Grupo 1':'Coca RefPet',
     'Grupo 2':'Coca LS',
-    'Grupo 3':'Fanta Ref'
+    'Grupo 3':'Fanta RefPet'
   };
   function apply(root=document){
     const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
