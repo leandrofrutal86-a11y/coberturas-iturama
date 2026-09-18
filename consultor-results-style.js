@@ -97,7 +97,7 @@ function ensureControls(){
   if(!bar){
     bar=document.createElement('div');
     bar.id='consultorDownloadBar';
-    bar.innerHTML='<button id="consultorDownloadTable">⬇️ BAIXAR TABELA</button>';
+    bar.innerHTML='<button id="consultorDownloadTable" type="button">⬇️ BAIXAR TABELA</button>';
     results.insertAdjacentElement('beforebegin',bar);
     $('consultorDownloadTable').onclick=baixarPrimeiraTabela;
   }
@@ -159,6 +159,7 @@ async function baixarPrimeiraTabela(){
   const btn=$('consultorDownloadTable');
   if(btn){btn.disabled=true;btn.textContent='GERANDO IMAGEM...'}
   let stage=null;
+  let objectUrl=null;
   try{
     await loadScript('https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js',()=>!!window.html2canvas);
     const c=consultor();
@@ -182,24 +183,60 @@ async function baixarPrimeiraTabela(){
         </table>
       </div>`;
     document.body.appendChild(stage);
-    const canvas=await window.html2canvas(stage,{scale:3,backgroundColor:'#ffffff',useCORS:true,logging:false,width:1400,windowWidth:1400});
+
+    const canvas=await window.html2canvas(stage,{
+      scale:3,
+      backgroundColor:'#ffffff',
+      useCORS:true,
+      logging:false,
+      width:1400,
+      windowWidth:1400
+    });
+
     const blob=await new Promise(ok=>canvas.toBlob(ok,'image/png',1));
     if(!blob)throw Error('Não foi possível criar a imagem.');
+
+    const nomeArquivo=`tabela_coberturas_${String(c.rota||'consultor').replace(/[^a-z0-9_-]/gi,'_')}_${new Date().toISOString().slice(0,10)}.png`;
+    const file=new File([blob],nomeArquivo,{type:'image/png'});
+
+    if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
+      try{
+        await navigator.share({
+          files:[file],
+          title:'Tabela de Coberturas',
+          text:'Tabela de coberturas'
+        });
+        return;
+      }catch(err){
+        if(err?.name==='AbortError')return;
+      }
+    }
+
+    objectUrl=URL.createObjectURL(blob);
     const a=document.createElement('a');
-    const url=URL.createObjectURL(blob);
-    a.href=url;
-    a.download=`tabela_coberturas_${String(c.rota||'consultor').replace(/[^a-z0-9_-]/gi,'_')}_${new Date().toISOString().slice(0,10)}.png`;
+    a.href=objectUrl;
+    a.download=nomeArquivo;
+    a.rel='noopener';
+    a.style.display='none';
     document.body.appendChild(a);
     a.click();
     a.remove();
-    setTimeout(()=>URL.revokeObjectURL(url),1500);
+
+    setTimeout(()=>{
+      try{
+        const w=window.open(objectUrl,'_blank');
+        if(!w) location.href=objectUrl;
+      }catch{}
+    },900);
   }catch(e){
     alert('Erro ao baixar tabela: '+(e?.message||e));
   }finally{
     stage?.remove();
     if(btn){btn.disabled=false;btn.textContent='⬇️ BAIXAR TABELA'}
+    if(objectUrl)setTimeout(()=>URL.revokeObjectURL(objectUrl),15000);
   }
 }
+
 function schedule(){
   if(scheduled)return;
   scheduled=true;
