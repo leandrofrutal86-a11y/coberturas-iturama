@@ -26,8 +26,8 @@ function ensureStyle(){
 #results .daily-note{margin:6px 0 4px;padding:7px 9px;border-radius:9px;background:#eef5fb;color:#28465f;font-size:9px;font-weight:900;text-align:center}
 #consultorRelatorio{margin-top:10px;border:1px solid #d8e0e6;border-radius:12px;overflow:hidden;background:#fff;box-shadow:0 3px 12px #0001}#consultorRelatorio.hiddenRel{display:none!important}
 .crHead{background:linear-gradient(180deg,#d90914,#ad0008);color:#fff;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}.crHead b{font-size:14px}.crHead small{font-size:9px;font-weight:800;opacity:.95}
-.crBtns{display:flex;gap:6px;padding:8px;background:#f5f7f9;flex-wrap:wrap}.crBtns button{border:0;border-radius:8px;padding:8px 10px;color:#fff;font-size:10px;font-weight:900;cursor:pointer}.crGen{background:#d50612}.crPdf{background:#087d37}.crPrint{background:#1c5fa8}.crBtns button:disabled{background:#b8c1c8;cursor:not-allowed}
-#crStatus{font-size:9px;font-weight:800;color:#536273;padding:0 10px 7px}#crResumo{display:flex;gap:5px;flex-wrap:wrap;padding:7px 10px}.crChip{font-size:8px;font-weight:900;background:#eef3f6;border:1px solid #d4dde4;border-radius:999px;padding:5px 7px}
+.crBtns{padding:8px;background:#f5f7f9}.crBtns button{display:block;width:100%;border:0;border-radius:9px;padding:11px 12px;color:#fff;font-size:11px;font-weight:950;cursor:pointer;background:#087d37}.crBtns button:disabled{background:#b8c1c8;cursor:not-allowed}
+#crResumo{display:flex;gap:5px;flex-wrap:wrap;padding:7px 10px}.crChip{font-size:8px;font-weight:900;background:#eef3f6;border:1px solid #d4dde4;border-radius:999px;padding:5px 7px}
 #crResultado{padding:0 10px 10px}.crTableWrap{overflow:hidden;border:1px solid #dce3e8;border-radius:9px}.crTable{width:100%;border-collapse:collapse;table-layout:fixed}.crTable th{background:#c3000b;color:#fff;padding:7px 4px;font-size:9px}.crTable td{padding:7px 4px;border-bottom:1px solid #e0e6eb;text-align:center;font-size:9px;font-weight:800}.crTable td:first-child{text-align:left;font-weight:900}.crTable tr:nth-child(even) td{background:#f5f8fa}.crEmpty{padding:14px;text-align:center;font-size:10px;font-weight:800;color:#64748b}
 @media(max-width:760px){
  .panel{padding:6px!important}.head{gap:4px!important}.panel h2{font-size:14px!important;margin:2px 0!important}.head small{font-size:9px!important}.head select{padding:7px!important;font-size:11px!important}
@@ -42,7 +42,7 @@ function ensureStyle(){
  #results tbody td:first-child{width:42%!important;text-align:left!important;padding-left:4px!important;font-size:7.2px!important;font-weight:900!important}
  #results tbody td:nth-child(2){width:10%!important}#results tbody td:nth-child(3){width:13%!important}#results tbody td:nth-child(4){width:10%!important}#results tbody td:nth-child(5){width:9%!important}#results tbody td:nth-child(6){width:16%!important;border-right:0!important}
  #results .meta-dia{font-size:8.2px!important}.daily-note{font-size:8px!important;margin:5px 0 4px!important}
- .crHead{padding:8px}.crHead b{font-size:12px}.crBtns{display:grid;grid-template-columns:1fr 1fr 1fr;padding:6px;gap:4px}.crBtns button{font-size:8px;padding:8px 2px}.crChip{font-size:7px;padding:4px 6px}#crStatus{font-size:8px;padding:0 7px 5px}#crResumo{padding:5px 7px}
+ .crHead{padding:8px}.crHead b{font-size:12px}.crBtns{display:block;padding:6px}.crBtns button{width:100%;font-size:10px;padding:10px 8px}.crChip{font-size:7px;padding:4px 6px}#crResumo{padding:5px 7px}
  #crResultado{padding:0 6px 7px}.crTableWrap{width:100%;overflow:hidden}.crTable{display:table;width:100%;min-width:0;table-layout:fixed}.crTable thead{display:table-header-group}.crTable tbody{display:table-row-group}.crTable tr{display:table-row}.crTable th,.crTable td{display:table-cell;box-sizing:border-box;white-space:normal;overflow-wrap:anywhere}
  .crTable th{font-size:6.8px;padding:6px 1px}.crTable td{font-size:7.5px;padding:6px 1px}.crTable th:first-child,.crTable td:first-child{width:48%;text-align:left;padding-left:4px}.crTable th:nth-child(2),.crTable td:nth-child(2){width:11%}.crTable th:nth-child(3),.crTable td:nth-child(3){width:14%}.crTable th:nth-child(4),.crTable td:nth-child(4){width:11%}.crTable th:nth-child(5),.crTable td:nth-child(5){width:16%}
 }
@@ -61,13 +61,13 @@ function decorateResults(){
     const labs=['','Meta','Real','Falta','%','Meta/dia'];[...tr.cells].forEach((c,i)=>{if(i>0)c.dataset.label=labs[i]||''})
   });
   let note=results.querySelector('.daily-note');if(meu){if(!note){note=document.createElement('div');note.className='daily-note';table.parentElement?.insertAdjacentElement('beforebegin',note)}note.textContent=`Dias úteis restantes: ${dias}. Meta/dia calculada de segunda a sexta, sem contar o último dia do mês.`}else note?.remove();
-  ensureReport();toggleReport();
+  ensureReport();toggleReport();if(meu)gerarRelatorio();
 }
 function reportRows(){const dias=diasUteisRestantes();return ownRows().map(x=>{const meta=Number(x.meta||0),real=Number(x.realizado||0),falta=Math.max(meta-real,0);return{nome:String(x.nome||''),meta,real,falta,dias,diaria:metaDiaria(falta,dias)}}).filter(x=>x.falta>0)}
 function ensureReport(){
   if($('consultorRelatorio'))return;const results=$('results');if(!results)return;
-  const box=document.createElement('section');box.id='consultorRelatorio';box.innerHTML=`<div class="crHead"><div><b>RELATÓRIO INDIVIDUAL</b><br><small>META • REALIZADO • FALTA • META/DIA</small></div><small>DIAS ÚTEIS NO TOPO • ÚLTIMO DIA FORA</small></div><div class="crBtns"><button id="crGerar" class="crGen">GERAR RELATÓRIO</button><button id="crPdf" class="crPdf" disabled>📄 BAIXAR PDF</button><button id="crPrint" class="crPrint" disabled>🖨️ IMPRIMIR</button></div><div id="crStatus">Clique em GERAR RELATÓRIO.</div><div id="crResumo"></div><div id="crResultado"></div>`;
-  results.insertAdjacentElement('afterend',box);$('crGerar').onclick=gerarRelatorio;$('crPdf').onclick=baixarPdf;$('crPrint').onclick=imprimirRelatorio
+  const box=document.createElement('section');box.id='consultorRelatorio';box.innerHTML=`<div class="crHead"><div><b>RELATÓRIO INDIVIDUAL</b><br><small>META • REALIZADO • FALTA • META/DIA</small></div><small>DIAS ÚTEIS NO TOPO • ÚLTIMO DIA FORA</small></div><div class="crBtns"><button id="crDownload">⬇️ BAIXAR TABELA</button></div><div id="crResumo"></div><div id="crResultado"></div>`;
+  results.insertAdjacentElement('afterend',box);$('crDownload').onclick=baixarTabela
 }
 function toggleReport(){const b=$('consultorRelatorio');if(b)b.classList.toggle('hiddenRel',!isMeu())}
 function gerarRelatorio(){
@@ -76,15 +76,54 @@ function gerarRelatorio(){
   const all=ownRows(),tot=all.reduce((a,x)=>{const m=Number(x.meta||0),r=Number(x.realizado||0);a.meta+=m;a.real+=r;a.falta+=Math.max(m-r,0);return a},{meta:0,real:0,falta:0});
   $('crResumo').innerHTML=`<span class="crChip">${esc(relInfo.rota)} ${esc(relInfo.nome)}</span><span class="crChip">META ${tot.meta}</span><span class="crChip">REAL ${tot.real}</span><span class="crChip">FALTA ${tot.falta}</span><span class="crChip">DIAS ${dias}</span>`;
   if(!rows.length)$('crResultado').innerHTML='<div class="crEmpty">Nenhuma cobertura pendente. Meta concluída.</div>';else $('crResultado').innerHTML=`<div class="crTableWrap"><table class="crTable"><thead><tr><th>Categoria</th><th>Meta</th><th>Realizado</th><th>Falta</th><th>Meta/dia</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${esc(r.nome)}</td><td>${r.meta}</td><td>${r.real}</td><td>${r.falta}</td><td>${r.diaria}</td></tr>`).join('')}</tbody></table></div>`;
-  $('crStatus').textContent=`Relatório gerado em ${relInfo.data}. Mostrando somente categorias que ainda faltam.`;$('crPdf').disabled=false;$('crPrint').disabled=false
 }
-function loadScript(src,test){return new Promise((ok,no)=>{if(test())return ok();const s=document.createElement('script');s.src=src;s.onload=ok;s.onerror=()=>no(Error('Não foi possível carregar o gerador de PDF.'));document.head.appendChild(s)})}
-async function baixarPdf(){
-  if(!relInfo)gerarRelatorio();if(!relInfo)return;const b=$('crPdf');b.disabled=true;$('crStatus').textContent='Gerando PDF...';
-  try{await loadScript('https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js',()=>!!window.jspdf);await loadScript('https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.4/dist/jspdf.plugin.autotable.min.js',()=>!!window.jspdf?.jsPDF?.API?.autoTable);const {jsPDF}=window.jspdf,doc=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});doc.setFillColor(198,0,10);doc.rect(0,0,297,22,'F');doc.setTextColor(255,255,255);doc.setFontSize(15);doc.setFont(undefined,'bold');doc.text('RELATÓRIO DE COBERTURAS - EQUIPE ITURAMA',12,10);doc.setFontSize(9);doc.text(`${relInfo.rota} ${relInfo.nome}   |   ${relInfo.mes}   |   EMISSÃO: ${relInfo.data}`,12,17);doc.setTextColor(20,20,20);doc.setFontSize(8);doc.text(`Dias úteis restantes: ${relInfo.dias} - segunda a sexta, sem considerar o último dia do mês.`,12,29);doc.autoTable({startY:34,head:[['CATEGORIA','META','REALIZADO','FALTA','META/DIA']],body:relRows.map(r=>[r.nome,String(r.meta),String(r.real),String(r.falta),String(r.diaria)]),styles:{fontSize:8,cellPadding:2.5},headStyles:{fillColor:[198,0,10],textColor:255,fontStyle:'bold'},margin:{left:10,right:10}});doc.save(`relatorio_${String(relInfo.rota||'consultor').replace(/[^a-z0-9_-]/gi,'_')}_${new Date().toISOString().slice(0,10)}.pdf`);$('crStatus').textContent='PDF gerado com sucesso.'}catch(e){$('crStatus').textContent='Erro ao gerar PDF: '+e.message}finally{b.disabled=false}
-}
-function imprimirRelatorio(){
-  if(!relInfo)gerarRelatorio();if(!relInfo)return;const w=window.open('','_blank');if(!w){alert('Libere pop-ups para imprimir.');return}const rows=relRows.map(r=>`<tr><td>${esc(r.nome)}</td><td>${r.meta}</td><td>${r.real}</td><td>${r.falta}</td><td>${r.diaria}</td></tr>`).join('');w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Relatório ${esc(relInfo.rota)}</title><style>@page{size:A4 landscape;margin:8mm}body{font-family:Arial;margin:0;color:#111}h1{font-size:18px;margin:0;color:#b40009}p{font-size:11px}table{width:100%;border-collapse:collapse;font-size:10px}th{background:#c3000b;color:#fff}th,td{border:1px solid #bbb;padding:6px;text-align:center}td:first-child{text-align:left;font-weight:bold}</style></head><body><h1>RELATÓRIO DE COBERTURAS - EQUIPE ITURAMA</h1><p><b>${esc(relInfo.rota)} ${esc(relInfo.nome)}</b> • ${esc(relInfo.mes)} • Emissão ${esc(relInfo.data)}<br>Dias úteis restantes: ${relInfo.dias}. Segunda a sexta, sem considerar o último dia do mês.</p><table><thead><tr><th>Categoria</th><th>Meta</th><th>Realizado</th><th>Falta</th><th>Meta/dia</th></tr></thead><tbody>${rows||'<tr><td colspan="5">Nenhuma cobertura pendente.</td></tr>'}</tbody></table><script>window.onload=()=>{window.print()}<\/script></body></html>`);w.document.close()
+
+function loadScript(src,test){return new Promise((ok,no)=>{if(test())return ok();const s=document.createElement('script');s.src=src;s.onload=ok;s.onerror=()=>no(Error('Não foi possível carregar o gerador de imagem.'));document.head.appendChild(s)})}
+async function baixarTabela(){
+  gerarRelatorio();
+  if(!relInfo)return;
+  const btn=$('crDownload');if(btn){btn.disabled=true;btn.textContent='GERANDO IMAGEM...'}
+  let stage=null;
+  try{
+    await loadScript('https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js',()=>!!window.html2canvas);
+    const all=ownRows(),tot=all.reduce((a,x)=>{const m=Number(x.meta||0),r=Number(x.realizado||0);a.meta+=m;a.real+=r;a.falta+=Math.max(m-r,0);return a},{meta:0,real:0,falta:0});
+    const rows=relRows.map(r=>`<tr><td>${esc(r.nome)}</td><td>${r.meta}</td><td>${r.real}</td><td>${r.falta}</td><td>${r.diaria}</td></tr>`).join('')||'<tr><td colspan="5">Nenhuma cobertura pendente. Meta concluída.</td></tr>';
+    stage=document.createElement('div');
+    stage.style.cssText='position:fixed;left:-10000px;top:0;width:1400px;background:#fff;color:#142236;font-family:Arial,sans-serif;padding:0;z-index:-1';
+    stage.innerHTML=`
+      <div style="background:linear-gradient(180deg,#d90914,#ad0008);color:#fff;padding:26px 30px">
+        <div style="font-size:30px;font-weight:900">RELATÓRIO INDIVIDUAL</div>
+        <div style="font-size:17px;font-weight:800;margin-top:8px">META • REALIZADO • FALTA • META/DIA</div>
+        <div style="font-size:15px;font-weight:700;margin-top:10px">${esc(relInfo.rota)} ${esc(relInfo.nome)} • ${esc(relInfo.mes)} • EMISSÃO ${esc(relInfo.data)}</div>
+      </div>
+      <div style="padding:18px 24px 8px;font-size:16px;font-weight:800">Dias úteis restantes: ${relInfo.dias}. Segunda a sexta, sem considerar o último dia do mês.</div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;padding:10px 24px 18px">
+        <span style="background:#eef3f6;border:1px solid #d4dde4;border-radius:999px;padding:10px 16px;font-weight:900">META ${tot.meta}</span>
+        <span style="background:#eef3f6;border:1px solid #d4dde4;border-radius:999px;padding:10px 16px;font-weight:900">REALIZADO ${tot.real}</span>
+        <span style="background:#eef3f6;border:1px solid #d4dde4;border-radius:999px;padding:10px 16px;font-weight:900">FALTA ${tot.falta}</span>
+      </div>
+      <div style="padding:0 24px 28px">
+        <table style="width:100%;border-collapse:collapse;table-layout:fixed;font-size:18px">
+          <thead><tr>
+            <th style="width:52%;background:#c3000b;color:#fff;padding:14px 12px;text-align:left;border:1px solid #a90009">Categoria</th>
+            <th style="width:12%;background:#c3000b;color:#fff;padding:14px 8px;border:1px solid #a90009">Meta</th>
+            <th style="width:14%;background:#c3000b;color:#fff;padding:14px 8px;border:1px solid #a90009">Realizado</th>
+            <th style="width:10%;background:#c3000b;color:#fff;padding:14px 8px;border:1px solid #a90009">Falta</th>
+            <th style="width:12%;background:#c3000b;color:#fff;padding:14px 8px;border:1px solid #a90009">Meta/dia</th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>`;
+    document.body.appendChild(stage);
+    stage.querySelectorAll('tbody tr').forEach((tr,i)=>{tr.querySelectorAll('td').forEach((td,j)=>{td.style.cssText=`padding:13px 12px;border:1px solid #d6dde4;text-align:${j===0?'left':'center'};font-weight:${j===0?'900':'800'};background:${i%2?'#f5f8fa':'#fff'}`})});
+    const canvas=await window.html2canvas(stage,{scale:3,backgroundColor:'#ffffff',useCORS:true,logging:false,width:1400,windowWidth:1400});
+    const blob=await new Promise(ok=>canvas.toBlob(ok,'image/png',1));
+    if(!blob)throw Error('Não foi possível criar a imagem.');
+    const a=document.createElement('a'),url=URL.createObjectURL(blob);
+    a.href=url;a.download=`tabela_coberturas_${String(relInfo.rota||'consultor').replace(/[^a-z0-9_-]/gi,'_')}_${new Date().toISOString().slice(0,10)}.png`;
+    document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);
+  }catch(e){alert('Erro ao baixar tabela: '+(e?.message||e))}
+  finally{stage?.remove();if(btn){btn.disabled=false;btn.textContent='⬇️ BAIXAR TABELA'}}
 }
 function schedule(){if(scheduled)return;scheduled=true;requestAnimationFrame(()=>{scheduled=false;decorateResults()})}
 function startWhenReady(){if(!painelAberto()){setTimeout(startWhenReady,500);return}ensureStyle();ensureReport();decorateResults();const r=$('results');if(r&&!observer){observer=new MutationObserver(schedule);observer.observe(r,{childList:true,subtree:true})}}
