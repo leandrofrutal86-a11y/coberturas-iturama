@@ -1,12 +1,17 @@
 (()=>{
 const norm=v=>String(v??'').trim().toUpperCase();
 function fixClient(c){
-  if(!c||!c.ccoSmallSold)return c;
+  if(!c)return c;
+  const sold=new Set((c.soldMaterials||[]).map(v=>String(v??'').trim().replace(/^0+(?=\d)/,'')));
   for(const cat of (c.categorias||[])){
-    if(String(cat.categoria||'').toUpperCase()!=='SSD')continue;
     for(const s of (cat.slots||[])){
+      const vals=Array.isArray(s.valores)?s.valores.map(v=>String(v??'').trim().replace(/^0+(?=\d)/,'')):[];
+      if(s.campo==='material'&&s.operador==='IN'&&vals.some(v=>sold.has(v)))s.vendido=true;
+      if(Array.isArray(s.matchedCodes)&&s.matchedCodes.length)s.vendido=true;
       const n=norm(s.nome);
-      if(n.includes('CCO KS 290ML')&&n.includes('LT 310ML'))s.vendido=true;
+      if(String(cat.categoria||'').toUpperCase()==='SSD'&&c.ccoSmallSold&&n.includes('CCO KS 290ML')&&n.includes('LT 310ML'))s.vendido=true;
+      if(String(cat.categoria||'').toUpperCase()==='STILL'&&n==='ÁGUA PT 500ML'&&['1219','1220'].some(v=>sold.has(v)))s.vendido=true;
+      if(String(cat.categoria||'').toUpperCase()==='STILL'&&n.includes('NECTAR LT 290ML')&&n.includes('FRUT PT 450ML')&&['1434','1578','1584','1585','1613','1616','1697','1792','1793','1822','1830','1839','8228','8230','8232'].some(v=>sold.has(v)))s.vendido=true;
     }
     cat.vendidos=(cat.slots||[]).filter(s=>s.vendido).length;
     cat.faltam=(cat.slots||[]).filter(s=>!s.vendido).length;
@@ -31,7 +36,8 @@ if(!window.__impReportFetchFixed){
     const r=await nativeFetch(url,init);
     if(!isImp)return r;
     try{
-      const txt=await r.text();
+      const clone=r.clone();
+      const txt=await clone.text();
       const j=JSON.parse(txt);
       if(Array.isArray(j.clients))j.clients=j.clients.map(fixClient);
       return new Response(JSON.stringify(j),{status:r.status,statusText:r.statusText,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'}});
