@@ -123,34 +123,59 @@ function openPvFromReport(pv){
 function printReport(){
  if(!reportData)return;
  const rows=reportData.clients||[],opp=rows.filter(x=>x._faltas.length).length,w=window.open('','_blank');if(!w)return alert('O navegador bloqueou a janela de impressão.');
- const cards=rows.map(c=>`<article class="pcard"><div class="phead"><div><b class="ord">${esc(c.ordem)}</b> <strong>PV ${esc(c.pv)}</strong></div><span class="${c._faltas.length?'bad':'good'}">${c._faltas.length?c._faltas.length+' opp.':'COBERTO'}</span></div><div class="pname">${esc(c.razao)}</div><div class="psub">${esc(c.subcanal||'')}</div>${c._faltas.length?`<div class="pmiss">${c._faltas.map(x=>x.simple?`<div class="pitem simple"><b>${esc(x.name)}</b><span>✕</span></div>`:`<div class="pitem"><b>${esc(x.name)}</b><div class="pprods">${(x.products||[]).map(p=>`<span><i>✕</i>${esc(p)}</span>`).join('')}</div></div>`).join('')}</div>`:''}</article>`).join('');
+
+ const missingInline=c=>{
+   if(!c._faltas?.length)return '<span class="covered">✓ COBERTO</span>';
+   return c._faltas.map(x=>{
+     if(x.simple)return `<span class="miss"><b>${esc(x.name)}</b> <i>✕</i></span>`;
+     const ps=(x.products||[]).map(p=>`<i>✕</i> ${esc(p)}`).join(' / ');
+     return `<span class="miss"><b>${esc(x.name)}</b>: ${ps}</span>`;
+   }).join('<span class="sep"> • </span>');
+ };
+
+ const trs=rows.map(c=>`<tr>
+   <td class="ord">${esc(c.ordem)}</td>
+   <td class="pv">${esc(c.pv)}</td>
+   <td class="cliente">${esc(c.razao)}</td>
+   <td class="sub">${esc(c.subcanal||'')}</td>
+   <td class="faltas">${missingInline(c)}</td>
+ </tr>`).join('');
+
  w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Relatório ${esc(reportData.route)} ${esc(reportData.day)}</title><style>
- @page{size:A4 landscape;margin:2mm}
+ @page{size:A4 landscape;margin:7mm}
  *{box-sizing:border-box}
  html,body{margin:0;padding:0}
- body{font-family:Arial,sans-serif;color:#111;font-size:6.3px}
- h1{font-size:10px;margin:0 0 .5px;line-height:1}
- p{font-size:6px;margin:0 0 2px;line-height:1}
- .wrap{column-count:3;column-gap:2.5mm;column-fill:auto}
- .pcard{display:inline-block;width:100%;vertical-align:top;border:.6px solid #aaa;border-radius:3px;padding:2.2px;margin:0 0 2px;break-inside:avoid;page-break-inside:avoid}
- .phead{display:flex;justify-content:space-between;gap:2px;align-items:center;font-size:6.2px;line-height:1}
- .ord{display:inline-block;background:#222;color:#fff;border-radius:999px;padding:1px 3px}
- .bad,.good{font-size:5.2px;font-weight:bold;border-radius:999px;padding:1px 3px;white-space:nowrap}
- .bad{background:#fde0e0;color:#a00}.good{background:#def3e7;color:#075}
- .pname{font-size:7px;font-weight:bold;margin-top:1px;line-height:1}
- .psub{font-size:5.2px;color:#555;margin:.5px 0 1.5px;line-height:1}
- .pmiss{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px}
- .pitem{border:.5px solid #e5caca;background:#fff5f5;border-radius:2px;padding:1.2px 1.5px;min-height:11px}
- .pitem b{display:block;font-size:4.9px;color:#900;line-height:1}
- .pitem.simple{display:flex;align-items:center;justify-content:space-between;gap:1px}
- .pitem.simple b{margin:0}.pitem.simple span{font-size:6.8px;font-weight:bold;color:#d00}
- .pprods{display:grid;gap:0;margin-top:.3px}
- .pprods span{font-size:4.8px;line-height:1;display:flex;gap:1px}
- .pprods i{font-style:normal;color:#d00;font-weight:bold}
- @media print{
-   .pcard{break-inside:avoid-page;page-break-inside:avoid}
- }
- </style></head><body><h1>Relatório de visitas • ${esc(reportData.route)} • ${esc(dayLabel(reportData.day))}</h1><p>${rows.length} clientes • ${opp} com oportunidade • ${rows.length-opp} cobertos</p><div class="wrap">${cards}</div><script>window.onload=()=>setTimeout(()=>window.print(),200)<\/script></body></html>`);w.document.close();
+ body{font-family:Arial,sans-serif;color:#172534}
+ .head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin-bottom:6px}
+ h1{font-size:15px;margin:0;line-height:1.1}
+ .resume{font-size:8px;color:#536371;white-space:nowrap}
+ table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:7.4px}
+ col.ord{width:5%} col.pv{width:9%} col.cli{width:22%} col.sub{width:14%} col.fal{width:50%}
+ thead{display:table-header-group}
+ th{background:#172534;color:#fff;border:1px solid #172534;padding:4px 5px;text-align:left;font-size:7.3px;letter-spacing:.15px}
+ td{border:1px solid #cfd6dc;padding:4px 5px;vertical-align:middle;line-height:1.15}
+ tbody tr:nth-child(even){background:#f7f9fa}
+ tbody tr{break-inside:avoid;page-break-inside:avoid}
+ td.ord{text-align:center;font-weight:900}
+ td.pv{font-weight:900;white-space:nowrap}
+ td.cliente{font-weight:800}
+ td.sub{font-size:6.9px;color:#4e5d69}
+ td.faltas{font-size:6.9px;line-height:1.22}
+ .miss{white-space:normal}
+ .miss b{color:#8e1717}
+ .miss i{font-style:normal;color:#e30613;font-weight:950;font-size:8px}
+ .sep{color:#9aa5ad;padding:0 2px}
+ .covered{color:#087249;font-weight:900}
+ </style></head><body>
+ <div class="head"><h1>Relatório de visitas • ${esc(reportData.route)} • ${esc(dayLabel(reportData.day))}</h1><div class="resume">${rows.length} clientes • ${opp} com oportunidade • ${rows.length-opp} cobertos</div></div>
+ <table>
+   <colgroup><col class="ord"><col class="pv"><col class="cli"><col class="sub"><col class="fal"></colgroup>
+   <thead><tr><th>ORDEM</th><th>PV</th><th>CLIENTE</th><th>SUBCANAL</th><th>O QUE FALTA</th></tr></thead>
+   <tbody>${trs}</tbody>
+ </table>
+ <script>window.onload=()=>setTimeout(()=>window.print(),200)<\/script>
+ </body></html>`);
+ w.document.close();
 }
 async function inject(force=false){
  css();ensureReportOverlay();wrapSearch();const b=searchBox();if(!b)return;
