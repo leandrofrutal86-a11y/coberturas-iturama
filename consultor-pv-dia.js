@@ -33,9 +33,9 @@ function css(){
 }
 function ensureReportOverlay(){
  if(document.getElementById('pvDayReport'))return;
- document.body.insertAdjacentHTML('beforeend',`<div id="pvDayReport" class="pvDayReportOverlay"><div class="pvDayReportSheet"><div class="pvDayReportTop"><h2 id="pvDayReportTitle">Relatório da rota</h2><div class="pvDayReportTopBtns"><button id="pvDayPrint">IMPRIMIR / PDF</button><button id="pvDayReportClose">FECHAR</button></div></div><div id="pvDayReportBody" class="pvDayReportBody"></div></div></div>`);
+ document.body.insertAdjacentHTML('beforeend',`<div id="pvDayReport" class="pvDayReportOverlay"><div class="pvDayReportSheet"><div class="pvDayReportTop"><h2 id="pvDayReportTitle">Relatório da rota</h2><div class="pvDayReportTopBtns"><button id="pvDayPrint">⬇ BAIXAR PDF</button><button id="pvDayReportClose">FECHAR</button></div></div><div id="pvDayReportBody" class="pvDayReportBody"></div></div></div>`);
  document.getElementById('pvDayReportClose').onclick=()=>document.getElementById('pvDayReport').classList.remove('show');
- document.getElementById('pvDayPrint').onclick=printReport;
+ document.getElementById('pvDayPrint').onclick=downloadReportPdf;
 }
 async function getDayClients(force=false){
  const rt=route(),key=rt+'|'+selectedDay;
@@ -120,62 +120,83 @@ function openPvFromReport(pv){
  document.getElementById('pvDayReport')?.classList.remove('show');if(typeof window.openPv==='function')window.openPv();else if(typeof openPv==='function')openPv();
  setTimeout(()=>{const i=document.getElementById('pv');if(i)i.value=pv;if(typeof window.searchPv==='function')window.searchPv();else if(typeof searchPv==='function')searchPv()},100);
 }
-function printReport(){
+function loadScriptOnce(id,src,test){
+ return new Promise((resolve,reject)=>{
+   if(test())return resolve();
+   const old=document.getElementById(id);
+   if(old){old.addEventListener('load',()=>resolve(),{once:true});old.addEventListener('error',()=>reject(new Error('Falha ao carregar gerador de PDF.')),{once:true});return}
+   const s=document.createElement('script');s.id=id;s.src=src;s.async=true;
+   s.onload=()=>test()?resolve():reject(new Error('Gerador de PDF indisponível.'));
+   s.onerror=()=>reject(new Error('Falha ao carregar gerador de PDF.'));
+   document.head.appendChild(s);
+ });
+}
+async function ensurePdfLibs(){
+ await loadScriptOnce('pvJsPdfLib','https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js',()=>!!window.jspdf?.jsPDF);
+ await loadScriptOnce('pvAutoTableLib','https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.4/dist/jspdf.plugin.autotable.min.js',()=>!!window.jspdf?.jsPDF?.API?.autoTable);
+}
+function pdfMissingText(c){
+ if(!c._faltas?.length)return 'COBERTO';
+ return c._faltas.map(x=>{
+   if(x.simple)return `${x.name}  X`;
+   const ps=(x.products||[]).map(p=>`X ${p}`).join(' / ');
+   return `${x.name}: ${ps}`;
+ }).join('  •  ');
+}
+function safePdfName(s){return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9_-]+/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'')}
+async function downloadReportPdf(){
  if(!reportData)return;
- const rows=reportData.clients||[],opp=rows.filter(x=>x._faltas.length).length,w=window.open('','_blank');if(!w)return alert('O navegador bloqueou a janela de impressão.');
-
- const missingInline=c=>{
-   if(!c._faltas?.length)return '<span class="covered">✓ COBERTO</span>';
-   return c._faltas.map(x=>{
-     if(x.simple)return `<span class="miss"><b>${esc(x.name)}</b> <i>✕</i></span>`;
-     const ps=(x.products||[]).map(p=>`<i>✕</i> ${esc(p)}`).join(' / ');
-     return `<span class="miss"><b>${esc(x.name)}</b>: ${ps}</span>`;
-   }).join('<span class="sep"> • </span>');
- };
-
- const trs=rows.map(c=>`<tr>
-   <td class="ord">${esc(c.ordem)}</td>
-   <td class="pv">${esc(c.pv)}</td>
-   <td class="cliente">${esc(c.razao)}</td>
-   <td class="sub">${esc(c.subcanal||'')}</td>
-   <td class="faltas">${missingInline(c)}</td>
- </tr>`).join('');
-
- w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Relatório ${esc(reportData.route)} ${esc(reportData.day)}</title><style>
- @page{size:A4 landscape;margin:8mm}
- *{box-sizing:border-box}
- html,body{margin:0;padding:0}
- body{font-family:Arial,sans-serif;color:#172534}
- .head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin-bottom:6px}
- h1{font-size:18px;margin:0;line-height:1.1}
- .resume{font-size:10px;color:#536371;white-space:nowrap;font-weight:700}
- table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:9.4px}
- col.ord{width:6%} col.pv{width:10%} col.cli{width:24%} col.sub{width:15%} col.fal{width:45%}
- thead{display:table-header-group}
- th{background:#172534;color:#fff;border:1px solid #172534;padding:6px 7px;text-align:left;font-size:9.5px;letter-spacing:.15px}
- td{border:1px solid #cfd6dc;padding:6px 7px;vertical-align:middle;line-height:1.28}
- tbody tr:nth-child(even){background:#f7f9fa}
- tbody tr{break-inside:avoid;page-break-inside:avoid}
- td.ord{text-align:center;font-weight:900}
- td.pv{font-weight:900;white-space:nowrap}
- td.cliente{font-weight:800}
- td.sub{font-size:8.8px;color:#4e5d69}
- td.faltas{font-size:8.8px;line-height:1.3}
- .miss{white-space:normal;display:inline}.faltas{overflow-wrap:anywhere;word-break:normal}
- .miss b{color:#8e1717}
- .miss i{font-style:normal;color:#e30613;font-weight:950;font-size:10px}
- .sep{color:#9aa5ad;padding:0 2px}
- .covered{color:#087249;font-weight:900}
- </style></head><body>
- <div class="head"><h1>Relatório de visitas • ${esc(reportData.route)} • ${esc(dayLabel(reportData.day))}</h1><div class="resume">${rows.length} clientes • ${opp} com oportunidade • ${rows.length-opp} cobertos</div></div>
- <table>
-   <colgroup><col class="ord"><col class="pv"><col class="cli"><col class="sub"><col class="fal"></colgroup>
-   <thead><tr><th>ORDEM</th><th>PV</th><th>CLIENTE</th><th>SUBCANAL</th><th>O QUE FALTA</th></tr></thead>
-   <tbody>${trs}</tbody>
- </table>
- <script>window.onload=()=>setTimeout(()=>window.print(),200)<\/script>
- </body></html>`);
- w.document.close();
+ const btn=document.getElementById('pvDayPrint'),old=btn?.innerHTML;
+ if(btn){btn.disabled=true;btn.textContent='GERANDO PDF...'}
+ try{
+   await ensurePdfLibs();
+   const {jsPDF}=window.jspdf;
+   const doc=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
+   const rows=reportData.clients||[],opp=rows.filter(x=>x._faltas.length).length;
+   doc.setFont('helvetica','bold');doc.setFontSize(15);doc.setTextColor(23,37,52);
+   doc.text(`Relatório de visitas • ${reportData.route} • ${dayLabel(reportData.day)}`,8,10);
+   doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(83,99,113);
+   doc.text(`${rows.length} clientes • ${opp} com oportunidade • ${rows.length-opp} cobertos`,289,10,{align:'right'});
+   const body=rows.map(c=>[
+     String(c.ordem??''),
+     String(c.pv??''),
+     String(c.razao??''),
+     String(c.subcanal??''),
+     pdfMissingText(c)
+   ]);
+   doc.autoTable({
+     startY:14,
+     head:[['ORDEM','PV','CLIENTE','SUBCANAL','O QUE FALTA']],
+     body,
+     theme:'grid',
+     styles:{font:'helvetica',fontSize:8.6,cellPadding:2.2,valign:'middle',lineColor:[207,214,220],lineWidth:.15,textColor:[23,37,52],overflow:'linebreak'},
+     headStyles:{fillColor:[23,37,52],textColor:[255,255,255],fontStyle:'bold',fontSize:9.2,cellPadding:2.4},
+     alternateRowStyles:{fillColor:[247,249,250]},
+     columnStyles:{
+       0:{cellWidth:16,halign:'center',fontStyle:'bold'},
+       1:{cellWidth:25,fontStyle:'bold'},
+       2:{cellWidth:58,fontStyle:'bold'},
+       3:{cellWidth:38,textColor:[78,93,105]},
+       4:{cellWidth:142,textColor:[120,20,20]}
+     },
+     margin:{left:8,right:8,bottom:8},
+     rowPageBreak:'avoid',
+     showHead:'everyPage',
+     didDrawPage:()=>{
+       const n=doc.internal.getNumberOfPages();
+       doc.setFontSize(7.5);doc.setTextColor(110,120,128);
+       doc.text(`Página ${n}`,289,202,{align:'right'});
+     }
+   });
+   const filename=`relatorio-${safePdfName(reportData.route)}-${safePdfName(reportData.day)}.pdf`;
+   const blob=doc.output('blob'),url=URL.createObjectURL(blob),a=document.createElement('a');
+   a.href=url;a.download=filename;a.style.display='none';document.body.appendChild(a);a.click();
+   setTimeout(()=>{URL.revokeObjectURL(url);a.remove()},1500);
+ }catch(e){
+   alert(e?.message||'Não foi possível gerar o PDF.');
+ }finally{
+   if(btn){btn.disabled=false;btn.innerHTML=old||'⬇ BAIXAR PDF'}
+ }
 }
 async function inject(force=false){
  css();ensureReportOverlay();wrapSearch();const b=searchBox();if(!b)return;
