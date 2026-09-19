@@ -148,7 +148,7 @@ function missingItemHeight(doc,item,colW){
  if(item.simple)return 4.8;
  let h=4.6;
  for(const p of (item.products||[])){
-   const lines=pdfTextLines(doc,p,colW-10,6.9);
+   const lines=pdfTextLines(doc,p,colW-8,6.6);
    h+=Math.max(1,lines.length)*3.25+.8;
  }
  return h+1;
@@ -173,10 +173,10 @@ function drawMissingColumn(doc,items,x,y,colW){
      yy+=Math.max(4.4,catLines.length*3.3+.8);
      doc.setFont('helvetica','normal');doc.setTextColor(58,69,78);
      for(const p of (item.products||[])){
-       const lines=pdfTextLines(doc,p,colW-10,6.9);
-       doc.setFont('helvetica','bold');doc.setFontSize(7.6);doc.setTextColor(227,6,19);
+       const lines=pdfTextLines(doc,p,colW-8,6.6);
+       doc.setFont('helvetica','bold');doc.setFontSize(7.3);doc.setTextColor(227,6,19);
        doc.text('X',x+1,yy+3);
-       doc.setFont('helvetica','normal');doc.setFontSize(6.9);doc.setTextColor(58,69,78);
+       doc.setFont('helvetica','normal');doc.setFontSize(6.6);doc.setTextColor(58,69,78);
        doc.text(lines,x+6,yy+3);
        yy+=Math.max(4.1,lines.length*3.25+.8);
      }
@@ -202,21 +202,22 @@ function buildPdfDocument(){
  const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
  const rows=reportData.clients||[],opp=rows.filter(x=>x._faltas.length).length;
  const W=doc.internal.pageSize.getWidth(),H=doc.internal.pageSize.getHeight();
- const L=10,R=10,usable=W-L-R,gap=5,colW=(usable-gap)/2;
+ const L=10,R=10,usable=W-L-R,gap=3.2,colW=(usable-gap*2)/3;
  let page=1,y=drawPdfHeader(doc,rows,opp,page);
 
  rows.forEach((client,idx)=>{
    const faltas=client._faltas||[];
-   const left=[],right=[];
-   let lh=0,rh=0;
+   const cols=[[],[],[]],heights=[0,0,0];
    for(const item of faltas){
      const h=missingItemHeight(doc,item,colW);
-     if(lh<=rh){left.push(item);lh+=h}else{right.push(item);rh+=h}
+     const target=heights.indexOf(Math.min(...heights));
+     cols[target].push(item);
+     heights[target]+=h;
    }
 
    const infoH=12.5;
    const missTitleH=5.5;
-   const contentH=faltas.length?Math.max(missingColumnHeight(doc,left,colW),missingColumnHeight(doc,right,colW)):8;
+   const contentH=faltas.length?Math.max(...heights):8;
    const blockH=infoH+missTitleH+contentH+3.8;
 
    if(y+blockH>H-13){
@@ -257,9 +258,14 @@ function buildPdfDocument(){
 
    const contentY=y+infoH+missTitleH+1;
    if(faltas.length){
-     doc.setDrawColor(238,241,243);doc.line(L+colW+gap/2,contentY-1,L+colW+gap/2,y+blockH-3);
-     drawMissingColumn(doc,left,L+3,contentY,colW-5);
-     drawMissingColumn(doc,right,L+colW+gap+2,contentY,colW-5);
+     const sep1=L+colW+gap/2;
+     const sep2=L+(colW*2)+(gap*1.5);
+     doc.setDrawColor(238,241,243);
+     doc.line(sep1,contentY-1,sep1,y+blockH-3);
+     doc.line(sep2,contentY-1,sep2,y+blockH-3);
+     drawMissingColumn(doc,cols[0],L+2.2,contentY,colW-3.2);
+     drawMissingColumn(doc,cols[1],L+colW+gap+1.1,contentY,colW-3.2);
+     drawMissingColumn(doc,cols[2],L+(colW*2)+(gap*2)+0.1,contentY,colW-3.2);
    }else{
      doc.setFont('helvetica','bold');doc.setFontSize(8.2);doc.setTextColor(8,114,73);
      doc.text('✓ Cliente coberto neste relatório.',L+3,contentY+4);
