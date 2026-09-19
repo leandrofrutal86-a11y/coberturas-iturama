@@ -125,27 +125,27 @@ function printReport(){
  const rows=reportData.clients||[],opp=rows.filter(x=>x._faltas.length).length,w=window.open('','_blank');if(!w)return alert('O navegador bloqueou a janela de impressão.');
  const cards=rows.map(c=>`<article class="pcard"><div class="phead"><div><b class="ord">${esc(c.ordem)}</b> <strong>PV ${esc(c.pv)}</strong></div><span class="${c._faltas.length?'bad':'good'}">${c._faltas.length?c._faltas.length+' opp.':'COBERTO'}</span></div><div class="pname">${esc(c.razao)}</div><div class="psub">${esc(c.subcanal||'')}</div>${c._faltas.length?`<div class="pmiss">${c._faltas.map(x=>x.simple?`<div class="pitem simple"><b>${esc(x.name)}</b><span>✕</span></div>`:`<div class="pitem"><b>${esc(x.name)}</b><div class="pprods">${(x.products||[]).map(p=>`<span><i>✕</i>${esc(p)}</span>`).join('')}</div></div>`).join('')}</div>`:''}</article>`).join('');
  w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Relatório ${esc(reportData.route)} ${esc(reportData.day)}</title><style>
- @page{size:A4 landscape;margin:3.5mm}
+ @page{size:A4 landscape;margin:2mm}
  *{box-sizing:border-box}
  html,body{margin:0;padding:0}
- body{font-family:Arial,sans-serif;color:#111;font-size:7px}
- h1{font-size:12px;margin:0 0 1px;line-height:1.05}
- p{font-size:7px;margin:0 0 3px;line-height:1.05}
- .wrap{column-count:2;column-gap:4px;column-fill:auto}
- .pcard{display:inline-block;width:100%;vertical-align:top;border:1px solid #aaa;border-radius:4px;padding:3px;margin:0 0 3px;break-inside:avoid;page-break-inside:avoid}
- .phead{display:flex;justify-content:space-between;gap:3px;align-items:center;font-size:7px;line-height:1}
- .ord{display:inline-block;background:#222;color:#fff;border-radius:999px;padding:1.5px 4px}
- .bad,.good{font-size:6px;font-weight:bold;border-radius:999px;padding:1.5px 4px;white-space:nowrap}
+ body{font-family:Arial,sans-serif;color:#111;font-size:6.3px}
+ h1{font-size:10px;margin:0 0 .5px;line-height:1}
+ p{font-size:6px;margin:0 0 2px;line-height:1}
+ .wrap{column-count:3;column-gap:2.5mm;column-fill:auto}
+ .pcard{display:inline-block;width:100%;vertical-align:top;border:.6px solid #aaa;border-radius:3px;padding:2.2px;margin:0 0 2px;break-inside:avoid;page-break-inside:avoid}
+ .phead{display:flex;justify-content:space-between;gap:2px;align-items:center;font-size:6.2px;line-height:1}
+ .ord{display:inline-block;background:#222;color:#fff;border-radius:999px;padding:1px 3px}
+ .bad,.good{font-size:5.2px;font-weight:bold;border-radius:999px;padding:1px 3px;white-space:nowrap}
  .bad{background:#fde0e0;color:#a00}.good{background:#def3e7;color:#075}
- .pname{font-size:8px;font-weight:bold;margin-top:1.5px;line-height:1.05}
- .psub{font-size:6px;color:#555;margin:1px 0 2px;line-height:1}
- .pmiss{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.5px}
- .pitem{border:1px solid #e5caca;background:#fff5f5;border-radius:3px;padding:2px;min-height:15px}
- .pitem b{display:block;font-size:5.8px;color:#900;line-height:1}
- .pitem.simple{display:flex;align-items:center;justify-content:space-between;gap:2px}
- .pitem.simple b{margin:0}.pitem.simple span{font-size:8px;font-weight:bold;color:#d00}
- .pprods{display:grid;gap:.5px;margin-top:.5px}
- .pprods span{font-size:5.8px;line-height:1;display:flex;gap:1.5px}
+ .pname{font-size:7px;font-weight:bold;margin-top:1px;line-height:1}
+ .psub{font-size:5.2px;color:#555;margin:.5px 0 1.5px;line-height:1}
+ .pmiss{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px}
+ .pitem{border:.5px solid #e5caca;background:#fff5f5;border-radius:2px;padding:1.2px 1.5px;min-height:11px}
+ .pitem b{display:block;font-size:4.9px;color:#900;line-height:1}
+ .pitem.simple{display:flex;align-items:center;justify-content:space-between;gap:1px}
+ .pitem.simple b{margin:0}.pitem.simple span{font-size:6.8px;font-weight:bold;color:#d00}
+ .pprods{display:grid;gap:0;margin-top:.3px}
+ .pprods span{font-size:4.8px;line-height:1;display:flex;gap:1px}
  .pprods i{font-style:normal;color:#d00;font-weight:bold}
  @media print{
    .pcard{break-inside:avoid-page;page-break-inside:avoid}
