@@ -142,28 +142,28 @@ function printReport(){
  </tr>`).join('');
 
  w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Relatório ${esc(reportData.route)} ${esc(reportData.day)}</title><style>
- @page{size:A4 landscape;margin:7mm}
+ @page{size:A4 landscape;margin:8mm}
  *{box-sizing:border-box}
  html,body{margin:0;padding:0}
  body{font-family:Arial,sans-serif;color:#172534}
  .head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin-bottom:6px}
- h1{font-size:15px;margin:0;line-height:1.1}
- .resume{font-size:8px;color:#536371;white-space:nowrap}
- table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:7.4px}
- col.ord{width:5%} col.pv{width:9%} col.cli{width:22%} col.sub{width:14%} col.fal{width:50%}
+ h1{font-size:18px;margin:0;line-height:1.1}
+ .resume{font-size:10px;color:#536371;white-space:nowrap;font-weight:700}
+ table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:9.4px}
+ col.ord{width:6%} col.pv{width:10%} col.cli{width:24%} col.sub{width:15%} col.fal{width:45%}
  thead{display:table-header-group}
- th{background:#172534;color:#fff;border:1px solid #172534;padding:4px 5px;text-align:left;font-size:7.3px;letter-spacing:.15px}
- td{border:1px solid #cfd6dc;padding:4px 5px;vertical-align:middle;line-height:1.15}
+ th{background:#172534;color:#fff;border:1px solid #172534;padding:6px 7px;text-align:left;font-size:9.5px;letter-spacing:.15px}
+ td{border:1px solid #cfd6dc;padding:6px 7px;vertical-align:middle;line-height:1.28}
  tbody tr:nth-child(even){background:#f7f9fa}
  tbody tr{break-inside:avoid;page-break-inside:avoid}
  td.ord{text-align:center;font-weight:900}
  td.pv{font-weight:900;white-space:nowrap}
  td.cliente{font-weight:800}
- td.sub{font-size:6.9px;color:#4e5d69}
- td.faltas{font-size:6.9px;line-height:1.22}
- .miss{white-space:normal}
+ td.sub{font-size:8.8px;color:#4e5d69}
+ td.faltas{font-size:8.8px;line-height:1.3}
+ .miss{white-space:normal;display:inline}.faltas{overflow-wrap:anywhere;word-break:normal}
  .miss b{color:#8e1717}
- .miss i{font-style:normal;color:#e30613;font-weight:950;font-size:8px}
+ .miss i{font-style:normal;color:#e30613;font-weight:950;font-size:10px}
  .sep{color:#9aa5ad;padding:0 2px}
  .covered{color:#087249;font-weight:900}
  </style></head><body>
