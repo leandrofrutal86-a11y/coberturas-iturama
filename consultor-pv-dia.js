@@ -140,72 +140,139 @@ function pdfMissingText(c){
  }).join('  |  ');
 }
 function safePdfName(s){return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9_-]+/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'')}
-function fitPdfLine(doc,text,maxWidth,startSize=8.2,minSize=6.2){
- let size=startSize;
+function pdfTextLines(doc,text,maxWidth,size=7.6){
  doc.setFontSize(size);
- while(size>minSize&&doc.getTextWidth(text)>maxWidth){size-=.2;doc.setFontSize(size)}
- if(doc.getTextWidth(text)<=maxWidth)return{text,size,lines:[text]};
- doc.setFontSize(minSize);
- let lines=doc.splitTextToSize(text,maxWidth);
- if(lines.length>2){
-   size=5.6;doc.setFontSize(size);lines=doc.splitTextToSize(text,maxWidth);
+ return doc.splitTextToSize(String(text||''),maxWidth);
+}
+function missingItemHeight(doc,item,colW){
+ if(item.simple)return 5.3;
+ let h=5.1;
+ for(const p of (item.products||[])){
+   const lines=pdfTextLines(doc,p,colW-10,7.4);
+   h+=Math.max(1,lines.length)*3.55+1;
  }
- return{text,size,lines:lines.slice(0,2)};
+ return h+1;
+}
+function missingColumnHeight(doc,items,colW){
+ return (items||[]).reduce((sum,item)=>sum+missingItemHeight(doc,item,colW),0);
+}
+function drawMissingColumn(doc,items,x,y,colW){
+ let yy=y;
+ for(const item of (items||[])){
+   if(item.simple){
+     doc.setFont('helvetica','bold');doc.setFontSize(8.4);doc.setTextColor(227,6,19);
+     doc.text('X',x,yy+3.3);
+     doc.setTextColor(116,24,29);
+     const nameLines=pdfTextLines(doc,item.name,colW-7,8.4);
+     doc.text(nameLines.slice(0,2),x+5,yy+3.3);
+     yy+=Math.max(5.3,nameLines.length*3.7+1.4);
+   }else{
+     doc.setFont('helvetica','bold');doc.setFontSize(8.5);doc.setTextColor(116,24,29);
+     const catLines=pdfTextLines(doc,item.name,colW-1,8.5);
+     doc.text(catLines.slice(0,2),x,yy+3.2);
+     yy+=Math.max(4.8,catLines.length*3.6+1);
+     doc.setFont('helvetica','normal');doc.setTextColor(58,69,78);
+     for(const p of (item.products||[])){
+       const lines=pdfTextLines(doc,p,colW-10,7.4);
+       doc.setFont('helvetica','bold');doc.setFontSize(8.2);doc.setTextColor(227,6,19);
+       doc.text('X',x+1,yy+3);
+       doc.setFont('helvetica','normal');doc.setFontSize(7.4);doc.setTextColor(58,69,78);
+       doc.text(lines,x+6,yy+3);
+       yy+=Math.max(4.5,lines.length*3.55+1);
+     }
+     yy+=1;
+   }
+   doc.setDrawColor(235,226,226);doc.setLineWidth(.12);doc.line(x,yy-.3,x+colW,yy-.3);
+ }
+ return yy;
 }
 function drawPdfHeader(doc,rows,opp,pageNo){
  const W=doc.internal.pageSize.getWidth();
- doc.setFont('helvetica','bold');doc.setFontSize(14);doc.setTextColor(23,37,52);
- doc.text(`Relatório de visitas • ${reportData.route} • ${dayLabel(reportData.day)}`,7,8.5);
- doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(83,99,113);
- doc.text(`${rows.length} clientes • ${opp} com oportunidade • ${rows.length-opp} cobertos`,W-7,8.5,{align:'right'});
- doc.setDrawColor(23,37,52);doc.setLineWidth(.35);doc.line(7,11,W-7,11);
- if(pageNo>1){doc.setFontSize(7);doc.text(`Página ${pageNo}`,W-7,14,{align:'right'})}
- return pageNo>1?16:14;
+ doc.setFont('helvetica','bold');doc.setFontSize(15);doc.setTextColor(23,37,52);
+ doc.text(`Relatório de visitas • ${reportData.route}`,10,11);
+ doc.setFont('helvetica','normal');doc.setFontSize(10);doc.setTextColor(92,104,114);
+ doc.text(dayLabel(reportData.day),10,16);
+ doc.setFontSize(8.5);doc.setTextColor(83,99,113);
+ doc.text(`${rows.length} clientes • ${opp} com oportunidade • ${rows.length-opp} cobertos`,W-10,11,{align:'right'});
+ doc.setDrawColor(23,37,52);doc.setLineWidth(.45);doc.line(10,19,W-10,19);
+ return 23;
 }
 function buildPdfDocument(){
  const {jsPDF}=window.jspdf;
- const doc=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
+ const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
  const rows=reportData.clients||[],opp=rows.filter(x=>x._faltas.length).length;
- const W=doc.internal.pageSize.getWidth(),H=doc.internal.pageSize.getHeight(),L=7,R=7,usable=W-L-R;
+ const W=doc.internal.pageSize.getWidth(),H=doc.internal.pageSize.getHeight();
+ const L=10,R=10,usable=W-L-R,gap=5,colW=(usable-gap)/2;
  let page=1,y=drawPdfHeader(doc,rows,opp,page);
- rows.forEach((c,idx)=>{
-   const missing=pdfMissingText(c),fit=fitPdfLine(doc,missing,usable-5,8.2,6.2);
-   const missingLines=Math.max(1,fit.lines.length),infoH=6.7,missH=missingLines===1?6.4:9.4,blockH=infoH+missH;
-   if(y+blockH>H-8){
-     doc.addPage('a4','landscape');page++;y=drawPdfHeader(doc,rows,opp,page);
+
+ rows.forEach((client,idx)=>{
+   const faltas=client._faltas||[];
+   const left=[],right=[];
+   let lh=0,rh=0;
+   for(const item of faltas){
+     const h=missingItemHeight(doc,item,colW);
+     if(lh<=rh){left.push(item);lh+=h}else{right.push(item);rh+=h}
    }
-   const alt=idx%2===1;
-   if(alt){doc.setFillColor(247,249,250);doc.rect(L,y,usable,infoH,'F')}
-   doc.setDrawColor(195,204,211);doc.setLineWidth(.18);doc.rect(L,y,usable,blockH);
-   doc.line(L,y+infoH,W-R,y+infoH);
 
-   // linha 1: dados do cliente
-   const c1=15,c2=24,c3=110;
-   doc.line(L+c1,y,L+c1,y+infoH);doc.line(L+c1+c2,y,L+c1+c2,y+infoH);doc.line(L+c1+c2+c3,y,L+c1+c2+c3,y+infoH);
-   doc.setTextColor(23,37,52);doc.setFontSize(8.2);doc.setFont('helvetica','bold');
-   doc.text(String(c.ordem??''),L+c1/2,y+4.35,{align:'center'});
-   doc.text(String(c.pv??''),L+c1+2,y+4.35);
-   doc.setFontSize(8);doc.text(String(c.razao??''),L+c1+c2+2,y+4.35,{maxWidth:c3-4});
-   doc.setFont('helvetica','normal');doc.setFontSize(7.5);doc.setTextColor(74,88,99);
-   doc.text(String(c.subcanal??''),L+c1+c2+c3+2,y+4.35,{maxWidth:usable-c1-c2-c3-4});
+   const infoH=14;
+   const missTitleH=6.5;
+   const contentH=faltas.length?Math.max(missingColumnHeight(doc,left,colW),missingColumnHeight(doc,right,colW)):8;
+   const blockH=infoH+missTitleH+contentH+5;
 
-   // linha 2: o que falta, ocupando toda a largura
-   const label='O QUE FALTA:';
-   doc.setFont('helvetica','bold');doc.setFontSize(7.3);doc.setTextColor(c._faltas.length?150:8,c._faltas.length?20:114,c._faltas.length?20:73);
-   doc.text(label,L+2,y+infoH+4.1);
-   const labelW=doc.getTextWidth(label)+2;
-   doc.setFont('helvetica','normal');doc.setFontSize(fit.size);
-   doc.setTextColor(c._faltas.length?105:8,c._faltas.length?25:114,c._faltas.length?25:73);
-   if(fit.lines.length===1){
-     doc.text(fit.lines[0],L+2+labelW,y+infoH+4.1);
+   if(y+blockH>H-13){
+     doc.addPage('a4','portrait');page++;y=drawPdfHeader(doc,rows,opp,page);
+   }
+
+   // bloco do cliente
+   doc.setDrawColor(205,214,221);doc.setLineWidth(.3);
+   doc.roundedRect(L,y,usable,blockH,2.4,2.4);
+
+   // cabeçalho do cliente
+   doc.setFillColor(247,249,250);doc.roundedRect(L+.3,y+.3,usable-.6,infoH,2.1,2.1,'F');
+   doc.setFillColor(23,37,52);doc.roundedRect(L+3,y+3,12,8,3,3,'F');
+   doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(255,255,255);
+   doc.text(String(client.ordem??''),L+9,y+8.4,{align:'center'});
+
+   doc.setFont('helvetica','bold');doc.setFontSize(9.4);doc.setTextColor(23,37,52);
+   doc.text(`PV ${String(client.pv??'')}`,L+18,y+6);
+   doc.setFontSize(10.2);
+   const nameLines=pdfTextLines(doc,String(client.razao??''),usable-72,10.2);
+   doc.text(nameLines.slice(0,2),L+18,y+11);
+   doc.setFont('helvetica','normal');doc.setFontSize(8.4);doc.setTextColor(92,104,114);
+   doc.text(String(client.subcanal??''),W-R-3,y+6,{align:'right',maxWidth:45});
+   if(faltas.length){
+     doc.setFillColor(255,232,232);doc.roundedRect(W-R-35,y+8.2,32,4.8,2.2,2.2,'F');
+     doc.setFont('helvetica','bold');doc.setFontSize(7.2);doc.setTextColor(163,20,20);
+     doc.text(`${faltas.length} oportunidade(s)`,W-R-19,y+11.5,{align:'center'});
    }else{
-     doc.text(fit.lines[0],L+2+labelW,y+infoH+3.6);
-     doc.text(fit.lines[1],L+2+labelW,y+infoH+6.7);
+     doc.setFillColor(222,243,231);doc.roundedRect(W-R-28,y+8.2,25,4.8,2.2,2.2,'F');
+     doc.setFont('helvetica','bold');doc.setFontSize(7.2);doc.setTextColor(8,114,73);
+     doc.text('COBERTO',W-R-15.5,y+11.5,{align:'center'});
    }
-   y+=blockH+1.2;
+
+   const titleY=y+infoH+4.4;
+   doc.setFont('helvetica','bold');doc.setFontSize(9.2);doc.setTextColor(faltas.length?166:8,faltas.length?22:114,faltas.length?22:73);
+   doc.text('O QUE FALTA',L+3,titleY);
+   doc.setDrawColor(232,236,239);doc.setLineWidth(.2);doc.line(L+3,titleY+2,W-R-3,titleY+2);
+
+   const contentY=y+infoH+missTitleH+1.5;
+   if(faltas.length){
+     doc.setDrawColor(238,241,243);doc.line(L+colW+gap/2,contentY-1,L+colW+gap/2,y+blockH-3);
+     drawMissingColumn(doc,left,L+3,contentY,colW-5);
+     drawMissingColumn(doc,right,L+colW+gap+2,contentY,colW-5);
+   }else{
+     doc.setFont('helvetica','bold');doc.setFontSize(9);doc.setTextColor(8,114,73);
+     doc.text('✓ Cliente coberto neste relatório.',L+3,contentY+4);
+   }
+
+   y+=blockH+4;
  });
+
  const pages=doc.internal.getNumberOfPages();
- for(let p=1;p<=pages;p++){doc.setPage(p);doc.setFont('helvetica','normal');doc.setFontSize(7);doc.setTextColor(110,120,128);doc.text(`Página ${p}/${pages}`,W-7,H-3.5,{align:'right'})}
+ for(let p=1;p<=pages;p++){
+   doc.setPage(p);doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(110,120,128);
+   doc.text(`Página ${p}/${pages}`,W-10,H-6,{align:'right'});
+ }
  return doc;
 }
 async function prepareReportPdf(){
