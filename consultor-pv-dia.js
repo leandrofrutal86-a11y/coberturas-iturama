@@ -8,7 +8,7 @@ const DAYS=[
 ];
 const norm=v=>String(v??'').trim().toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const savedDay=sessionStorage.getItem('pv_dia_visita')||'';let selectedDay=DAYS.some(x=>x.code===savedDay)?savedDay:currentDay(),clients=[],loading=false,lastKey='',reportData=null,preparedPdfDoc=null,preparedPdfName='',preparingPdf=false;
+const savedDay=sessionStorage.getItem('pv_dia_visita')||'';let selectedDay=DAYS.some(x=>x.code===savedDay)?savedDay:currentDay(),clients=[],loading=false,lastKey='',reportData=null,preparedPdfDoc=null,preparedPdfName='',preparedPdfBlob=null,preparedPdfFile=null,preparedPdfUrl='',preparingPdf=false;
 
 function currentDay(){const d=['DOM','SEG','TER','QUA','QUI','SEX','SAB'][new Date().getDay()];return DAYS.some(x=>x.code===d)?d:'SEG'}
 function route(){return String(window.getIturamaContext?.()||window.__ituramaContext||document.querySelector('#route')?.textContent||'').trim()}
@@ -99,7 +99,7 @@ function buildReportRows(data){
 async function openReport(){
  ensureReportOverlay();ensurePdfLibs().catch(()=>{});
  const ov=document.getElementById('pvDayReport'),body=document.getElementById('pvDayReportBody'),title=document.getElementById('pvDayReportTitle');
- ov.classList.add('show');title.textContent=`Relatório • ${route()} • ${dayLabel(selectedDay)}`;body.innerHTML='<div class="pvDayProgress">Gerando relatório e conferindo as vendas atuais...</div>';preparedPdfDoc=null;preparedPdfName='';const pdfBtn=document.getElementById('pvDayPrint');if(pdfBtn){pdfBtn.disabled=true;pdfBtn.textContent='PREPARANDO PDF...';}
+ ov.classList.add('show');title.textContent=`Relatório • ${route()} • ${dayLabel(selectedDay)}`;body.innerHTML='<div class="pvDayProgress">Gerando relatório e conferindo as vendas atuais...</div>';if(preparedPdfUrl){try{URL.revokeObjectURL(preparedPdfUrl)}catch{}}preparedPdfDoc=null;preparedPdfName='';preparedPdfBlob=null;preparedPdfFile=null;preparedPdfUrl='';const pdfBtn=document.getElementById('pvDayPrint');if(pdfBtn){pdfBtn.disabled=true;pdfBtn.textContent='PREPARANDO PDF...';}
  try{
   const j=await api('day_report',{day:selectedDay,rota:route()});reportData={...j,clients:buildReportRows(j)};
   renderReport(reportData);prepareReportPdf().catch(()=>{});
@@ -216,22 +216,57 @@ async function prepareReportPdf(){
    await ensurePdfLibs();
    preparedPdfDoc=buildPdfDocument();
    preparedPdfName=`relatorio-${safePdfName(reportData.route)}-${safePdfName(reportData.day)}.pdf`;
+   preparedPdfBlob=preparedPdfDoc.output('blob');
+   preparedPdfFile=new File([preparedPdfBlob],preparedPdfName,{type:'application/pdf'});
+   preparedPdfUrl=URL.createObjectURL(preparedPdfBlob);
    if(btn){btn.disabled=false;btn.innerHTML='⬇ BAIXAR PDF'}
  }catch(e){
    preparedPdfDoc=null;
    if(btn){btn.disabled=false;btn.textContent='TENTAR PDF NOVAMENTE'}
  }finally{preparingPdf=false}
 }
-function downloadReportPdf(){
- if(!preparedPdfDoc){
-   prepareReportPdf().catch(()=>{});
-   return;
+async function downloadReportPdf(){
+ if(!preparedPdfDoc||!preparedPdfBlob){
+   await prepareReportPdf().catch(()=>{});
+   if(!preparedPdfDoc||!preparedPdfBlob)return;
  }
+ const btn=document.getElementById('pvDayPrint');
  try{
-   // Sem await: mantém o clique do usuário ativo no Chrome/Android.
-   preparedPdfDoc.save(preparedPdfName);
+   if(btn){btn.disabled=true;btn.textContent='ABRINDO PDF...'}
+   if(preparedPdfFile&&navigator.share&&navigator.canShare&&navigator.canShare({files:[preparedPdfFile]})){
+     try{
+       await navigator.share({files:[preparedPdfFile],title:'Relatório de visitas',text:`Relatório ${reportData.route} • ${dayLabel(reportData.day)}`});
+       return;
+     }catch(err){
+       if(err?.name==='AbortError')return;
+     }
+   }
+   const a=document.createElement('a');
+   a.href=preparedPdfUrl;
+   a.download=preparedPdfName;
+   a.rel='noopener';
+   a.style.display='none';
+   document.body.appendChild(a);
+   a.click();
+   a.remove();
+   setTimeout(()=>{
+     try{
+       const w=window.open(preparedPdfUrl,'_blank');
+       if(!w)window.location.href=preparedPdfUrl;
+     }catch{
+       try{window.location.href=preparedPdfUrl}catch{}
+     }
+   },700);
  }catch(e){
-   alert('Não foi possível iniciar o download do PDF.');
+   try{
+     const data=preparedPdfDoc.output('datauristring');
+     const w=window.open(data,'_blank');
+     if(!w)window.location.href=data;
+   }catch{
+     alert('Não foi possível abrir o PDF neste aparelho.');
+   }
+ }finally{
+   if(btn){btn.disabled=false;btn.innerHTML='⬇ BAIXAR PDF'}
  }
 }
 async function inject(force=false){
