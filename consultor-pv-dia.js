@@ -8,7 +8,7 @@ const DAYS=[
 ];
 const norm=v=>String(v??'').trim().toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const savedDay=sessionStorage.getItem('pv_dia_visita')||'';let selectedDay=DAYS.some(x=>x.code===savedDay)?savedDay:currentDay(),clients=[],loading=false,lastKey='',reportData=null;
+const savedDay=sessionStorage.getItem('pv_dia_visita')||'';let selectedDay=DAYS.some(x=>x.code===savedDay)?savedDay:currentDay(),clients=[],loading=false,lastKey='',reportData=null,preparedPdfDoc=null,preparedPdfName='',preparingPdf=false;
 
 function currentDay(){const d=['DOM','SEG','TER','QUA','QUI','SEX','SAB'][new Date().getDay()];return DAYS.some(x=>x.code===d)?d:'SEG'}
 function route(){return String(window.getIturamaContext?.()||window.__ituramaContext||document.querySelector('#route')?.textContent||'').trim()}
@@ -99,10 +99,10 @@ function buildReportRows(data){
 async function openReport(){
  ensureReportOverlay();ensurePdfLibs().catch(()=>{});
  const ov=document.getElementById('pvDayReport'),body=document.getElementById('pvDayReportBody'),title=document.getElementById('pvDayReportTitle');
- ov.classList.add('show');title.textContent=`Relatório • ${route()} • ${dayLabel(selectedDay)}`;body.innerHTML='<div class="pvDayProgress">Gerando relatório e conferindo as vendas atuais...</div>';
+ ov.classList.add('show');title.textContent=`Relatório • ${route()} • ${dayLabel(selectedDay)}`;body.innerHTML='<div class="pvDayProgress">Gerando relatório e conferindo as vendas atuais...</div>';preparedPdfDoc=null;preparedPdfName='';const pdfBtn=document.getElementById('pvDayPrint');if(pdfBtn){pdfBtn.disabled=true;pdfBtn.textContent='PREPARANDO PDF...';}
  try{
   const j=await api('day_report',{day:selectedDay,rota:route()});reportData={...j,clients:buildReportRows(j)};
-  renderReport(reportData);
+  renderReport(reportData);prepareReportPdf().catch(()=>{});
  }catch(e){body.innerHTML=`<div class="pvDayProgress">${esc(e.message||'Não foi possível gerar o relatório.')}</div>`}
 }
 function renderReport(data){
@@ -130,67 +130,108 @@ function loadScriptOnce(id,src,test){
 }
 async function ensurePdfLibs(){
  await loadScriptOnce('pvJsPdfLib','https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js',()=>!!window.jspdf?.jsPDF);
- await loadScriptOnce('pvAutoTableLib','https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.4/dist/jspdf.plugin.autotable.min.js',()=>!!window.jspdf?.jsPDF?.API?.autoTable);
 }
 function pdfMissingText(c){
- if(!c._faltas?.length)return 'COBERTO';
+ if(!c._faltas?.length)return '✓ COBERTO';
  return c._faltas.map(x=>{
-   if(x.simple)return `${x.name}  X`;
-   const ps=(x.products||[]).map(p=>`X ${p}`).join(' / ');
+   if(x.simple)return `${x.name} ✕`;
+   const ps=(x.products||[]).map(p=>`✕ ${p}`).join(' / ');
    return `${x.name}: ${ps}`;
- }).join('  •  ');
+ }).join('  |  ');
 }
 function safePdfName(s){return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9_-]+/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'')}
-async function downloadReportPdf(){
- if(!reportData)return;
- const btn=document.getElementById('pvDayPrint'),old=btn?.innerHTML;
- if(btn){btn.disabled=true;btn.textContent='GERANDO PDF...'}
+function fitPdfLine(doc,text,maxWidth,startSize=8.2,minSize=6.2){
+ let size=startSize;
+ doc.setFontSize(size);
+ while(size>minSize&&doc.getTextWidth(text)>maxWidth){size-=.2;doc.setFontSize(size)}
+ if(doc.getTextWidth(text)<=maxWidth)return{text,size,lines:[text]};
+ doc.setFontSize(minSize);
+ let lines=doc.splitTextToSize(text,maxWidth);
+ if(lines.length>2){
+   size=5.6;doc.setFontSize(size);lines=doc.splitTextToSize(text,maxWidth);
+ }
+ return{text,size,lines:lines.slice(0,2)};
+}
+function drawPdfHeader(doc,rows,opp,pageNo){
+ const W=doc.internal.pageSize.getWidth();
+ doc.setFont('helvetica','bold');doc.setFontSize(14);doc.setTextColor(23,37,52);
+ doc.text(`Relatório de visitas • ${reportData.route} • ${dayLabel(reportData.day)}`,7,8.5);
+ doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(83,99,113);
+ doc.text(`${rows.length} clientes • ${opp} com oportunidade • ${rows.length-opp} cobertos`,W-7,8.5,{align:'right'});
+ doc.setDrawColor(23,37,52);doc.setLineWidth(.35);doc.line(7,11,W-7,11);
+ if(pageNo>1){doc.setFontSize(7);doc.text(`Página ${pageNo}`,W-7,14,{align:'right'})}
+ return pageNo>1?16:14;
+}
+function buildPdfDocument(){
+ const {jsPDF}=window.jspdf;
+ const doc=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
+ const rows=reportData.clients||[],opp=rows.filter(x=>x._faltas.length).length;
+ const W=doc.internal.pageSize.getWidth(),H=doc.internal.pageSize.getHeight(),L=7,R=7,usable=W-L-R;
+ let page=1,y=drawPdfHeader(doc,rows,opp,page);
+ rows.forEach((c,idx)=>{
+   const missing=pdfMissingText(c),fit=fitPdfLine(doc,missing,usable-5,8.2,6.2);
+   const missingLines=Math.max(1,fit.lines.length),infoH=6.7,missH=missingLines===1?6.4:9.4,blockH=infoH+missH;
+   if(y+blockH>H-8){
+     doc.addPage('a4','landscape');page++;y=drawPdfHeader(doc,rows,opp,page);
+   }
+   const alt=idx%2===1;
+   if(alt){doc.setFillColor(247,249,250);doc.rect(L,y,usable,infoH,'F')}
+   doc.setDrawColor(195,204,211);doc.setLineWidth(.18);doc.rect(L,y,usable,blockH);
+   doc.line(L,y+infoH,W-R,y+infoH);
+
+   // linha 1: dados do cliente
+   const c1=15,c2=24,c3=110;
+   doc.line(L+c1,y,L+c1,y+infoH);doc.line(L+c1+c2,y,L+c1+c2,y+infoH);doc.line(L+c1+c2+c3,y,L+c1+c2+c3,y+infoH);
+   doc.setTextColor(23,37,52);doc.setFontSize(8.2);doc.setFont('helvetica','bold');
+   doc.text(String(c.ordem??''),L+c1/2,y+4.35,{align:'center'});
+   doc.text(String(c.pv??''),L+c1+2,y+4.35);
+   doc.setFontSize(8);doc.text(String(c.razao??''),L+c1+c2+2,y+4.35,{maxWidth:c3-4});
+   doc.setFont('helvetica','normal');doc.setFontSize(7.5);doc.setTextColor(74,88,99);
+   doc.text(String(c.subcanal??''),L+c1+c2+c3+2,y+4.35,{maxWidth:usable-c1-c2-c3-4});
+
+   // linha 2: o que falta, ocupando toda a largura
+   const label='O QUE FALTA:';
+   doc.setFont('helvetica','bold');doc.setFontSize(7.3);doc.setTextColor(c._faltas.length?150:8,c._faltas.length?20:114,c._faltas.length?20:73);
+   doc.text(label,L+2,y+infoH+4.1);
+   const labelW=doc.getTextWidth(label)+2;
+   doc.setFont('helvetica','normal');doc.setFontSize(fit.size);
+   doc.setTextColor(c._faltas.length?105:8,c._faltas.length?25:114,c._faltas.length?25:73);
+   if(fit.lines.length===1){
+     doc.text(fit.lines[0],L+2+labelW,y+infoH+4.1);
+   }else{
+     doc.text(fit.lines[0],L+2+labelW,y+infoH+3.6);
+     doc.text(fit.lines[1],L+2+labelW,y+infoH+6.7);
+   }
+   y+=blockH+1.2;
+ });
+ const pages=doc.internal.getNumberOfPages();
+ for(let p=1;p<=pages;p++){doc.setPage(p);doc.setFont('helvetica','normal');doc.setFontSize(7);doc.setTextColor(110,120,128);doc.text(`Página ${p}/${pages}`,W-7,H-3.5,{align:'right'})}
+ return doc;
+}
+async function prepareReportPdf(){
+ if(!reportData||preparingPdf)return;
+ const btn=document.getElementById('pvDayPrint');preparingPdf=true;
+ if(btn){btn.disabled=true;btn.textContent='PREPARANDO PDF...'}
  try{
    await ensurePdfLibs();
-   const {jsPDF}=window.jspdf;
-   const doc=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
-   const rows=reportData.clients||[],opp=rows.filter(x=>x._faltas.length).length;
-   doc.setFont('helvetica','bold');doc.setFontSize(15);doc.setTextColor(23,37,52);
-   doc.text(`Relatório de visitas • ${reportData.route} • ${dayLabel(reportData.day)}`,8,10);
-   doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(83,99,113);
-   doc.text(`${rows.length} clientes • ${opp} com oportunidade • ${rows.length-opp} cobertos`,289,10,{align:'right'});
-   const body=rows.map(c=>[
-     String(c.ordem??''),
-     String(c.pv??''),
-     String(c.razao??''),
-     String(c.subcanal??''),
-     pdfMissingText(c)
-   ]);
-   doc.autoTable({
-     startY:14,
-     head:[['ORDEM','PV','CLIENTE','SUBCANAL','O QUE FALTA']],
-     body,
-     theme:'grid',
-     styles:{font:'helvetica',fontSize:8.6,cellPadding:2.2,valign:'middle',lineColor:[207,214,220],lineWidth:.15,textColor:[23,37,52],overflow:'linebreak'},
-     headStyles:{fillColor:[23,37,52],textColor:[255,255,255],fontStyle:'bold',fontSize:9.2,cellPadding:2.4},
-     alternateRowStyles:{fillColor:[247,249,250]},
-     columnStyles:{
-       0:{cellWidth:16,halign:'center',fontStyle:'bold'},
-       1:{cellWidth:25,fontStyle:'bold'},
-       2:{cellWidth:58,fontStyle:'bold'},
-       3:{cellWidth:38,textColor:[78,93,105]},
-       4:{cellWidth:142,textColor:[120,20,20]}
-     },
-     margin:{left:8,right:8,bottom:8},
-     rowPageBreak:'avoid',
-     showHead:'everyPage',
-     didDrawPage:()=>{
-       const n=doc.internal.getNumberOfPages();
-       doc.setFontSize(7.5);doc.setTextColor(110,120,128);
-       doc.text(`Página ${n}`,289,202,{align:'right'});
-     }
-   });
-   const filename=`relatorio-${safePdfName(reportData.route)}-${safePdfName(reportData.day)}.pdf`;
-   await doc.save(filename,{returnPromise:true});
+   preparedPdfDoc=buildPdfDocument();
+   preparedPdfName=`relatorio-${safePdfName(reportData.route)}-${safePdfName(reportData.day)}.pdf`;
+   if(btn){btn.disabled=false;btn.innerHTML='⬇ BAIXAR PDF'}
  }catch(e){
-   alert(e?.message||'Não foi possível gerar o PDF.');
- }finally{
-   if(btn){btn.disabled=false;btn.innerHTML=old||'⬇ BAIXAR PDF'}
+   preparedPdfDoc=null;
+   if(btn){btn.disabled=false;btn.textContent='TENTAR PDF NOVAMENTE'}
+ }finally{preparingPdf=false}
+}
+function downloadReportPdf(){
+ if(!preparedPdfDoc){
+   prepareReportPdf().catch(()=>{});
+   return;
+ }
+ try{
+   // Sem await: mantém o clique do usuário ativo no Chrome/Android.
+   preparedPdfDoc.save(preparedPdfName);
+ }catch(e){
+   alert('Não foi possível iniciar o download do PDF.');
  }
 }
 async function inject(force=false){
