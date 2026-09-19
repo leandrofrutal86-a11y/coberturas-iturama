@@ -45,12 +45,12 @@ function addStyle(){
 .acompTitle{font-size:24px;font-weight:950;text-align:center;line-height:1.02;letter-spacing:.2px;text-transform:uppercase}
 .acompBadge{background:#ffd31c;color:#080808;border-radius:9px;padding:8px 12px;text-align:center;font-size:22px;font-weight:950;box-shadow:inset 0 -2px 0 #d0a700;text-transform:uppercase}
 .acompGrid{overflow:auto;background:#fff;width:100%;min-width:0}
-.acompGrid table{border-collapse:collapse!important;width:100%!important;min-width:1160px!important;table-layout:fixed!important;background:#fff!important;text-transform:uppercase!important}
+.acompGrid table{border-collapse:collapse!important;width:100%!important;min-width:0!important;table-layout:fixed!important;background:#fff!important;text-transform:uppercase!important}
 .acompGrid th,.acompGrid td{border:1px solid #aeb8c1!important;padding:5px 4px!important;text-align:center!important;vertical-align:middle!important;box-sizing:border-box!important;text-transform:uppercase!important;line-height:1.08!important}
 .acompGrid thead th{background:linear-gradient(#f7fafc,#e6edf2)!important;color:#151515!important;font-weight:950!important;white-space:normal!important;overflow-wrap:anywhere!important;word-break:normal!important}
 .acompGrid thead tr:first-child th{font-size:12px!important;height:32px!important}
 .acompGrid thead tr:nth-child(2) th{font-size:10px!important;height:25px!important}
-.acompGrid .catHead{width:280px!important;min-width:280px!important;text-align:center!important}
+.acompGrid .catHead{width:22%!important;min-width:210px!important;text-align:center!important}
 .acompGrid .catCell{text-align:left!important;padding-left:12px!important;font-size:12px!important;font-weight:950!important;color:#171717!important;white-space:normal!important;overflow-wrap:anywhere!important;word-break:normal!important}
 .acompGrid tbody tr:nth-child(odd) td{background:#fbfbfb!important}
 .acompGrid tbody tr:nth-child(even) td{background:#f3f6f8!important}
@@ -69,9 +69,9 @@ function addStyle(){
 .mobileLabel{display:none}
 
 /* Durante a exportação, volta ao tamanho amplo para gerar imagem em alta resolução. */
-.acompPoster.acompExporting{width:1160px!important}
+.acompPoster.acompExporting{width:1280px!important}
 .acompPoster.acompExporting .acompGrid{overflow:visible!important}
-.acompPoster.acompExporting .acompGrid table{min-width:1160px!important;width:1160px!important}
+.acompPoster.acompExporting .acompGrid table{min-width:1280px!important;width:1280px!important}
 .acompPoster.acompExporting .desktopLabel{display:inline!important}
 .acompPoster.acompExporting .mobileLabel{display:none!important}
 
@@ -120,7 +120,7 @@ function ensureLayout(){
 }
 
 function headerHtml(inds){
- return '<tr><th class="catHead" rowspan="2">CATEGORIA</th>'+inds.map(i=>`<th class="sepL" colspan="2">${esc(i.rota)} ${esc(i.nome)}</th>`).join('')+'<th class="teamHead sepL" colspan="2">TOTAL EQUIPE</th></tr><tr>'+inds.map(()=>'<th class="sepL">META</th><th><span class="desktopLabel">REALIZADO</span><span class="mobileLabel">REAL</span></th>').join('')+'<th class="teamHead sepL">META</th><th class="teamHead"><span class="desktopLabel">REALIZADO</span><span class="mobileLabel">REAL</span></th></tr>';
+ return '<tr><th class="catHead" rowspan="2">CATEGORIA</th>'+inds.map(i=>`<th class="sepL" colspan="2">${esc(i.rota)} ${esc(i.nome)}</th>`).join('')+'<th class="teamHead sepL" colspan="2">EQUIPE</th></tr><tr>'+inds.map(()=>'<th class="sepL">META</th><th><span class="desktopLabel">REALIZADO</span><span class="mobileLabel">REAL</span></th>').join('')+'<th class="teamHead sepL">META</th><th class="teamHead"><span class="desktopLabel">REALIZADO</span><span class="mobileLabel">REAL</span></th></tr>';
 }
 function categoryRow(entry,inds){
  let teamMeta=0,teamReal=0,found=false;
@@ -141,7 +141,7 @@ async function capture(id){
  const a=q('acompPoster'+id);if(!a)throw Error('Tabela não encontrada.');
  const grid=a.querySelector('.acompGrid');
  a.classList.add('acompExporting');
- const target=1160;
+ const target=1280;
  try{return await html2canvas(a,{scale:4.5,backgroundColor:'#fff',useCORS:true,logging:false,windowWidth:target+40})}finally{a.classList.remove('acompExporting');grid.style.removeProperty('overflow')}
 }
 window.exportarAcompImagem=async(id=1)=>{try{const t=TABLES.find(x=>x.id===Number(id))||TABLES[0],c=await capture(t.id),a=document.createElement('a');a.download=t.file+'.png';a.href=c.toDataURL('image/png',1);document.body.appendChild(a);a.click();a.remove()}catch(e){alert(e.message)}};
