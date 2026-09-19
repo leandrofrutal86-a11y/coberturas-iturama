@@ -97,7 +97,8 @@ function buildReportRows(data){
  return (data.clients||[]).map(c=>{const faltas=(c.faltas||[]).map(missingInfo).filter(x=>x.name);return{...c,_faltas:faltas}})
 }
 async function openReport(){
- ensureReportOverlay();const ov=document.getElementById('pvDayReport'),body=document.getElementById('pvDayReportBody'),title=document.getElementById('pvDayReportTitle');
+ ensureReportOverlay();ensurePdfLibs().catch(()=>{});
+ const ov=document.getElementById('pvDayReport'),body=document.getElementById('pvDayReportBody'),title=document.getElementById('pvDayReportTitle');
  ov.classList.add('show');title.textContent=`Relatório • ${route()} • ${dayLabel(selectedDay)}`;body.innerHTML='<div class="pvDayProgress">Gerando relatório e conferindo as vendas atuais...</div>';
  try{
   const j=await api('day_report',{day:selectedDay,rota:route()});reportData={...j,clients:buildReportRows(j)};
@@ -110,9 +111,7 @@ function renderReport(data){
  <div class="pvDayClientGrid">${rows.length?rows.map(c=>`<article class="pvDayClientCard">
    <div class="pvDayClientTop"><div><div class="pvDayClientId"><span class="pvDayOrder">${esc(c.ordem)}</span><b>PV ${esc(c.pv)}</b></div><h3>${esc(c.razao)}</h3><small>${esc(c.subcanal||'Sem subcanal')}</small></div>${c._faltas.length?`<span class="pvDayOppCount">${c._faltas.length} oportunidade(s)</span>`:'<span class="pvDayCovered">✓ COBERTO</span>'}</div>
    ${c._faltas.length?`<div class="pvDayMissingTitle">O QUE FALTA</div><div class="pvDayMissingList">${c._faltas.map(x=>x.simple?`<div class="pvDayMissingRow simple"><b>${esc(x.name)}</b><span class="pvDayX">✕</span></div>`:`<div class="pvDayMissingRow"><b>${esc(x.name)}</b><div class="pvDayProducts">${(x.products||[]).map(p=>`<div class="pvDayProduct"><span class="pvDayX">✕</span><span>${esc(p)}</span></div>`).join('')}</div></div>`).join('')}</div>`:''}
-   <div class="pvDayActions"><button class="pvDayPvBtn" data-pv="${esc(c.pv)}">🔎 PESQUISAR ESTE PV</button></div>
  </article>`).join(''):'<div class="empty">Nenhum cliente programado neste dia.</div>'}</div>`;
- body.querySelectorAll('[data-pv]').forEach(b=>b.onclick=()=>openPvFromReport(b.dataset.pv));
 }
 function openPvFromReport(pv){
  document.getElementById('pvDayReport')?.classList.remove('show');if(typeof window.openPv==='function')window.openPv();else if(typeof openPv==='function')openPv();
@@ -187,9 +186,7 @@ async function downloadReportPdf(){
      }
    });
    const filename=`relatorio-${safePdfName(reportData.route)}-${safePdfName(reportData.day)}.pdf`;
-   const blob=doc.output('blob'),url=URL.createObjectURL(blob),a=document.createElement('a');
-   a.href=url;a.download=filename;a.style.display='none';document.body.appendChild(a);a.click();
-   setTimeout(()=>{URL.revokeObjectURL(url);a.remove()},1500);
+   await doc.save(filename,{returnPromise:true});
  }catch(e){
    alert(e?.message||'Não foi possível gerar o PDF.');
  }finally{
@@ -203,7 +200,11 @@ async function inject(force=false){
 }
 function watch(){
  inject().catch(()=>{});
- setInterval(()=>{wrapSearch();const ov=document.getElementById('ov');if(ov?.classList.contains('show'))inject(false).catch(()=>{})},700);
+ setInterval(()=>{
+   wrapSearch();
+   const ov=document.getElementById('ov');
+   if(ov?.classList.contains('show')&&!ov.querySelector('.pvDiaBox'))inject(false).catch(()=>{});
+ },700);
 }
 window.addEventListener('iturama:routechange',()=>{clients=[];lastKey='';inject(true).catch(()=>{})});
 window.__openPvDayReport=()=>openReport();
