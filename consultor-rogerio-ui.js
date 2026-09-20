@@ -6,7 +6,7 @@
     {rota:'8D1',nome:'Poliana'},
     {rota:'8F1',nome:'Heitor'}
   ];
-  const TEAM='TEAM', TEAM_LABEL='Equipe Iturama - Leandro';
+  const TEAM='TEAM', TEAM_LABEL='Toda a Equipe';
   let started=false,busy=false,baseApi=null,apiWrapped=false;
 
   function isRogerio(){
@@ -41,7 +41,9 @@
     const s=document.createElement('style');
     s.id='rogerioUiStyle';
     s.textContent=`
-#dash.rogerioMode .user{display:none!important}
+#dash.rogerioMode .user{display:flex!important;flex-direction:column!important;margin-left:auto!important}
+#dash.rogerioMode #name{font-weight:900!important}
+#dash.rogerioMode #route{font-size:11px!important;opacity:.85!important}
 .rogerioUiHead{margin-left:auto;min-width:245px;display:flex;flex-direction:column;gap:3px;color:#fff}
 .rogerioUiHead label{font-size:9px;font-weight:900;text-transform:uppercase;opacity:.82}
 .rogerioUiSelect{width:100%;height:42px;border-radius:11px;border:1px solid #d5dde4;background:#fff;color:#142236;padding:0 34px 0 11px;font-weight:900;cursor:pointer}
@@ -61,20 +63,13 @@
     const wrapped=async function(action,body={}){
       if(!isRogerio())return baseApi(action,body);
       const ctx=getCtx();
-      if(action==='search_pv'&&ctx===TEAM&&!body.rota){
-        let last={found:false};
-        for(const x of FIXED){
-          try{
-            const j=await baseApi(action,{...body,rota:x.rota});
-            if(j?.found)return j;
-            last=j||last;
-          }catch(e){last={found:false,error:e?.message||String(e)}}
-        }
-        return last;
+      if(action==='search_pv'&&!body.rota){
+        const local=String(window.__pvSearchRoute||'').trim().toUpperCase();
+        if(local&&local!=='TODOS'&&FIXED.some(x=>x.rota===local))return baseApi(action,{...body,rota:local});
+        if(local==='TODOS'||ctx===TEAM)return baseApi(action,{...body,rota:'TEAM'});
+        if(ctx!==TEAM)return baseApi(action,{...body,rota:ctx});
       }
-      if((action==='dashboard'||action==='search_pv')&&ctx!==TEAM&&!body.rota){
-        return baseApi(action,{...body,rota:ctx});
-      }
+      if(action==='dashboard'&&!body.rota)return baseApi(action,{...body,rota:ctx===TEAM?'TEAM':ctx});
       return baseApi(action,body);
     };
     try{api=wrapped;window.api=wrapped;apiWrapped=true}catch{}
@@ -89,19 +84,23 @@
     selects.forEach(s=>s.disabled=true);
     try{
       setCtx(v);
+      const fn=baseApi||api;
+      const j=await fn('dashboard',{rota:v===TEAM?'TEAM':v});
+      DATA=j;
+      window.__ituramaConsultores=Array.isArray(j?.consultores)?j.consultores:FIXED;
+      if(typeof TAB!=='undefined')TAB='meu';
+      const nm=document.getElementById('name'),rt=document.getElementById('route');
       if(v===TEAM){
-        if(typeof TAB!=='undefined')TAB='equipe';
-        if(typeof render==='function')render();
-        if(typeof summary==='function')summary();
+        if(nm)nm.textContent=String(j?.acesso?.nome||'Rogério');
+        if(rt)rt.textContent='Equipe Iturama • Todas as rotas';
       }else{
-        const fn=baseApi||api;
-        const j=await fn('dashboard',{rota:v});
-        DATA=j;
-        if(typeof TAB!=='undefined')TAB='meu';
-        if(typeof fill==='function')fill();
-        if(typeof render==='function')render();
-        if(typeof summary==='function')summary();
+        if(nm)nm.textContent=String(j?.acesso?.nome||'Rogério');
+        if(rt)rt.textContent='Visualizando '+v+' - '+String(j?.consultor?.nome||v);
       }
+      if(typeof fill==='function')fill();
+      if(typeof render==='function')render();
+      if(typeof summary==='function')summary();
+      applyTeamLabels(v);
       sync();
       window.dispatchEvent(new CustomEvent('iturama:routechange',{detail:{rota:v,equipe:v===TEAM,keepOpen:true}}));
       setTimeout(addOverlaySelectors,60);
@@ -113,6 +112,16 @@
       busy=false;
       document.querySelectorAll('.rogerioUiSelect').forEach(s=>s.disabled=false);
     }
+  }
+
+  function applyTeamLabels(v){
+    const team=v===TEAM;
+    const tabs=[...document.querySelectorAll('.tabs .tab')];
+    if(tabs[0]){tabs[0].textContent=team?'Equipe Iturama':'Resultado da Rota';tabs[0].style.display=''}
+    if(tabs[1])tabs[1].style.display=team?'none':'';
+    const title=document.getElementById('title'),hint=document.getElementById('hint');
+    if(title&&team)title.textContent='Resultado da Equipe Iturama';
+    if(hint&&team)hint.textContent='Selecione um incentivo para visualizar os resultados de toda a equipe.';
   }
 
   function addHeader(){
@@ -152,12 +161,14 @@
     started=true;
     addStyle();
     setCtx(TEAM);
+    window.getIturamaContext=()=>getCtx();
+    window.__ituramaConsultores=Array.isArray(DATA?.consultores)&&DATA.consultores.length?DATA.consultores:FIXED;
     patchApiAfterLogin();
     addHeader();
-    if(typeof TAB!=='undefined')TAB='equipe';
-    try{if(typeof render==='function')render();if(typeof summary==='function')summary()}catch(e){console.error(e)}
+    applyTeamLabels(TEAM);
     addOverlaySelectors();
     document.addEventListener('click',()=>setTimeout(addOverlaySelectors,80),true);
+    setTimeout(()=>changeRoute(TEAM),40);
     return true;
   }
 
