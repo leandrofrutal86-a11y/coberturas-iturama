@@ -34,7 +34,7 @@
     if(s.dataset.rogerioUi!=='1'){s.innerHTML=options();s.dataset.rogerioUi='1'}
     s.value=getCtx();
   }
-  function sync(){document.querySelectorAll('.rogerioUiSelect').forEach(fillSelect)}
+  function sync(){document.querySelectorAll('.rogerioUiSelect').forEach(fillSelect);try{applyTeamLabels(getCtx())}catch{}}
 
   function addStyle(){
     if(document.getElementById('rogerioUiStyle'))return;
@@ -88,7 +88,7 @@
       const j=await fn('dashboard',{rota:v===TEAM?'TEAM':v});
       DATA=j;
       window.__ituramaConsultores=Array.isArray(j?.consultores)?j.consultores:FIXED;
-      if(typeof TAB!=='undefined')TAB='meu';
+      if(typeof TAB!=='undefined')TAB=(v===TEAM?'equipe':'meu');
       const nm=document.getElementById('name'),rt=document.getElementById('route');
       if(v===TEAM){
         if(nm)nm.textContent=String(j?.acesso?.nome||'Rogério');
@@ -117,11 +117,27 @@
   function applyTeamLabels(v){
     const team=v===TEAM;
     const tabs=[...document.querySelectorAll('.tabs .tab')];
-    if(tabs[0]){tabs[0].textContent=team?'Equipe Iturama':'Resultado da Rota';tabs[0].style.display=''}
-    if(tabs[1])tabs[1].style.display=team?'none':'';
+    const myTab=tabs.find(x=>x.dataset.t==='meu')||tabs[0];
+    const teamTab=tabs.find(x=>x.dataset.t==='equipe')||tabs[1];
+    if(team){
+      if(typeof TAB!=='undefined')TAB='equipe';
+      if(myTab){myTab.style.display='none';myTab.classList.remove('active')}
+      if(teamTab){teamTab.style.display='';teamTab.textContent='Resultado da Equipe';teamTab.classList.add('active')}
+    }else{
+      if(myTab){myTab.style.display='';myTab.textContent='Meu Resultado';myTab.classList.toggle('active',typeof TAB!=='undefined'&&TAB==='meu')}
+      if(teamTab){teamTab.style.display='';teamTab.textContent='Resultado da Equipe';teamTab.classList.toggle('active',typeof TAB!=='undefined'&&TAB==='equipe')}
+    }
+    const sums=[...document.querySelectorAll('.summary .sum')];
+    if(sums[0])sums[0].style.display=team?'none':'';
+    if(sums[1])sums[1].style.display='';
     const title=document.getElementById('title'),hint=document.getElementById('hint');
-    if(title&&team)title.textContent='Resultado da Equipe Iturama';
-    if(hint&&team)hint.textContent='Selecione um incentivo para visualizar os resultados de toda a equipe.';
+    if(team){
+      if(title)title.textContent='Resultado da Equipe por incentivo';
+      if(hint)hint.textContent='Selecione um incentivo para visualizar os resultados de toda a equipe.';
+    }else{
+      if(title)title.textContent='Meu resultado por incentivo';
+      if(hint)hint.textContent='Selecione um incentivo para ver os clientes cobertos.';
+    }
   }
 
   function addHeader(){
@@ -165,7 +181,9 @@
     window.__ituramaConsultores=Array.isArray(DATA?.consultores)&&DATA.consultores.length?DATA.consultores:FIXED;
     patchApiAfterLogin();
     addHeader();
+    if(typeof TAB!=='undefined')TAB='equipe';
     applyTeamLabels(TEAM);
+    if(typeof render==='function')render();
     addOverlaySelectors();
     document.addEventListener('click',()=>setTimeout(addOverlaySelectors,80),true);
     setTimeout(()=>changeRoute(TEAM),40);
@@ -179,4 +197,5 @@
   },250);
   if(document.readyState!=='loading')activateOnce();
   else document.addEventListener('DOMContentLoaded',activateOnce,{once:true});
+  setInterval(()=>{if(isRogerio())sync()},1200);
 })();
