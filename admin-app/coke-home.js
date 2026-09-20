@@ -4,22 +4,59 @@ header{background:linear-gradient(135deg,#060606 0%,#171717 48%,#b40000 100%)!im
 header>b,header b{font-size:18px}
 .cokeBrand{font-family:Georgia,serif;font-style:italic;font-weight:900;color:#e30613;font-size:30px;letter-spacing:-2px}
 .tabs{display:none!important}.cokeHome{display:block}
-.homeHero{background:linear-gradient(135deg,#090909,#191919 58%,#7b0000);border-radius:24px;padding:24px;color:#fff;box-shadow:0 14px 36px #0003;margin-bottom:18px}
+.homeHero{background:linear-gradient(135deg,#090909,#191919 58%,#7b0000);border-radius:26px;padding:24px;color:#fff;box-shadow:0 14px 36px #0003;margin-bottom:26px}
 .homeHeroTop{display:flex;justify-content:space-between;gap:16px;align-items:center}.homeHello{display:flex;gap:14px;align-items:center}
-.homeAvatar{width:62px;height:62px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#f11,#a80000);font-size:30px;box-shadow:0 8px 22px #0004}
-.homeHero h1{margin:0;font-size:28px}.homeHero p{margin:5px 0 0;color:#ddd}.adminBadge{background:#fff;color:#c40000;border-radius:999px;padding:9px 14px;font-weight:900}
+.homeAvatar{width:66px;height:66px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#f11,#a80000);font-size:31px;box-shadow:0 8px 22px #0004}
+.homeHero h1{margin:0;font-size:29px}.homeHero p{margin:5px 0 0;color:#ddd}.adminBadge{background:#fff;color:#c40000;border-radius:999px;padding:9px 14px;font-weight:900}
 .homeStats{display:none!important}
-.menuTopic{margin:18px 0 22px}.menuTopic:first-of-type{margin-top:4px}
-.topicHead{display:flex;align-items:center;gap:10px;margin:0 0 10px;padding:0 2px}.topicIcon{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;color:#fff;font-size:19px;box-shadow:0 3px 9px #0002}.topicHead h2{font-size:19px;margin:0;color:#172534}.topicHead small{display:block;color:#73808b;font-size:11px;margin-top:2px}
-.menuGrid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
-.menuCard{background:#fff;border:1px solid #e1e7ec;border-radius:17px;padding:15px;min-height:88px;display:flex;align-items:center;gap:13px;box-shadow:0 4px 14px #0000000d;cursor:pointer;text-align:left;width:100%}
-.menuCard:hover{transform:translateY(-1px)}.mi{width:50px;height:50px;border-radius:14px;display:grid;place-items:center;color:#fff;font-size:24px;flex:0 0 auto}
-.menuCard b{display:block;font-size:16px;color:#172534}.menuCard small{display:block;color:#607080;margin-top:4px;font-size:11px;line-height:1.25}
-.topicVendas .topicIcon{background:#0b63ce}.topicMetas .topicIcon{background:#16a35b}.topicIncentivos .topicIcon{background:#d97706}.topicConsultores .topicIcon{background:#6b3fc4}.topicInfo .topicIcon{background:#56616d}
-.topicVendas{border-left:4px solid #0b63ce;padding-left:10px}.topicMetas{border-left:4px solid #16a35b;padding-left:10px}.topicIncentivos{border-left:4px solid #d97706;padding-left:10px}.topicConsultores{border-left:4px solid #6b3fc4;padding-left:10px}.topicInfo{border-left:4px solid #56616d;padding-left:10px}
+
+.menuTopic{margin:24px 0 30px;padding:0!important;border:0!important}
+.menuTopic:first-of-type{margin-top:6px}
+.topicHead{display:flex;align-items:center;gap:15px;margin:0 0 15px;padding:16px 18px;border-radius:20px;box-shadow:0 7px 18px #00000017;border:1px solid #ffffff66;position:relative;overflow:hidden}
+.topicHead:after{content:'';position:absolute;right:-28px;top:-32px;width:150px;height:150px;border-radius:50%;background:#ffffff1c}
+.topicIcon{width:58px;height:58px;border-radius:16px;display:grid;place-items:center;color:#fff;font-size:29px;box-shadow:0 5px 13px #0003;flex:0 0 auto;position:relative;z-index:1}
+.topicHead>div{position:relative;z-index:1}.topicHead h2{font-size:26px;line-height:1.04;margin:0;font-weight:950;color:#fff;text-shadow:0 1px 2px #0003}.topicHead small{display:block;color:#f7fbff;font-size:13px;font-weight:650;margin-top:5px;line-height:1.2}
+
+.topicVendas .topicHead{background:linear-gradient(110deg,#1787ee,#0e67d5 68%,#0b57bd)}
+.topicVendas .topicIcon{background:#075fc8}
+.topicMetas .topicHead{background:linear-gradient(110deg,#22bd68,#0ea553 68%,#078740)}
+.topicMetas .topicIcon{background:#078d47}
+.topicIncentivos .topicHead{background:linear-gradient(110deg,#f3b400,#db9600 68%,#bd7900)}
+.topicIncentivos .topicIcon{background:#a66b00}
+.topicConsultores .topicHead{background:linear-gradient(110deg,#13b8c8,#079baa 68%,#087987)}
+.topicConsultores .topicIcon{background:#087c89}
+.topicInfo .topicHead{background:linear-gradient(110deg,#73879a,#596c7e 68%,#465766)}
+.topicInfo .topicIcon{background:#415364}
+
+.menuGrid{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.menuCard{position:relative;background:#fff;border:1px solid #dfe6ec;border-radius:21px;padding:16px 44px 16px 16px;min-height:94px;display:flex;align-items:center;gap:15px;box-shadow:0 6px 17px #00000012;cursor:pointer;text-align:left;width:100%;transition:transform .15s ease,box-shadow .15s ease}
+.menuCard:after{content:'›';position:absolute;right:17px;top:50%;transform:translateY(-52%);font-size:31px;line-height:1;color:#637485;font-weight:300}
+.menuCard:hover{transform:translateY(-2px);box-shadow:0 9px 22px #00000019}
+.menuCard:active{transform:scale(.99)}
+.mi{width:58px;height:58px;border-radius:17px;display:grid;place-items:center;color:#fff;font-size:29px;flex:0 0 auto;box-shadow:0 4px 10px #0002}
+.menuCard b{display:block;font-size:17px;line-height:1.12;color:#172534;font-weight:900}
+.menuCard small{display:block;color:#637280;margin-top:5px;font-size:12px;line-height:1.25;font-weight:600}
+
 .backHome{margin:0 0 14px;background:#fff;border:1px solid #d7dde4;color:#17212b;box-shadow:0 3px 10px #0001}
 .secureNote{margin-top:16px;background:#eaf3ff;border-radius:16px;padding:15px;color:#1756a3;font-weight:700}
-@media(max-width:780px){.menuGrid{grid-template-columns:1fr}.homeHeroTop{align-items:flex-start}.adminBadge{font-size:11px}.homeHero h1{font-size:23px}.menuTopic{margin:15px 0 20px}.topicHead h2{font-size:17px}.menuCard{min-height:76px;padding:12px}.mi{width:46px;height:46px;font-size:22px}.menuCard b{font-size:15px}.menuCard small{font-size:10.5px}}
+
+@media(max-width:780px){
+ .menuGrid{grid-template-columns:1fr}
+ .homeHeroTop{align-items:flex-start}
+ .adminBadge{font-size:11px}
+ .homeHero h1{font-size:25px}
+ .menuTopic{margin:20px 0 27px}
+ .topicHead{padding:15px 16px;margin-bottom:13px;border-radius:19px;gap:13px}
+ .topicIcon{width:55px;height:55px;font-size:27px}
+ .topicHead h2{font-size:24px}
+ .topicHead small{font-size:12.5px;margin-top:4px}
+ .menuGrid{gap:12px}
+ .menuCard{min-height:88px;padding:14px 42px 14px 14px;border-radius:20px}
+ .mi{width:56px;height:56px;font-size:27px}
+ .menuCard b{font-size:17px}
+ .menuCard small{font-size:11.5px}
+ .menuCard:after{right:15px;font-size:29px}
+}
 `;document.head.appendChild(s)}function openContent(type,tries=0){if(typeof window.openConteudoAdmin==='function'){window.openConteudoAdmin(type);return}if(tries<30)setTimeout(()=>openContent(type,tries+1),120)}
 function openMeta(target){const tryNav=()=>{const b=[...document.querySelectorAll('.tabs button')].find(x=>x.textContent.includes('Metas'));if(!b)return false;b.click();setTimeout(()=>{const sec=$('metas');if(!sec)return;if(target==='meta'){const h=[...sec.querySelectorAll('h2')].find(x=>x.textContent.includes('Alterar Meta'));(h?.closest('.box')||h)?.scrollIntoView({behavior:'smooth',block:'start'})}else sec.scrollIntoView({behavior:'smooth',block:'start'})},80);return true};if(!tryNav())setTimeout(tryNav,250)}
 function nav(label){
