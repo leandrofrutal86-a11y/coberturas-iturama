@@ -8,10 +8,19 @@ const DAYS=[
 ];
 const norm=v=>String(v??'').trim().toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const savedDay=sessionStorage.getItem('pv_dia_visita')||'';let selectedDay=DAYS.some(x=>x.code===savedDay)?savedDay:currentDay(),clients=[],loading=false,lastKey='',reportData=null,preparedPdfDoc=null,preparedPdfName='',preparedPdfBlob=null,preparedPdfFile=null,preparedPdfUrl='',preparingPdf=false;
+const savedDay=sessionStorage.getItem('pv_dia_visita')||'',savedRoute=sessionStorage.getItem('pv_rota_pesquisa')||'TODOS';let selectedDay=DAYS.some(x=>x.code===savedDay)?savedDay:currentDay(),selectedRoute=savedRoute,clients=[],loading=false,lastKey='',reportData=null,preparedPdfDoc=null,preparedPdfName='',preparedPdfBlob=null,preparedPdfFile=null,preparedPdfUrl='',preparingPdf=false;
 
 function currentDay(){const d=['DOM','SEG','TER','QUA','QUI','SEX','SAB'][new Date().getDay()];return DAYS.some(x=>x.code===d)?d:'SEG'}
 function route(){return String(window.getIturamaContext?.()||window.__ituramaContext||document.querySelector('#route')?.textContent||'').trim()}
+function isRogerioMulti(){try{return String(DATA?.perfil||'')==='acompanhante'&&String(DATA?.acesso?.matricula||DATA?.consultor?.matricula||'')==='5125'}catch{return false}}
+function availableRoutes(){try{return Array.isArray(DATA?.consultores)&&DATA.consultores.length?DATA.consultores:[{rota:'8A1',nome:'Lucas'},{rota:'8B1',nome:'Pedro Henrique'},{rota:'8C1',nome:'Pedro Afonso'},{rota:'8D1',nome:'Poliana'},{rota:'8F1',nome:'Heitor'}]}catch{return[]}}
+function effectiveRoute(){
+ if(!isRogerioMulti())return route();
+ const v=String(selectedRoute||'TODOS').trim().toUpperCase();
+ if(v==='TODOS'||availableRoutes().some(x=>String(x.rota)===v))return v;
+ selectedRoute='TODOS';return 'TODOS';
+}
+function routeLabel(v){return String(v||'')==='TODOS'?'TODAS AS ROTAS':String(v||'')}
 function dayLabel(code){return DAYS.find(x=>x.code===code)?.label||code}
 function searchBox(){
   const root=document.getElementById('ov');
@@ -38,7 +47,7 @@ function ensureReportOverlay(){
  document.getElementById('pvDayPrint').onclick=downloadReportPdf;
 }
 async function getDayClients(force=false){
- const rt=route(),key=rt+'|'+selectedDay;
+ const rt=effectiveRoute(),key=rt+'|'+selectedDay;
  if(!force&&key===lastKey&&clients.length)return clients;
  loading=true;renderPanel();
  try{
@@ -52,19 +61,30 @@ async function setSelectedDay(code){
  selectedDay=code;sessionStorage.setItem('pv_dia_visita',selectedDay);window.__pvDiaSelectedDay=selectedDay;
  clients=[];lastKey='';renderPanel();await getDayClients(true);
 }
+async function setSelectedRoute(v){
+ if(!isRogerioMulti())return;
+ const val=String(v||'TODOS').trim().toUpperCase();
+ selectedRoute=(val==='TODOS'||availableRoutes().some(x=>String(x.rota)===val))?val:'TODOS';
+ sessionStorage.setItem('pv_rota_pesquisa',selectedRoute);
+ window.__pvSearchRoute=selectedRoute;
+ clients=[];lastKey='';renderPanel();await getDayClients(true);
+}
 function renderPanel(){
  const b=searchBox();if(!b?.body)return;
  let box=b.body.querySelector('.pvDiaBox');
  if(!box){box=document.createElement('div');box.className='pvDiaBox';b.body.insertBefore(box,b.body.firstChild)}
  const dayBtns=DAYS.map(d=>`<button type="button" class="pvDayChoice ${d.code===selectedDay?'active':''}" data-day="${d.code}">${d.code}</button>`).join('');
- const cliOpts=clients.map(c=>`<option value="${esc(c.pv)}">${esc(c.ordem)} • ${esc(c.pv)} • ${esc(c.razao)}</option>`).join('');
- box.innerHTML=`<div class="pvDiaHead"><b>📍 Clientes por dia de visita</b><span class="pvDiaCount">${esc(route())} • ${clients.length} cliente(s)</span></div>
+ const cliOpts=clients.map(c=>`<option value="${esc(c.pv)}">${effectiveRoute()==='TODOS'?esc(c.rota)+' • ':''}${esc(c.ordem)} • ${esc(c.pv)} • ${esc(c.razao)}</option>`).join('');
+ const routePicker=isRogerioMulti()?`<div class="pvDiaFilters" style="margin-bottom:10px"><div><label>ROTA DA PESQUISA</label><select id="pvDiaRoute" class="pvDiaSelect" ${loading?'disabled':''}><option value="TODOS">TODAS AS ROTAS</option>${availableRoutes().map(x=>`<option value="${esc(x.rota)}" ${effectiveRoute()===String(x.rota)?'selected':''}>${esc(x.rota)} - ${esc(x.nome||'')}</option>`).join('')}</select></div></div>`:'';
+ box.innerHTML=`<div class="pvDiaHead"><b>📍 Clientes por dia de visita</b><span class="pvDiaCount">${esc(routeLabel(effectiveRoute()))} • ${clients.length} cliente(s)</span></div>
+ ${routePicker}
  <div class="pvDayChoices">${dayBtns}</div>
- <div class="pvDiaFilters"><div><label>CLIENTE DA ROTA</label><select id="pvDiaClient" class="pvDiaSelect" ${loading?'disabled':''}><option value="">${loading?'Carregando clientes...':'Selecione um cliente...'}</option>${cliOpts}</select></div></div>
- <div class="pvDiaHint">Toque em SEG, TER, QUA, QUI ou SEX. A lista de clientes e o relatório acompanham o dia escolhido.</div>
+ <div class="pvDiaFilters"><div><label>${effectiveRoute()==='TODOS'?'CLIENTES DE TODAS AS ROTAS':'CLIENTE DA ROTA'}</label><select id="pvDiaClient" class="pvDiaSelect" ${loading?'disabled':''}><option value="">${loading?'Carregando clientes...':'Selecione um cliente...'}</option>${cliOpts}</select></div></div>
+ <div class="pvDiaHint">${isRogerioMulti()?'Escolha a rota ou TODAS AS ROTAS e depois o dia da visita. ':' '}Toque em SEG, TER, QUA, QUI ou SEX. A lista de clientes e o relatório acompanham os filtros escolhidos.</div>
  <button id="pvDiaReportBtn" class="pvDiaReportBtn" ${loading||!clients.length?'disabled':''}>📋 GERAR RELATÓRIO • ${esc(dayLabel(selectedDay).toUpperCase())}</button>`;
+ const rs=box.querySelector('#pvDiaRoute');if(rs){rs.value=effectiveRoute();rs.onchange=()=>setSelectedRoute(rs.value)}
  box.querySelectorAll('[data-day]').forEach(btn=>btn.onclick=()=>setSelectedDay(btn.dataset.day));
- const cs=box.querySelector('#pvDiaClient');if(cs)cs.onchange=async()=>{const pv=String(cs.value||'').trim();if(!pv)return;b.input.value=pv;b.input.dispatchEvent(new Event('input',{bubbles:true}));cs.disabled=true;try{if(typeof window.searchPv==='function')await window.searchPv();else b.btn.click()}finally{cs.disabled=false}};
+ const cs=box.querySelector('#pvDiaClient');if(cs)cs.onchange=async()=>{const pv=String(cs.value||'').trim();if(!pv)return;b.input.value=pv;b.input.dispatchEvent(new Event('input',{bubbles:true}));cs.disabled=true;try{window.__pvSearchRoute=effectiveRoute();if(typeof window.searchPv==='function')await window.searchPv();else b.btn.click()}finally{cs.disabled=false}};
  box.querySelector('#pvDiaReportBtn').onclick=openReport;
 }
 function fallbackClient(pv){return clients.find(x=>String(x.pv)===String(pv))}
@@ -99,9 +119,9 @@ function buildReportRows(data){
 async function openReport(){
  ensureReportOverlay();ensurePdfLibs().catch(()=>{});
  const ov=document.getElementById('pvDayReport'),body=document.getElementById('pvDayReportBody'),title=document.getElementById('pvDayReportTitle');
- ov.classList.add('show');title.textContent=`Relatório • ${route()} • ${dayLabel(selectedDay)}`;body.innerHTML='<div class="pvDayProgress">Gerando relatório e conferindo as vendas atuais...</div>';if(preparedPdfUrl){try{URL.revokeObjectURL(preparedPdfUrl)}catch{}}preparedPdfDoc=null;preparedPdfName='';preparedPdfBlob=null;preparedPdfFile=null;preparedPdfUrl='';const pdfBtn=document.getElementById('pvDayPrint');if(pdfBtn){pdfBtn.disabled=true;pdfBtn.textContent='PREPARANDO PDF...';}
+ ov.classList.add('show');title.textContent=`Relatório • ${routeLabel(effectiveRoute())} • ${dayLabel(selectedDay)}`;body.innerHTML='<div class="pvDayProgress">Gerando relatório e conferindo as vendas atuais...</div>';if(preparedPdfUrl){try{URL.revokeObjectURL(preparedPdfUrl)}catch{}}preparedPdfDoc=null;preparedPdfName='';preparedPdfBlob=null;preparedPdfFile=null;preparedPdfUrl='';const pdfBtn=document.getElementById('pvDayPrint');if(pdfBtn){pdfBtn.disabled=true;pdfBtn.textContent='PREPARANDO PDF...';}
  try{
-  const j=await api('day_report',{day:selectedDay,rota:route()});reportData={...j,clients:buildReportRows(j)};
+  const j=await api('day_report',{day:selectedDay,rota:effectiveRoute()});reportData={...j,clients:buildReportRows(j)};
   renderReport(reportData);prepareReportPdf().catch(()=>{});
  }catch(e){body.innerHTML=`<div class="pvDayProgress">${esc(e.message||'Não foi possível gerar o relatório.')}</div>`}
 }
@@ -345,7 +365,7 @@ async function downloadReportPdf(){
 async function inject(force=false){
  css();ensureReportOverlay();wrapSearch();const b=searchBox();if(!b)return;
  renderPanel();
- const key=route()+'|'+selectedDay;if(force||key!==lastKey||!clients.length)await getDayClients(force);
+ if(isRogerioMulti())window.__pvSearchRoute=effectiveRoute();const key=effectiveRoute()+'|'+selectedDay;if(force||key!==lastKey||!clients.length)await getDayClients(force);
 }
 function watch(){
  inject().catch(()=>{});
