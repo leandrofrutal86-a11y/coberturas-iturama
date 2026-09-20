@@ -10,7 +10,7 @@
     const sub=card('Subcanais');
     if(sub){sub.dataset.navfix='1';sub.onclick=()=>openWhenReady('Subcanais','subcanaisPainel')}
     const hist=card('Histórico de Acesso');
-    if(hist){hist.dataset.navfix='1';hist.onclick=()=>{const url=new URL('historico.html',window.location.href).href;try{window.top.location.assign(url)}catch{window.location.assign(url)}}}
+    if(hist){hist.dataset.navfix='1';hist.onclick=()=>{const url=new URL('historico.html?v=20260920-who-accessed-02',window.location.href).href;try{window.top.location.assign(url)}catch{window.location.assign(url)}}}
     const vis=card('Visita de Clientes');
     if(vis){vis.dataset.navfix='1';vis.onclick=()=>openVisit()}
     const cont=card('Contato dos Clientes');
