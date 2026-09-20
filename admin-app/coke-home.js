@@ -23,6 +23,7 @@ header>b,header b{font-size:18px}
 `;document.head.appendChild(s)}function openContent(type,tries=0){if(typeof window.openConteudoAdmin==='function'){window.openConteudoAdmin(type);return}if(tries<30)setTimeout(()=>openContent(type,tries+1),120)}
 function openMeta(target){const tryNav=()=>{const b=[...document.querySelectorAll('.tabs button')].find(x=>x.textContent.includes('Metas'));if(!b)return false;b.click();setTimeout(()=>{const sec=$('metas');if(!sec)return;if(target==='meta'){const h=[...sec.querySelectorAll('h2')].find(x=>x.textContent.includes('Alterar Meta'));(h?.closest('.box')||h)?.scrollIntoView({behavior:'smooth',block:'start'})}else sec.scrollIntoView({behavior:'smooth',block:'start'})},80);return true};if(!tryNav())setTimeout(tryNav,250)}
 function nav(label){
+ if(String(label)==='Pesquisar PV'){try{window.ensureAdminPvSearch?.()}catch{}setTimeout(()=>{try{window.ensureAdminPvSearch?.()}catch{}},120)}
  if(String(label)==='Histórico de Acesso'){const url=new URL('historico.html?v=20260920-who-accessed-02',window.location.href).href;try{window.top.location.assign(url)}catch{window.location.assign(url)}return}
  if(String(label)==='Ações Vigentes'){openContent('acoes_vigentes');return}
  if(String(label)==='Premiações de Incentivos'){openContent('premiacoes_incentivos');return}
