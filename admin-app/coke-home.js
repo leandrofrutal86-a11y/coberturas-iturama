@@ -79,6 +79,7 @@ function nav(label){
   <button class="menuCard" onclick="window.cokeNav('Visita de Clientes')"><span class="mi" style="background:#0b63ce">📍</span><span><b>Visita de Clientes</b><small>Dias, sequência e frequência da rota</small></span></button>
   <button class="menuCard" onclick="window.cokeNav('Subcanais')"><span class="mi" style="background:#0d8f6a">🏪</span><span><b>Subcanais</b><small>Clientes e quantidades por perfil</small></span></button>
   <button class="menuCard" data-cmgr="acoes" onclick="window.cokeNav('Ações Vigentes')"><span class="mi" style="background:#e85d04">⚡</span><span><b>Ações Vigentes</b><small>Cadastrar e atualizar ações comerciais</small></span></button>
+  <button class="menuCard" onclick="window.cokeNav('Atualizar Vendas')"><span class="mi" style="background:#2563eb">📊</span><span><b>Atualizar Vendas</b><small>Anexar planilha Excel e atualizar a base de vendas</small></span></button>
  </div>
 </div>
 
