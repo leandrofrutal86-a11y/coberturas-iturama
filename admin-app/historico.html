@@ -33,7 +33,7 @@ th{background:#f6f7f8;font-size:12px;position:sticky;top:0}
 <div class="tableWrap"><table><thead><tr><th>Nº</th><th>Consultor</th><th>Rota</th><th>Matrícula</th><th>Início</th><th>Fim</th><th>Tempo logado</th></tr></thead><tbody id="body"><tr><td colspan="7"><div class="empty">Carregando...</div></td></tr></tbody></table></div><div id="mobileList" class="mobileList"><div class="empty">Carregando...</div></div>
 </div></main>
 <script>
-function voltarMenuAdm(){try{sessionStorage.setItem('adm_force_home','1')}catch{}if(document.referrer&&document.referrer.includes('/admin-app/')){history.back();return}location.href='index.html?home=1&v=20260920-home-back-01'}
+function voltarMenuAdm(){try{sessionStorage.setItem('adm_force_home','1');if(TOKEN)localStorage.setItem('adm_return_token',TOKEN)}catch{}location.replace('index.html?home=1&from=historico&v=20260920-session-return-02')}
 const project='harlrfhukjvhpufwhtep';
 const ADMIN_URLS=[`https://${project}.supabase.co/functions/v1/admin-api`,`https://${project}.functions.supabase.co/admin-api`];
 const ACCESS_URLS=[`https://${project}.supabase.co/functions/v1/admin-access-api`,`https://${project}.functions.supabase.co/admin-access-api`];
