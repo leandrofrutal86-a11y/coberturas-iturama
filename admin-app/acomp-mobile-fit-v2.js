@@ -18,10 +18,10 @@
   #acomp .acompGrid thead tr:nth-child(2) th{font-size:5.6px!important;line-height:1!important;height:auto!important;padding:2px 0!important}
   #acomp .acompGrid .metaCell,#acomp .acompGrid .realCell,#acomp .acompGrid .teamMeta,#acomp .acompGrid .teamReal{font-size:7px!important;line-height:1!important;padding:3px 0!important}
   #acomp .acompGrid .sepL{border-left-width:1px!important}
-  #acomp .acompHero{grid-template-columns:72px 1fr 58px!important;min-height:42px!important;padding:5px 5px!important;gap:3px!important}
+  #acomp .acompHero{grid-template-columns:minmax(0,1fr) 78px!important;min-height:42px!important;padding:5px 7px!important;gap:6px!important}
   #acomp .acompCoke{font-size:15px!important;white-space:nowrap!important}
-  #acomp .acompTitle{font-size:9px!important;line-height:1.02!important;white-space:normal!important}
-  #acomp .acompBadge{font-size:9px!important;padding:5px 2px!important;border-radius:6px!important}
+  #acomp .acompTitle{font-size:9px!important;line-height:1.02!important;white-space:normal!important;text-align:left!important;padding-left:2px!important}
+  #acomp .acompBadge{font-size:8px!important;padding:5px 3px!important;border-radius:6px!important;white-space:nowrap!important}
   #acomp .acompFooter{padding:6px 4px!important;gap:5px!important}
   #acomp .acompBtn{font-size:8px!important;padding:7px 8px!important}
   #acomp .acompBtn small{font-size:6px!important}
