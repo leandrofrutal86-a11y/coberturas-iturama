@@ -101,7 +101,7 @@ function addStyle(){
  .acompGrid .sepL{border-left-width:1px!important}
  .acompGrid .teamHead{font-size:5.8px!important}
  .desktopLabel{display:none!important}.mobileLabel{display:inline!important}
- .acompFooter{padding:7px 5px;gap:5px;display:grid;grid-template-columns:1fr 1fr}
+ .acompFooter{padding:7px 5px;gap:5px;display:grid;grid-template-columns:1fr}
  .acompBtn{padding:8px 3px!important;font-size:7.5px!important;line-height:1.1!important;width:100%}
  .acompBtn small{font-size:6px!important}
 }
@@ -123,7 +123,7 @@ function ensureLayout(){
  const legacy=box.querySelector('table.wide')||box.querySelector('table');if(legacy)legacy.classList.add('acompLegacyTable');
  let root=q('acompSplitRoot');if(root&&root.dataset.unified==='1')return root;if(root)root.remove();
  root=document.createElement('div');root.id='acompSplitRoot';root.dataset.unified='1';
- root.innerHTML=`<section class="acompPanel"><div id="acompPoster1" class="acompPoster"><div class="acompHero"><div class="acompTitle">ACOMPANHAMENTO GERAL DA EQUIPE</div><div class="acompBadge">COBERTURAS</div></div><div class="acompGrid"><table><thead id="thAcomp1"></thead><tbody id="tbAcomp1"></tbody></table></div></div><div class="acompFooter"><button id="acompShareImageBtn" class="acompBtn img" onclick="exportarAcompImagem(1)">🖼️ BAIXAR IMAGEM <small>(ALTA RESOLUÇÃO)</small></button><button class="acompBtn pdf" onclick="exportarAcompPDF(1)">📄 BAIXAR PDF <small>(ALTA RESOLUÇÃO)</small></button></div></section>`;
+ root.innerHTML=`<section class="acompPanel"><div id="acompPoster1" class="acompPoster"><div class="acompHero"><div class="acompTitle">ACOMPANHAMENTO GERAL DA EQUIPE</div><div class="acompBadge">COBERTURAS</div></div><div class="acompGrid"><table><thead id="thAcomp1"></thead><tbody id="tbAcomp1"></tbody></table></div></div><div class="acompFooter"><button id="acompShareImageBtn" class="acompBtn img" onclick="exportarAcompImagem(1)">🖼️ BAIXAR IMAGEM <small>(ALTA RESOLUÇÃO)</small></button></div></section>`;
  if(legacy)legacy.insertAdjacentElement('afterend',root);else box.appendChild(root);return root;
 }
 
