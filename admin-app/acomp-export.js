@@ -121,9 +121,9 @@ function addStyle(){
 function ensureLayout(){
  const sec=q('acomp');if(!sec)return null;const box=sec.querySelector('.box');if(!box)return null;
  const legacy=box.querySelector('table.wide')||box.querySelector('table');if(legacy)legacy.classList.add('acompLegacyTable');
- let root=q('acompSplitRoot');if(root)return root;
- root=document.createElement('div');root.id='acompSplitRoot';
- root.innerHTML=`<section class="acompPanel"><div id="acompPoster1" class="acompPoster"><div class="acompHero"><div class="acompTitle">ACOMPANHAMENTO GERAL DA EQUIPE</div><div class="acompBadge">COBERTURAS</div></div><div class="acompGrid"><table><thead id="thAcomp1"></thead><tbody id="tbAcomp1"></tbody></table></div></div><div class="acompFooter"><button id="acompShareImageBtn" class="acompBtn img" onclick="exportarAcompImagem(1)">📲 COMPARTILHAR IMAGEM <small>(ALTA RESOLUÇÃO)</small></button><button class="acompBtn pdf" onclick="exportarAcompPDF(1)">📄 BAIXAR PDF <small>(ALTA RESOLUÇÃO)</small></button></div></section>`;
+ let root=q('acompSplitRoot');if(root&&root.dataset.unified==='1')return root;if(root)root.remove();
+ root=document.createElement('div');root.id='acompSplitRoot';root.dataset.unified='1';
+ root.innerHTML=`<section class="acompPanel"><div id="acompPoster1" class="acompPoster"><div class="acompHero"><div class="acompTitle">ACOMPANHAMENTO GERAL DA EQUIPE</div><div class="acompBadge">COBERTURAS</div></div><div class="acompGrid"><table><thead id="thAcomp1"></thead><tbody id="tbAcomp1"></tbody></table></div></div><div class="acompFooter"><button id="acompShareImageBtn" class="acompBtn img" onclick="exportarAcompImagem(1)">🖼️ BAIXAR IMAGEM <small>(ALTA RESOLUÇÃO)</small></button><button class="acompBtn pdf" onclick="exportarAcompPDF(1)">📄 BAIXAR PDF <small>(ALTA RESOLUÇÃO)</small></button></div></section>`;
  if(legacy)legacy.insertAdjacentElement('afterend',root);else box.appendChild(root);return root;
 }
 
@@ -162,9 +162,9 @@ async function prepareShareImage(force=false){
   if(btn&&!shareFile){btn.disabled=true;btn.innerHTML='⏳ PREPARANDO IMAGEM...'}
   const canvas=await capture(1,2.6),blob=await canvasBlob(canvas);
   shareBlob=blob;shareFile=new File([blob],TABLE.file+'.png',{type:'image/png'});
-  if(btn){btn.disabled=false;btn.innerHTML='📲 COMPARTILHAR IMAGEM <small>(ALTA RESOLUÇÃO)</small>'}
+  if(btn){btn.disabled=false;btn.innerHTML='🖼️ BAIXAR IMAGEM <small>(ALTA RESOLUÇÃO)</small>'}
   return shareFile;
- })().catch(e=>{const btn=q('acompShareImageBtn');if(btn){btn.disabled=false;btn.innerHTML='📲 TENTAR COMPARTILHAR IMAGEM'}throw e}).finally(()=>sharePreparing=null);
+ })().catch(e=>{const btn=q('acompShareImageBtn');if(btn){btn.disabled=false;btn.innerHTML='🖼️ TENTAR BAIXAR IMAGEM'}throw e}).finally(()=>sharePreparing=null);
  return sharePreparing;
 }
 function queueSharePreparation(){
