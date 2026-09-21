@@ -141,7 +141,16 @@ function renderOne(t,d){
  const inds=(d.individual||[]).slice(),entries=catEntries(d),th=q('thAcomp1'),tb=q('tbAcomp1');if(!th||!tb)return false;
  th.innerHTML=headerHtml(inds);tb.innerHTML=entries.map(e=>categoryRow(e,inds)).join('');return true;
 }
-function render(){const d=getDash();if(!d)return false;addStyle();ensureLayout();const ok=renderOne(TABLE,d);if(ok)window.invalidateAcompShare?.();return ok}
+let lastRenderSignature='';
+function render(){
+ const d=getDash();if(!d)return false;addStyle();ensureLayout();
+ const ok=renderOne(TABLE,d);
+ if(ok){
+  const sig=(q('thAcomp1')?.innerHTML||'')+'|'+(q('tbAcomp1')?.innerHTML||'');
+  if(sig!==lastRenderSignature){lastRenderSignature=sig;window.invalidateAcompShare?.()}
+ }
+ return ok
+}
 
 function load(src,test){return new Promise((ok,no)=>{if(test())return ok();const s=document.createElement('script');s.src=src;s.onload=ok;s.onerror=()=>no(Error('Não foi possível carregar o recurso de exportação.'));document.head.appendChild(s)})}
 async function capture(id,scale=3){
@@ -152,33 +161,54 @@ async function capture(id,scale=3){
  const target=1280;
  try{return await html2canvas(a,{scale,backgroundColor:'#fff',useCORS:true,logging:false,windowWidth:target+40})}finally{a.classList.remove('acompExporting');grid.style.removeProperty('overflow')}
 }
-let shareBlob=null,shareFile=null,sharePreparing=null,shareTimer=null;
+let shareBlob=null,shareFile=null,sharePreparing=null;
+function setImageButton(state){
+ const btn=q('acompShareImageBtn');if(!btn)return;
+ btn.disabled=state==='preparing';
+ if(state==='preparing')btn.innerHTML='⏳ PREPARANDO IMAGEM...';
+ else if(state==='ready')btn.innerHTML='📤 COMPARTILHAR IMAGEM <small>TOQUE AQUI</small>';
+ else if(state==='retry')btn.innerHTML='🖼️ TENTAR NOVAMENTE';
+ else btn.innerHTML='🖼️ BAIXAR IMAGEM <small>(ALTA RESOLUÇÃO)</small>';
+}
 function canvasBlob(canvas){return new Promise((ok,no)=>canvas.toBlob(b=>b?ok(b):no(Error('Não foi possível gerar a imagem.')),'image/png',1))}
+function timeout(ms,msg){return new Promise((_,no)=>setTimeout(()=>no(Error(msg)),ms))}
 async function prepareShareImage(force=false){
  if(shareFile&&!force)return shareFile;
  if(sharePreparing)return sharePreparing;
+ setImageButton('preparing');
  sharePreparing=(async()=>{
-  const btn=q('acompShareImageBtn');
-  if(btn&&!shareFile){btn.disabled=true;btn.innerHTML='⏳ PREPARANDO IMAGEM...'}
-  const canvas=await capture(1,2.6),blob=await canvasBlob(canvas);
-  shareBlob=blob;shareFile=new File([blob],TABLE.file+'.png',{type:'image/png'});
-  if(btn){btn.disabled=false;btn.innerHTML='🖼️ BAIXAR IMAGEM <small>(ALTA RESOLUÇÃO)</small>'}
+  const canvas=await Promise.race([
+   capture(1,2.0),
+   timeout(25000,'A imagem demorou demais para ser gerada. Tente novamente.')
+  ]);
+  const blob=await canvasBlob(canvas);
+  shareBlob=blob;
+  shareFile=new File([blob],TABLE.file+'.png',{type:'image/png'});
+  setImageButton('ready');
   return shareFile;
- })().catch(e=>{const btn=q('acompShareImageBtn');if(btn){btn.disabled=false;btn.innerHTML='🖼️ TENTAR BAIXAR IMAGEM'}throw e}).finally(()=>sharePreparing=null);
+ })().catch(e=>{setImageButton('retry');throw e}).finally(()=>sharePreparing=null);
  return sharePreparing;
 }
-function queueSharePreparation(){
- clearTimeout(shareTimer);
- shareTimer=setTimeout(()=>prepareShareImage().catch(()=>{}),450);
-}
-window.invalidateAcompShare=()=>{shareBlob=null;shareFile=null;queueSharePreparation()};
+window.invalidateAcompShare=()=>{shareBlob=null;shareFile=null;setImageButton('idle')};
 window.exportarAcompImagem=async()=>{
  try{
-  const file=shareFile||await prepareShareImage();
-  const url=URL.createObjectURL(file),a=document.createElement('a');
+  // Primeiro toque: gera a imagem. Depois o botão muda para COMPARTILHAR IMAGEM.
+  // O segundo toque é necessário para o Android considerar uma ação direta do usuário.
+  if(!shareFile){
+   await prepareShareImage();
+   return;
+  }
+  const file=shareFile;
+  if(navigator.share&&(!navigator.canShare||navigator.canShare({files:[file]}))){
+   try{
+    await navigator.share({files:[file],title:'Coberturas • Equipe Iturama',text:'Acompanhamento geral da equipe'});
+    return;
+   }catch(e){if(e?.name==='AbortError')return;throw e}
+  }
+  const url=URL.createObjectURL(shareBlob||file),a=document.createElement('a');
   a.href=url;a.download=TABLE.file+'.png';a.rel='noopener';document.body.appendChild(a);a.click();a.remove();
   setTimeout(()=>URL.revokeObjectURL(url),5000);
- }catch(e){alert(e?.message||'Não foi possível baixar a imagem.')}
+ }catch(e){setImageButton('retry');alert(e?.message||'Não foi possível preparar ou compartilhar a imagem.')}
 };
 function printPdf(id){
  const t=TABLE,poster=q('acompPoster1');if(!poster)throw Error('Tabela não encontrada.');
