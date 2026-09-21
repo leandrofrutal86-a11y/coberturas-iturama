@@ -9,8 +9,8 @@ function getDash(){try{return typeof dash!=='undefined'&&dash?dash:(window.dash|
 const TABLE1_IDS=[1,2,12,16,17,21,13,18,19,20];
 const TABLE2_BASE_IDS=[4,6,7,15,14,8,9,10,11];
 const TABLES=[
- {id:1,title:'TABELA 1',file:'acompanhamento-geral-tabela-1-iturama'},
- {id:2,title:'TABELA 2',file:'acompanhamento-geral-tabela-2-iturama'}
+ {id:1,title:'COBERTURAS 1',file:'acompanhamento-geral-tabela-1-iturama'},
+ {id:2,title:'COBERTURAS 2',file:'acompanhamento-geral-tabela-2-iturama'}
 ];
 
 function catEntries(d,t){
@@ -72,7 +72,7 @@ function addStyle(){
 .acompGrid .realCell{font-weight:950!important;font-size:14px!important;color:#e30613!important}
 .acompGrid .realCell.ok{color:#0c9148!important}
 .acompGrid .teamHead{background:linear-gradient(#fff9db,#f9edb4)!important}
-.acompGrid .teamMeta{background:#dff1fb!important;color:#141c75!important;font-weight:950!important;font-size:15px!important}
+.acompGrid .teamMeta{background:#fff6cf!important;color:#141c75!important;font-weight:950!important;font-size:15px!important}
 .acompGrid .teamReal{background:#fff6cf!important;color:#e30613!important;font-weight:950!important;font-size:15px!important}
 .acompGrid .teamReal.ok{color:#0c9148!important}
 .acompGrid .sepL{border-left:2px solid #7f8c96!important}
@@ -93,9 +93,9 @@ function addStyle(){
  #acomp .box{padding:2px!important}
  #acompSplitRoot{gap:10px}
  .acompPanel{border-radius:11px;box-shadow:0 3px 10px #0002}
- .acompHero{grid-template-columns:1fr 58px;min-height:43px;padding:5px 5px;gap:3px}
- .acompTitle{font-size:9px;line-height:1.03;letter-spacing:0}
- .acompBadge{font-size:9px;padding:5px 2px;border-radius:6px}
+ .acompHero{grid-template-columns:minmax(0,1fr) 78px;min-height:43px;padding:5px 7px;gap:6px}
+ .acompTitle{font-size:9px;line-height:1.03;letter-spacing:0;text-align:left;padding-left:2px}
+ .acompBadge{font-size:8px;padding:5px 3px;border-radius:6px;white-space:nowrap}
  .acompGrid{overflow:hidden!important;width:100%!important}
  .acompGrid table{width:100%!important;min-width:0!important;max-width:100%!important;table-layout:fixed!important}
  .acompGrid th,.acompGrid td{padding:3px 1px!important;line-height:1.02!important;white-space:normal!important;overflow:hidden!important;overflow-wrap:anywhere!important;word-break:normal!important}
@@ -113,8 +113,8 @@ function addStyle(){
 }
 
 @media(max-width:390px){
- .acompHero{grid-template-columns:1fr 48px;padding:4px 3px}
- .acompTitle{font-size:7.8px}.acompBadge{font-size:7.8px;padding:4px 1px}
+ .acompHero{grid-template-columns:minmax(0,1fr) 72px;padding:4px 5px;gap:5px}
+ .acompTitle{font-size:7.8px}.acompBadge{font-size:7.2px;padding:4px 2px;white-space:nowrap}
  .acompGrid .catHead,.acompGrid .catCell{width:29%!important;max-width:29%!important}
  .acompGrid thead tr:first-child th{font-size:5.4px!important}
  .acompGrid thead tr:nth-child(2) th{font-size:5px!important}
@@ -170,7 +170,7 @@ thead tr:first-child th:nth-child(2),thead tr:first-child th:nth-child(4),thead 
 thead tr:first-child th:nth-child(3),thead tr:first-child th:nth-child(5){background:#fff}
 thead tr:nth-child(2) th:nth-child(1),thead tr:nth-child(2) th:nth-child(2),thead tr:nth-child(2) th:nth-child(5),thead tr:nth-child(2) th:nth-child(6),thead tr:nth-child(2) th:nth-child(9),thead tr:nth-child(2) th:nth-child(10){background:#e8f5ff}
 thead tr:nth-child(2) th:nth-child(3),thead tr:nth-child(2) th:nth-child(4),thead tr:nth-child(2) th:nth-child(7),thead tr:nth-child(2) th:nth-child(8){background:#fff}
-.catHead{width:19%}.catCell{text-align:left;font-weight:900;white-space:normal}.metaCell{color:#0562b8;font-weight:900}.realCell{color:#e30613;font-weight:900}.realCell.ok{color:#0c9148}.teamHead{background:#fff3bd}.teamMeta{background:#dff1fb;color:#141c75;font-weight:900}.teamReal{background:#fff6cf;color:#e30613;font-weight:900}.teamReal.ok{color:#0c9148}.sepL{border-left:2px solid #7f8c96}.mobileLabel{display:none}</style></head><body><div class="hero"><div class="ttl">ACOMPANHAMENTO GERAL DA EQUIPE</div><div class="badge">${t.title}</div></div>${poster.querySelector('table').outerHTML}<script>window.onload=()=>setTimeout(()=>window.print(),250)<\/script></body></html>`);w.document.close();
+.catHead{width:19%}.catCell{text-align:left;font-weight:900;white-space:normal}.metaCell{color:#0562b8;font-weight:900}.realCell{color:#e30613;font-weight:900}.realCell.ok{color:#0c9148}.teamHead{background:#fff3bd}.teamMeta{background:#fff6cf;color:#141c75;font-weight:900}.teamReal{background:#fff6cf;color:#e30613;font-weight:900}.teamReal.ok{color:#0c9148}.sepL{border-left:2px solid #7f8c96}.mobileLabel{display:none}</style></head><body><div class="hero"><div class="ttl">ACOMPANHAMENTO GERAL DA EQUIPE</div><div class="badge">${t.title}</div></div>${poster.querySelector('table').outerHTML}<script>window.onload=()=>setTimeout(()=>window.print(),250)<\/script></body></html>`);w.document.close();
 }
 window.exportarAcompPDF=id=>{try{printPdf(id)}catch(e){alert(e.message)}};
 
