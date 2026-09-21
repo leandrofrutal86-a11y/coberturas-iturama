@@ -52,8 +52,22 @@ function addStyle(){
 .acompGrid thead tr:nth-child(2) th{font-size:10px!important;height:25px!important}
 .acompGrid .catHead{width:22%!important;min-width:210px!important;text-align:center!important}
 .acompGrid .catCell{text-align:left!important;padding-left:12px!important;font-size:12px!important;font-weight:950!important;color:#171717!important;white-space:normal!important;overflow-wrap:anywhere!important;word-break:normal!important}
-.acompGrid tbody tr:nth-child(odd) td{background:#fbfbfb!important}
-.acompGrid tbody tr:nth-child(even) td{background:#f3f6f8!important}
+.acompGrid tbody td{background:#fff!important}
+.acompGrid tbody td:nth-child(2),.acompGrid tbody td:nth-child(3),
+.acompGrid tbody td:nth-child(6),.acompGrid tbody td:nth-child(7),
+.acompGrid tbody td:nth-child(10),.acompGrid tbody td:nth-child(11){background:#e8f5ff!important}
+.acompGrid tbody td:nth-child(4),.acompGrid tbody td:nth-child(5),
+.acompGrid tbody td:nth-child(8),.acompGrid tbody td:nth-child(9){background:#fff!important}
+.acompGrid thead tr:first-child th:nth-child(2),
+.acompGrid thead tr:first-child th:nth-child(4),
+.acompGrid thead tr:first-child th:nth-child(6){background:#e8f5ff!important}
+.acompGrid thead tr:first-child th:nth-child(3),
+.acompGrid thead tr:first-child th:nth-child(5){background:#fff!important}
+.acompGrid thead tr:nth-child(2) th:nth-child(1),.acompGrid thead tr:nth-child(2) th:nth-child(2),
+.acompGrid thead tr:nth-child(2) th:nth-child(5),.acompGrid thead tr:nth-child(2) th:nth-child(6),
+.acompGrid thead tr:nth-child(2) th:nth-child(9),.acompGrid thead tr:nth-child(2) th:nth-child(10){background:#e8f5ff!important}
+.acompGrid thead tr:nth-child(2) th:nth-child(3),.acompGrid thead tr:nth-child(2) th:nth-child(4),
+.acompGrid thead tr:nth-child(2) th:nth-child(7),.acompGrid thead tr:nth-child(2) th:nth-child(8){background:#fff!important}
 .acompGrid .metaCell{color:#0562b8!important;font-weight:950!important;font-size:14px!important}
 .acompGrid .realCell{font-weight:950!important;font-size:14px!important;color:#e30613!important}
 .acompGrid .realCell.ok{color:#0c9148!important}
@@ -148,7 +162,15 @@ window.exportarAcompImagem=async(id=1)=>{try{const t=TABLES.find(x=>x.id===Numbe
 function printPdf(id){
  const t=TABLES.find(x=>x.id===Number(id))||TABLES[0],poster=q('acompPoster'+t.id);if(!poster)throw Error('Tabela não encontrada.');
  const w=window.open('','_blank');if(!w)throw Error('O navegador bloqueou a janela do PDF. Libere pop-ups e tente novamente.');
- w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Acompanhamento Geral - ${t.title}</title><style>@page{size:A3 landscape;margin:4mm}*{box-sizing:border-box}body{font-family:Arial,sans-serif;margin:0;color:#151515}.hero{background:#c7000b;color:#fff;height:52px;display:grid;grid-template-columns:1fr 125px;align-items:center;padding:6px 12px}.ttl{text-align:center;font-size:20px;font-weight:900;text-transform:uppercase}.badge{background:#ffd31c;color:#111;border-radius:7px;padding:7px;text-align:center;font-size:18px;font-weight:900;text-transform:uppercase}table{border-collapse:collapse;width:100%;table-layout:fixed;font-size:7px;text-transform:uppercase}th,td{border:1px solid #9aa6b0;padding:3px 2px;text-align:center;text-transform:uppercase;white-space:normal;overflow-wrap:anywhere}thead th{background:#edf2f5;font-weight:900}.catHead{width:19%}.catCell{text-align:left;font-weight:900;white-space:normal}.metaCell{color:#0562b8;font-weight:900}.realCell{color:#e30613;font-weight:900}.realCell.ok{color:#0c9148}.teamHead{background:#fff3bd}.teamMeta{background:#dff1fb;color:#141c75;font-weight:900}.teamReal{background:#fff6cf;color:#e30613;font-weight:900}.teamReal.ok{color:#0c9148}.sepL{border-left:2px solid #7f8c96}.mobileLabel{display:none}</style></head><body><div class="hero"><div class="ttl">ACOMPANHAMENTO GERAL DA EQUIPE</div><div class="badge">${t.title}</div></div>${poster.querySelector('table').outerHTML}<script>window.onload=()=>setTimeout(()=>window.print(),250)<\/script></body></html>`);w.document.close();
+ w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Acompanhamento Geral - ${t.title}</title><style>@page{size:A3 landscape;margin:4mm}*{box-sizing:border-box}body{font-family:Arial,sans-serif;margin:0;color:#151515}.hero{background:#c7000b;color:#fff;height:52px;display:grid;grid-template-columns:1fr 125px;align-items:center;padding:6px 12px}.ttl{text-align:center;font-size:20px;font-weight:900;text-transform:uppercase}.badge{background:#ffd31c;color:#111;border-radius:7px;padding:7px;text-align:center;font-size:18px;font-weight:900;text-transform:uppercase}table{border-collapse:collapse;width:100%;table-layout:fixed;font-size:7px;text-transform:uppercase}th,td{border:1px solid #9aa6b0;padding:3px 2px;text-align:center;text-transform:uppercase;white-space:normal;overflow-wrap:anywhere}thead th{background:#edf2f5;font-weight:900}
+tbody td{background:#fff}
+tbody td:nth-child(2),tbody td:nth-child(3),tbody td:nth-child(6),tbody td:nth-child(7),tbody td:nth-child(10),tbody td:nth-child(11){background:#e8f5ff}
+tbody td:nth-child(4),tbody td:nth-child(5),tbody td:nth-child(8),tbody td:nth-child(9){background:#fff}
+thead tr:first-child th:nth-child(2),thead tr:first-child th:nth-child(4),thead tr:first-child th:nth-child(6){background:#e8f5ff}
+thead tr:first-child th:nth-child(3),thead tr:first-child th:nth-child(5){background:#fff}
+thead tr:nth-child(2) th:nth-child(1),thead tr:nth-child(2) th:nth-child(2),thead tr:nth-child(2) th:nth-child(5),thead tr:nth-child(2) th:nth-child(6),thead tr:nth-child(2) th:nth-child(9),thead tr:nth-child(2) th:nth-child(10){background:#e8f5ff}
+thead tr:nth-child(2) th:nth-child(3),thead tr:nth-child(2) th:nth-child(4),thead tr:nth-child(2) th:nth-child(7),thead tr:nth-child(2) th:nth-child(8){background:#fff}
+.catHead{width:19%}.catCell{text-align:left;font-weight:900;white-space:normal}.metaCell{color:#0562b8;font-weight:900}.realCell{color:#e30613;font-weight:900}.realCell.ok{color:#0c9148}.teamHead{background:#fff3bd}.teamMeta{background:#dff1fb;color:#141c75;font-weight:900}.teamReal{background:#fff6cf;color:#e30613;font-weight:900}.teamReal.ok{color:#0c9148}.sepL{border-left:2px solid #7f8c96}.mobileLabel{display:none}</style></head><body><div class="hero"><div class="ttl">ACOMPANHAMENTO GERAL DA EQUIPE</div><div class="badge">${t.title}</div></div>${poster.querySelector('table').outerHTML}<script>window.onload=()=>setTimeout(()=>window.print(),250)<\/script></body></html>`);w.document.close();
 }
 window.exportarAcompPDF=id=>{try{printPdf(id)}catch(e){alert(e.message)}};
 
