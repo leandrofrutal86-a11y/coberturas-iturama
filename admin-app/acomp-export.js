@@ -8,19 +8,13 @@ function getDash(){try{return typeof dash!=='undefined'&&dash?dash:(window.dash|
 // Toda categoria nova cadastrada é acrescentada automaticamente à TABELA 2.
 const TABLE1_IDS=[1,2,12,16,17,21,13,18,19,20];
 const TABLE2_BASE_IDS=[4,6,7,15,14,8,9,10,11];
-const TABLES=[
- {id:1,title:'COBERTURAS 1',file:'acompanhamento-geral-tabela-1-iturama'},
- {id:2,title:'COBERTURAS 2',file:'acompanhamento-geral-tabela-2-iturama'}
-];
+const ALL_BASE_IDS=[...TABLE1_IDS,...TABLE2_BASE_IDS];
+const TABLE={id:1,title:'COBERTURAS',file:'acompanhamento-geral-coberturas-iturama'};
 
-function catEntries(d,t){
+function catEntries(d){
  const cats=d?.categorias||[];
- const fixed=t.id===1?TABLE1_IDS:TABLE2_BASE_IDS;
- const fixedSet=new Set(fixed.map(Number));
- const usedSet=new Set([...TABLE1_IDS,...TABLE2_BASE_IDS].map(Number));
- const ids=t.id===1
-   ? fixed
-   : [...fixed,...cats.filter(cat=>!usedSet.has(Number(cat.id))).map(cat=>Number(cat.id))];
+ const usedSet=new Set(ALL_BASE_IDS.map(Number));
+ const ids=[...ALL_BASE_IDS,...cats.filter(cat=>!usedSet.has(Number(cat.id))).map(cat=>Number(cat.id))];
  return ids.map(id=>{
   const idx=cats.findIndex(cat=>Number(cat.id)===Number(id));
   return idx>=0?{cat:cats[idx],idx}:null;
@@ -129,7 +123,7 @@ function ensureLayout(){
  const legacy=box.querySelector('table.wide')||box.querySelector('table');if(legacy)legacy.classList.add('acompLegacyTable');
  let root=q('acompSplitRoot');if(root)return root;
  root=document.createElement('div');root.id='acompSplitRoot';
- root.innerHTML=TABLES.map(t=>`<section class="acompPanel"><div id="acompPoster${t.id}" class="acompPoster"><div class="acompHero"><div class="acompTitle">ACOMPANHAMENTO GERAL DA EQUIPE</div><div class="acompBadge">${t.title}</div></div><div class="acompGrid"><table><thead id="thAcomp${t.id}"></thead><tbody id="tbAcomp${t.id}"></tbody></table></div></div><div class="acompFooter"><button class="acompBtn img" onclick="exportarAcompImagem(${t.id})">🖼️ BAIXAR IMAGEM <small>(ALTA RESOLUÇÃO)</small></button><button class="acompBtn pdf" onclick="exportarAcompPDF(${t.id})">📄 BAIXAR PDF <small>(ALTA RESOLUÇÃO)</small></button></div></section>`).join('');
+ root.innerHTML=`<section class="acompPanel"><div id="acompPoster1" class="acompPoster"><div class="acompHero"><div class="acompTitle">ACOMPANHAMENTO GERAL DA EQUIPE</div><div class="acompBadge">COBERTURAS</div></div><div class="acompGrid"><table><thead id="thAcomp1"></thead><tbody id="tbAcomp1"></tbody></table></div></div><div class="acompFooter"><button id="acompShareImageBtn" class="acompBtn img" onclick="exportarAcompImagem(1)">📲 COMPARTILHAR IMAGEM <small>(ALTA RESOLUÇÃO)</small></button><button class="acompBtn pdf" onclick="exportarAcompPDF(1)">📄 BAIXAR PDF <small>(ALTA RESOLUÇÃO)</small></button></div></section>`;
  if(legacy)legacy.insertAdjacentElement('afterend',root);else box.appendChild(root);return root;
 }
 
@@ -144,23 +138,54 @@ function categoryRow(entry,inds){
  return `<tr><td class="catCell">${esc(nome)}</td>${cells}<td class="teamMeta sepL">${found?teamMeta:'—'}</td><td class="teamReal ${teamOk?'ok':''}">${found?teamReal:'—'}</td></tr>`;
 }
 function renderOne(t,d){
- const inds=(d.individual||[]).slice(),entries=catEntries(d,t),th=q('thAcomp'+t.id),tb=q('tbAcomp'+t.id);if(!th||!tb)return false;
+ const inds=(d.individual||[]).slice(),entries=catEntries(d),th=q('thAcomp1'),tb=q('tbAcomp1');if(!th||!tb)return false;
  th.innerHTML=headerHtml(inds);tb.innerHTML=entries.map(e=>categoryRow(e,inds)).join('');return true;
 }
-function render(){const d=getDash();if(!d)return false;addStyle();ensureLayout();let ok=true;TABLES.forEach(t=>{if(!renderOne(t,d))ok=false});return ok}
+function render(){const d=getDash();if(!d)return false;addStyle();ensureLayout();const ok=renderOne(TABLE,d);if(ok)window.invalidateAcompShare?.();return ok}
 
 function load(src,test){return new Promise((ok,no)=>{if(test())return ok();const s=document.createElement('script');s.src=src;s.onload=ok;s.onerror=()=>no(Error('Não foi possível carregar o recurso de exportação.'));document.head.appendChild(s)})}
-async function capture(id){
+async function capture(id,scale=3){
  await load('https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js',()=>!!window.html2canvas);
  const a=q('acompPoster'+id);if(!a)throw Error('Tabela não encontrada.');
  const grid=a.querySelector('.acompGrid');
  a.classList.add('acompExporting');
  const target=1280;
- try{return await html2canvas(a,{scale:4.5,backgroundColor:'#fff',useCORS:true,logging:false,windowWidth:target+40})}finally{a.classList.remove('acompExporting');grid.style.removeProperty('overflow')}
+ try{return await html2canvas(a,{scale,backgroundColor:'#fff',useCORS:true,logging:false,windowWidth:target+40})}finally{a.classList.remove('acompExporting');grid.style.removeProperty('overflow')}
 }
-window.exportarAcompImagem=async(id=1)=>{try{const t=TABLES.find(x=>x.id===Number(id))||TABLES[0],c=await capture(t.id),a=document.createElement('a');a.download=t.file+'.png';a.href=c.toDataURL('image/png',1);document.body.appendChild(a);a.click();a.remove()}catch(e){alert(e.message)}};
+let shareBlob=null,shareFile=null,sharePreparing=null,shareTimer=null;
+function canvasBlob(canvas){return new Promise((ok,no)=>canvas.toBlob(b=>b?ok(b):no(Error('Não foi possível gerar a imagem.')),'image/png',1))}
+async function prepareShareImage(force=false){
+ if(shareFile&&!force)return shareFile;
+ if(sharePreparing)return sharePreparing;
+ sharePreparing=(async()=>{
+  const btn=q('acompShareImageBtn');
+  if(btn&&!shareFile){btn.disabled=true;btn.innerHTML='⏳ PREPARANDO IMAGEM...'}
+  const canvas=await capture(1,2.6),blob=await canvasBlob(canvas);
+  shareBlob=blob;shareFile=new File([blob],TABLE.file+'.png',{type:'image/png'});
+  if(btn){btn.disabled=false;btn.innerHTML='📲 COMPARTILHAR IMAGEM <small>(ALTA RESOLUÇÃO)</small>'}
+  return shareFile;
+ })().catch(e=>{const btn=q('acompShareImageBtn');if(btn){btn.disabled=false;btn.innerHTML='📲 TENTAR COMPARTILHAR IMAGEM'}throw e}).finally(()=>sharePreparing=null);
+ return sharePreparing;
+}
+function queueSharePreparation(){
+ clearTimeout(shareTimer);
+ shareTimer=setTimeout(()=>prepareShareImage().catch(()=>{}),450);
+}
+window.invalidateAcompShare=()=>{shareBlob=null;shareFile=null;queueSharePreparation()};
+window.exportarAcompImagem=async()=>{
+ try{
+  const file=shareFile||await prepareShareImage();
+  if(navigator.share&&(!navigator.canShare||navigator.canShare({files:[file]}))){
+   await navigator.share({files:[file],title:'Coberturas • Equipe Iturama',text:'Acompanhamento geral da equipe'});
+   return;
+  }
+  const url=URL.createObjectURL(shareBlob||file),a=document.createElement('a');
+  a.href=url;a.download=TABLE.file+'.png';document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),5000);
+ }catch(e){if(e?.name!=='AbortError')alert(e?.message||'Não foi possível compartilhar a imagem.')}
+};
 function printPdf(id){
- const t=TABLES.find(x=>x.id===Number(id))||TABLES[0],poster=q('acompPoster'+t.id);if(!poster)throw Error('Tabela não encontrada.');
+ const t=TABLE,poster=q('acompPoster1');if(!poster)throw Error('Tabela não encontrada.');
  const w=window.open('','_blank');if(!w)throw Error('O navegador bloqueou a janela do PDF. Libere pop-ups e tente novamente.');
  w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Acompanhamento Geral - ${t.title}</title><style>@page{size:A3 landscape;margin:4mm}*{box-sizing:border-box}body{font-family:Arial,sans-serif;margin:0;color:#151515}.hero{background:#c7000b;color:#fff;height:52px;display:grid;grid-template-columns:1fr 125px;align-items:center;padding:6px 12px}.ttl{text-align:center;font-size:20px;font-weight:900;text-transform:uppercase}.badge{background:#ffd31c;color:#111;border-radius:7px;padding:7px;text-align:center;font-size:18px;font-weight:900;text-transform:uppercase}table{border-collapse:collapse;width:100%;table-layout:fixed;font-size:7px;text-transform:uppercase}th,td{border:1px solid #9aa6b0;padding:3px 2px;text-align:center;text-transform:uppercase;white-space:normal;overflow-wrap:anywhere}thead th{background:#edf2f5;font-weight:900}
 tbody td{background:#fff}
