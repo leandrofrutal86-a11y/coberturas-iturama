@@ -3,7 +3,7 @@ const DAYS=[['TODOS','Todos os dias'],['SEG','Segunda-feira'],['TER','Terça-fei
 const $=id=>document.getElementById(id);
 const E=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const norm=v=>String(v??'').trim().toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-let day='TODOS',route='TODAS',clients=[],reportData=null,pdfDoc=null,pdfName='',pdfBlob=null,pdfUrl='';
+let day='TODOS',route='TODAS',clients=[],reportData=null,pdfDoc=null,pdfName='',pdfBlob=null,pdfUrl='',visitScheduleRows=null;
 function currentDay(){const d=['DOM','SEG','TER','QUA','QUI','SEX','SAB'][new Date().getDay()];return DAYS.some(x=>x[0]===d)?d:'SEG'}
 function labelDay(d){return DAYS.find(x=>x[0]===d)?.[1]||d}
 function labelRoute(r){return r==='TODAS'?'Todas as rotas':r}
@@ -21,8 +21,32 @@ function searchByNameOrPv(){const raw=String($('admPvNameSearch')?.value||'').tr
 function drawDays(){$('admPvDays').innerHTML=DAYS.map(d=>`<button class="admPvDay ${d[0]===day?'on':''}" data-day="${d[0]}">${d[0]==='TODOS'?'TODOS':d[0]}</button>`).join('');$('admPvDays').querySelectorAll('[data-day]').forEach(b=>b.onclick=()=>{day=b.dataset.day;drawDays()})}
 async function loadClients(){const count=$('admPvCount'),sel=$('admPvClient');if(!count||!sel)return;count.textContent='Carregando base completa...';sel.innerHTML='<option value="">Carregando...</option>';try{const j=await post({action:'search_clients',token,rota:route});clients=j.clients||[];count.textContent=labelRoute(route)+' • '+clients.length+' cliente(s) na BASE GERAL';sel.innerHTML='<option value="">Selecione um cliente...</option>'+clients.map(x=>`<option value="${E(x.pv)}">${route==='TODAS'?E(x.rota)+' • ':''}${E(x.pv)} • ${E(x.razao)}</option>`).join('');renderSearchMatches(false)}catch(e){count.textContent='Erro: '+e.message;sel.innerHTML='<option value="">Não foi possível carregar</option>'}}
 function ensureOverlay(){if($('admPvOverlay'))return;document.body.insertAdjacentHTML('beforeend',`<div id="admPvOverlay" class="admPvOverlay"><div class="admPvSheet"><div class="admPvHead"><h2 id="admPvTitle">Relatório do dia</h2><div class="admPvHeadBtns"><button id="admPvPdf">⬇ BAIXAR PDF</button><button id="admPvClose">FECHAR</button></div></div><div id="admPvBody" class="admPvBody"></div></div></div>`);$('admPvClose').onclick=()=>$('admPvOverlay').classList.remove('show');$('admPvPdf').onclick=downloadPdf}
+function parseVisitCsv(text){const lines=String(text||'').replace(/^\uFEFF/,'').trim().split(/\r?\n/);if(!lines.length)return[];const head=lines.shift().split(';');return lines.filter(Boolean).map(line=>{const a=line.split(';'),o={};head.forEach((h,i)=>o[h]=a[i]??'');return o})}
+async function loadVisitSchedule(){
+ if(Array.isArray(visitScheduleRows))return visitScheduleRows;
+ const files=[0,1,2,3,4].map(i=>new URL('visitas_full_part'+i+'.csv?v=20260921-relatorio-faltas-01',location.href).href);
+ const parts=await Promise.all(files.map(async u=>{const r=await fetch(u,{cache:'no-store'});if(!r.ok)throw Error('Não foi possível carregar a programação completa de visitas.');return parseVisitCsv(await r.text())}));
+ const map=new Map();
+ parts.flat().forEach(x=>{const pv=String(x.Cliente||'').trim(),rt=String(x.Rota||'').trim();if(pv&&rt)map.set(rt+'|'+pv,x)});
+ visitScheduleRows=[...map.values()];
+ return visitScheduleRows;
+}
+function scheduledClientsFor(rt,dy){
+ const days=['SEG','TER','QUA','QUI','SEX'];
+ const rows=visitScheduleRows||[];
+ return rows.filter(x=>{
+   const xr=String(x.Rota||'').trim();
+   if(rt!=='TODAS'&&xr!==rt)return false;
+   if(dy==='TODOS')return days.some(d=>Number(x[d]||0)>0);
+   return Number(x[dy]||0)>0;
+ }).map(x=>{
+   const dias=days.filter(d=>Number(x[d]||0)>0);
+   const ordem=dy==='TODOS'?Math.min(...dias.map(d=>Number(x[d]||0)).filter(n=>n>0)):Number(x[dy]||0);
+   return{pv:String(x.Cliente||'').trim(),cliente:String(x.Cliente||'').trim(),rota:String(x.Rota||'').trim(),razao:String(x['Razão Social']||'').trim(),subcanal:String(x.SubCanal||'').trim(),ordem:Number.isFinite(ordem)?ordem:0,dias};
+ }).sort((a,b)=>a.rota.localeCompare(b.rota)||a.ordem-b.ordem||a.razao.localeCompare(b.razao,'pt-BR'));
+}
 function buildRows(j){return (j.clients||[]).map(c=>({...c,_faltas:(c.faltas||[]).map(missingInfo).filter(x=>x.name)}))}
-async function openReport(){ensureOverlay();$('admPvOverlay').classList.add('show');$('admPvTitle').textContent='Relatório • '+labelRoute(route)+' • '+labelDay(day);$('admPvBody').innerHTML='<div class="admPvLoading">Gerando relatório e conferindo as vendas atuais...</div>';$('admPvPdf').disabled=true;$('admPvPdf').textContent='PREPARANDO PDF...';try{const j=await post({action:'day_report',token,rota:route,day});reportData={...j,clients:buildRows(j)};renderReport();preparePdf().catch(()=>{})}catch(e){$('admPvBody').innerHTML='<div class="admPvLoading">'+E(e.message)+'</div>'}}
+async function openReport(){ensureOverlay();$('admPvOverlay').classList.add('show');$('admPvTitle').textContent='Relatório • '+labelRoute(route)+' • '+labelDay(day);$('admPvBody').innerHTML='<div class="admPvLoading">Carregando todos os clientes programados do dia e conferindo as coberturas...</div>';$('admPvPdf').disabled=true;$('admPvPdf').textContent='PREPARANDO PDF...';try{await loadVisitSchedule();const scheduled=scheduledClientsFor(route,day);const j=await post({action:'day_report',token,rota:route,day,clients:scheduled});reportData={...j,clients:buildRows(j)};renderReport();preparePdf().catch(()=>{})}catch(e){$('admPvBody').innerHTML='<div class="admPvLoading">'+E(e.message)+'</div>'}}
 function renderReport(){const rows=reportData?.clients||[],programados=Number(reportData?.total_programados??rows.length),comFalta=Number(reportData?.total_com_falta??rows.length),cobertos=Math.max(programados-comFalta,0);$('admPvBody').innerHTML=`<div class="admPvSummary"><div class="admPvSum"><b>PROGRAMADOS</b><strong>${programados}</strong></div><div class="admPvSum"><b>COM FALTA</b><strong>${comFalta}</strong></div><div class="admPvSum"><b>COBERTOS</b><strong>${cobertos}</strong></div></div>`+rows.map(c=>`<article class="admPvCard"><div class="admPvCardTop"><div><span class="admPvOrder">${E(c.ordem)}</span> <b>PV ${E(c.pv)}</b><h3>${E(c.razao)}</h3><small>${E(c.subcanal||'Sem subcanal')} • Rota ${E(c.rota||'-')}${c.dias?.length?' • '+E(c.dias.join('/')):''}</small></div>${c._faltas.length?'<span class="admPvBadge">'+c._faltas.length+' oportunidade(s)</span>':'<span class="admPvCovered">✓ COBERTO</span>'}</div>${c._faltas.length?'<div class="admPvMissingTitle">O QUE FALTA</div><div class="admPvMissing">'+c._faltas.map(x=>x.simple?'<div class="admPvMiss"><b><span class="admPvX">✕</span> '+E(x.name)+'</b></div>':'<div class="admPvMiss"><b>'+E(x.name)+'</b>'+(x.products||[]).map(p=>'<div class="admPvProd"><span class="admPvX">✕</span> '+E(p)+'</div>').join('')+'</div>').join('')+'</div>':''}</article>`).join('')}
 async function loadJsPdf(){if(window.jspdf?.jsPDF)return;await new Promise((ok,no)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js';s.onload=ok;s.onerror=no;document.head.appendChild(s)})}
 function pdfLines(doc,t,w,size){doc.setFontSize(size);return doc.splitTextToSize(String(t||''),w)}
