@@ -175,14 +175,10 @@ window.invalidateAcompShare=()=>{shareBlob=null;shareFile=null;queueSharePrepara
 window.exportarAcompImagem=async()=>{
  try{
   const file=shareFile||await prepareShareImage();
-  if(navigator.share&&(!navigator.canShare||navigator.canShare({files:[file]}))){
-   await navigator.share({files:[file],title:'Coberturas • Equipe Iturama',text:'Acompanhamento geral da equipe'});
-   return;
-  }
-  const url=URL.createObjectURL(shareBlob||file),a=document.createElement('a');
-  a.href=url;a.download=TABLE.file+'.png';document.body.appendChild(a);a.click();a.remove();
+  const url=URL.createObjectURL(file),a=document.createElement('a');
+  a.href=url;a.download=TABLE.file+'.png';a.rel='noopener';document.body.appendChild(a);a.click();a.remove();
   setTimeout(()=>URL.revokeObjectURL(url),5000);
- }catch(e){if(e?.name!=='AbortError')alert(e?.message||'Não foi possível compartilhar a imagem.')}
+ }catch(e){alert(e?.message||'Não foi possível baixar a imagem.')}
 };
 function printPdf(id){
  const t=TABLE,poster=q('acompPoster1');if(!poster)throw Error('Tabela não encontrada.');
