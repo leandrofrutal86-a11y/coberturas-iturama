@@ -69,11 +69,15 @@ async function getBaseClients(force=false){
  baseLoading=true;renderPanel();
  try{
   let j=await api('client_base',{rota:rt});
-  baseClients=j.clients||[];
-  if(!baseClients.length){
-   const rows=await loadVisitRows();
-   baseClients=rows.filter(x=>rt==='TODOS'||String(x.Rota||'').trim()===rt).map(x=>({pv:String(x.Cliente||'').trim(),cliente:String(x.Cliente||'').trim(),rota:String(x.Rota||'').trim(),razao:String(x['Razão Social']||'').trim(),subcanal:String(x.SubCanal||'').trim()}));
-  }
+  const online=j.clients||[],rows=await loadVisitRows(),mp=new Map();
+  online.forEach(x=>{const k=String(x.rota||'').trim()+'|'+String(x.pv||x.cliente||'').trim();if(k!=='|')mp.set(k,x)});
+  rows.filter(x=>rt==='TODOS'||String(x.Rota||'').trim()===rt).forEach(x=>{
+   const pv=String(x.Cliente||'').trim(),rota=String(x.Rota||'').trim(),k=rota+'|'+pv;
+   if(!pv||!rota)return;
+   const cur=mp.get(k)||{};
+   mp.set(k,{pv,cliente:pv,rota,razao:String(cur.razao||x['Razão Social']||'').trim(),subcanal:String(cur.subcanal||x.SubCanal||'').trim()});
+  });
+  baseClients=[...mp.values()].sort((a,b)=>String(a.rota).localeCompare(String(b.rota))||String(a.razao).localeCompare(String(b.razao),'pt-BR'));
   baseKey=key;window.__pvBaseClients=baseClients;
   renderPanel();return baseClients;
  }finally{baseLoading=false;renderPanel()}
