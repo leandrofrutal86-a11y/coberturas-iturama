@@ -8,10 +8,15 @@ const DAYS=[
 ];
 const norm=v=>String(v??'').trim().toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const savedDay=sessionStorage.getItem('pv_dia_visita')||'',savedRoute=sessionStorage.getItem('pv_rota_pesquisa')||'TODOS';let selectedDay=DAYS.some(x=>x.code===savedDay)?savedDay:currentDay(),selectedRoute=savedRoute,clients=[],baseClients=[],loading=false,baseLoading=false,lastKey='',baseKey='',reportData=null,preparedPdfDoc=null,preparedPdfName='',preparedPdfBlob=null,preparedPdfFile=null,preparedPdfUrl='',preparingPdf=false;
+const savedDay=sessionStorage.getItem('pv_dia_visita')||'',savedRoute=sessionStorage.getItem('pv_rota_pesquisa')||'TODOS';let selectedDay=DAYS.some(x=>x.code===savedDay)?savedDay:currentDay(),selectedRoute=savedRoute,clients=[],baseClients=[],visitRows=null,loading=false,baseLoading=false,lastKey='',baseKey='',reportData=null,preparedPdfDoc=null,preparedPdfName='',preparedPdfBlob=null,preparedPdfFile=null,preparedPdfUrl='',preparingPdf=false;
 
 function currentDay(){const d=['DOM','SEG','TER','QUA','QUI','SEX','SAB'][new Date().getDay()];return DAYS.some(x=>x.code===d)?d:'SEG'}
-function route(){return String(window.getIturamaContext?.()||window.__ituramaContext||document.querySelector('#route')?.textContent||'').trim()}
+function route(){
+ try{
+  if(typeof DATA!=='undefined'&&DATA?.perfil==='consultor'&&DATA?.consultor?.rota)return String(DATA.consultor.rota).trim();
+ }catch{}
+ return String(window.getIturamaContext?.()||window.__ituramaContext||document.querySelector('#route')?.textContent||'').trim()
+}
 function isRogerioMulti(){try{return String(DATA?.perfil||'')==='acompanhante'&&String(DATA?.acesso?.matricula||DATA?.consultor?.matricula||'')==='5125'}catch{return false}}
 function availableRoutes(){try{return Array.isArray(DATA?.consultores)&&DATA.consultores.length?DATA.consultores:[{rota:'8A1',nome:'Lucas'},{rota:'8B1',nome:'Pedro Henrique'},{rota:'8C1',nome:'Pedro Afonso'},{rota:'8D1',nome:'Poliana'},{rota:'8F1',nome:'Heitor'}]}catch{return[]}}
 function effectiveRoute(){
@@ -46,13 +51,30 @@ function ensureReportOverlay(){
  document.getElementById('pvDayReportClose').onclick=()=>document.getElementById('pvDayReport').classList.remove('show');
  document.getElementById('pvDayPrint').onclick=downloadReportPdf;
 }
+function parseVisitCsv(text){
+ const lines=String(text||'').replace(/^\uFEFF/,'').trim().split(/\r?\n/);if(!lines.length)return[];
+ const head=lines.shift().split(';');
+ return lines.filter(Boolean).map(line=>{const a=line.split(';'),o={};head.forEach((h,i)=>o[h]=a[i]??'');return o});
+}
+async function loadVisitRows(){
+ if(Array.isArray(visitRows))return visitRows;
+ const files=[0,1,2,3,4].map(i=>new URL('admin-app/visitas_full_part'+i+'.csv?v=20260923-consultores-base-01',location.href).href);
+ const parts=await Promise.all(files.map(async u=>{const r=await fetch(u,{cache:'no-store'});if(!r.ok)throw Error('Falha ao carregar programação de visitas.');return parseVisitCsv(await r.text())}));
+ const map=new Map();parts.flat().forEach(x=>{const pv=String(x.Cliente||'').trim(),rt=String(x.Rota||'').trim();if(pv&&rt)map.set(rt+'|'+pv,x)});
+ visitRows=[...map.values()];return visitRows;
+}
 async function getBaseClients(force=false){
  const rt=effectiveRoute(),key=rt;
  if(!force&&key===baseKey&&baseClients.length)return baseClients;
  baseLoading=true;renderPanel();
  try{
-  const j=await api('client_base',{rota:rt});
-  baseClients=j.clients||[];baseKey=key;window.__pvBaseClients=baseClients;
+  let j=await api('client_base',{rota:rt});
+  baseClients=j.clients||[];
+  if(!baseClients.length){
+   const rows=await loadVisitRows();
+   baseClients=rows.filter(x=>rt==='TODOS'||String(x.Rota||'').trim()===rt).map(x=>({pv:String(x.Cliente||'').trim(),cliente:String(x.Cliente||'').trim(),rota:String(x.Rota||'').trim(),razao:String(x['Razão Social']||'').trim(),subcanal:String(x.SubCanal||'').trim()}));
+  }
+  baseKey=key;window.__pvBaseClients=baseClients;
   renderPanel();return baseClients;
  }finally{baseLoading=false;renderPanel()}
 }
@@ -61,8 +83,18 @@ async function getDayClients(force=false){
  if(!force&&key===lastKey&&clients.length)return clients;
  loading=true;renderPanel();
  try{
-  const j=await api('day_clients',{day:selectedDay,rota:rt});
-  clients=j.clients||[];lastKey=key;window.__pvDiaSelectedDay=selectedDay;window.__pvDiaClients=clients;
+  if(!baseClients.length||baseKey!==rt)await getBaseClients(false);
+  const rows=await loadVisitRows(),baseMap=new Map(baseClients.map(x=>[String(x.rota||'').trim()+'|'+String(x.pv||x.cliente||'').trim(),x]));
+  clients=rows.filter(x=>{
+   const xr=String(x.Rota||'').trim(),pv=String(x.Cliente||'').trim();
+   if(rt!=='TODOS'&&xr!==rt)return false;
+   if(Number(x[selectedDay]||0)<=0)return false;
+   return !baseClients.length||baseMap.has(xr+'|'+pv);
+  }).map(x=>{
+   const xr=String(x.Rota||'').trim(),pv=String(x.Cliente||'').trim(),b=baseMap.get(xr+'|'+pv)||{};
+   return{pv,cliente:pv,razao:String(b.razao||x['Razão Social']||'').trim(),rota:xr,subcanal:String(b.subcanal||x.SubCanal||'').trim(),ordem:Number(x[selectedDay]||0)};
+  }).sort((a,b)=>String(a.rota).localeCompare(String(b.rota))||Number(a.ordem)-Number(b.ordem)||String(a.razao).localeCompare(String(b.razao),'pt-BR'));
+  lastKey=key;window.__pvDiaSelectedDay=selectedDay;window.__pvDiaClients=clients;
   renderPanel();return clients;
  }finally{loading=false;renderPanel()}
 }
@@ -132,7 +164,7 @@ async function openReport(){
  const ov=document.getElementById('pvDayReport'),body=document.getElementById('pvDayReportBody'),title=document.getElementById('pvDayReportTitle');
  ov.classList.add('show');title.textContent=`Relatório • ${routeLabel(effectiveRoute())} • ${dayLabel(selectedDay)}`;body.innerHTML='<div class="pvDayProgress">Gerando relatório e conferindo as vendas atuais...</div>';if(preparedPdfUrl){try{URL.revokeObjectURL(preparedPdfUrl)}catch{}}preparedPdfDoc=null;preparedPdfName='';preparedPdfBlob=null;preparedPdfFile=null;preparedPdfUrl='';const pdfBtn=document.getElementById('pvDayPrint');if(pdfBtn){pdfBtn.disabled=true;pdfBtn.textContent='PREPARANDO PDF...';}
  try{
-  const j=await api('day_report',{day:selectedDay,rota:effectiveRoute()});reportData={...j,clients:buildReportRows(j)};
+  const j=await api('day_report',{day:selectedDay,rota:effectiveRoute(),clients});reportData={...j,clients:buildReportRows(j)};
   renderReport(reportData);prepareReportPdf().catch(()=>{});
  }catch(e){body.innerHTML=`<div class="pvDayProgress">${esc(e.message||'Não foi possível gerar o relatório.')}</div>`}
 }
