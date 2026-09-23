@@ -19,7 +19,20 @@ function searchPool(){const q=norm($('admPvNameSearch')?.value||'');if(!q)return
 function renderSearchMatches(force=true){const host=$('admPvNameResults');if(!host)return;const q=String($('admPvNameSearch')?.value||'').trim();if(!q){host.innerHTML='';return}const a=searchPool();if(!force&&q.length<2){host.innerHTML='';return}host.innerHTML=a.length?a.map(x=>`<button class="admPvNameHit" data-pv="${E(x.pv)}"><b>${E(x.razao||'Sem razão social')}</b><small>PV ${E(x.pv)} • Rota ${E(x.rota)}${x.dias?.length?' • '+E(x.dias.join('/')):''}</small></button>`).join(''):'<div class="admPvInfo">Nenhum cliente encontrado nos filtros escolhidos.</div>';host.querySelectorAll('[data-pv]').forEach(b=>b.onclick=()=>openClientPv(b.dataset.pv))}
 function searchByNameOrPv(){const raw=String($('admPvNameSearch')?.value||'').trim();if(!raw)return;const exact=clients.find(x=>String(x.pv)===raw);if(exact){openClientPv(exact.pv);return}const a=searchPool();if(a.length===1){openClientPv(a[0].pv);return}renderSearchMatches(true)}
 function drawDays(){$('admPvDays').innerHTML=DAYS.map(d=>`<button class="admPvDay ${d[0]===day?'on':''}" data-day="${d[0]}">${d[0]==='TODOS'?'TODOS':d[0]}</button>`).join('');$('admPvDays').querySelectorAll('[data-day]').forEach(b=>b.onclick=()=>{day=b.dataset.day;drawDays()})}
-async function loadClients(){const count=$('admPvCount'),sel=$('admPvClient');if(!count||!sel)return;count.textContent='Carregando base completa...';sel.innerHTML='<option value="">Carregando...</option>';try{const j=await post({action:'search_clients',token,rota:route});clients=j.clients||[];count.textContent=labelRoute(route)+' • '+clients.length+' cliente(s) na BASE GERAL';sel.innerHTML='<option value="">Selecione um cliente...</option>'+clients.map(x=>`<option value="${E(x.pv)}">${route==='TODAS'?E(x.rota)+' • ':''}${E(x.pv)} • ${E(x.razao)}</option>`).join('');renderSearchMatches(false)}catch(e){count.textContent='Erro: '+e.message;sel.innerHTML='<option value="">Não foi possível carregar</option>'}}
+async function loadClients(){const count=$('admPvCount'),sel=$('admPvClient');if(!count||!sel)return;count.textContent='Carregando base completa...';sel.innerHTML='<option value="">Carregando...</option>';try{
+ const [j,schedule]=await Promise.all([post({action:'search_clients',token,rota:route}),loadVisitSchedule()]);
+ const mp=new Map();
+ (j.clients||[]).forEach(x=>{const k=String(x.rota||'').trim()+'|'+String(x.pv||x.cliente||'').trim();if(k!=='|')mp.set(k,x)});
+ schedule.filter(x=>route==='TODAS'||String(x.Rota||'').trim()===route).forEach(x=>{
+  const pv=String(x.Cliente||'').trim(),rt=String(x.Rota||'').trim(),k=rt+'|'+pv;if(!pv||!rt)return;
+  const cur=mp.get(k)||{};
+  mp.set(k,{pv,cliente:pv,rota:rt,razao:String(cur.razao||x['Razão Social']||'').trim(),subcanal:String(cur.subcanal||x.SubCanal||'').trim()});
+ });
+ clients=[...mp.values()].sort((a,b)=>String(a.rota).localeCompare(String(b.rota))||String(a.razao).localeCompare(String(b.razao),'pt-BR'));
+ count.textContent=labelRoute(route)+' • '+clients.length+' cliente(s) na BASE GERAL';
+ sel.innerHTML='<option value="">Selecione um cliente...</option>'+clients.map(x=>`<option value="${E(x.pv)}">${route==='TODAS'?E(x.rota)+' • ':''}${E(x.pv)} • ${E(x.razao)}</option>`).join('');
+ renderSearchMatches(false)
+}catch(e){count.textContent='Erro: '+e.message;sel.innerHTML='<option value="">Não foi possível carregar</option>'}}
 function ensureOverlay(){if($('admPvOverlay'))return;document.body.insertAdjacentHTML('beforeend',`<div id="admPvOverlay" class="admPvOverlay"><div class="admPvSheet"><div class="admPvHead"><h2 id="admPvTitle">Relatório do dia</h2><div class="admPvHeadBtns"><button id="admPvPdf">⬇ BAIXAR PDF</button><button id="admPvClose">FECHAR</button></div></div><div id="admPvBody" class="admPvBody"></div></div></div>`);$('admPvClose').onclick=()=>$('admPvOverlay').classList.remove('show');$('admPvPdf').onclick=downloadPdf}
 function parseVisitCsv(text){const lines=String(text||'').replace(/^\uFEFF/,'').trim().split(/\r?\n/);if(!lines.length)return[];const head=lines.shift().split(';');return lines.filter(Boolean).map(line=>{const a=line.split(';'),o={};head.forEach((h,i)=>o[h]=a[i]??'');return o})}
 async function loadVisitSchedule(){
