@@ -185,11 +185,13 @@ async function load(){
   state=j;fillRoutes();renderEntries();renderDocs();
   $('ctAdmExport').disabled=!(state.entries||[]).length;
   $('ctAdmClear').disabled=clearing||!(state.entries||[]).length;
-  reportStatus((state.entries||[]).length?'':'Nenhum contrato neste filtro.')
+  reportStatus((state.entries||[]).length?'':'Nenhum contrato neste filtro.');
+  return true
  }catch(e){
   if(n!==loadRevision)return;
   $('ctAdmClear').disabled=true;
-  reportStatus('Erro ao carregar os contratos: '+e.message,false)
+  reportStatus('Erro ao carregar os contratos: '+e.message,false);
+  return false
  }
 }
 async function clearTable(){
@@ -199,7 +201,7 @@ async function clearTable(){
  const month=$('ctAdmMonth').value||monthNow(),route=$('ctAdmRoute').value||'';
  const monthLabel=new Date(month+'-01T12:00:00').toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
  const routeLabel=route||'TODAS AS ROTAS';
- if(!confirm('Limpar '+rows.length+' contrato(s) de '+monthLabel+' • '+routeLabel+'?\\n\\nOs lançamentos deixarão de aparecer também para os consultores. Os documentos publicados serão mantidos.'))return;
+ if(!confirm('Limpar '+rows.length+' contrato(s) de '+monthLabel+' • '+routeLabel+'?\n\nOs lançamentos deixarão de aparecer também para os consultores. Os documentos publicados serão mantidos.'))return;
  const typed=prompt('Para confirmar a limpeza de '+rows.length+' contrato(s), digite LIMPAR:');
  if(String(typed||'').trim().toUpperCase()!=='LIMPAR')return;
  if(key!==reportKey())return reportStatus('O filtro foi alterado. Confira a tabela antes de limpar.',false);
@@ -211,8 +213,9 @@ async function clearTable(){
   const ids=rows.map(x=>Number(x.id));
   const j=await call({action:'admin_clear_entries',month,route,ids});
   resetReport();
-  await load();
-  reportStatus('Tabela limpa: '+Number(j.cleared||0)+' contrato(s) arquivado(s). Documentos publicados preservados.');
+  const refreshed=await load();
+  if(refreshed)reportStatus('Tabela limpa: '+Number(j.cleared||0)+' contrato(s) arquivado(s). Documentos publicados preservados.');
+  else reportStatus('Contratos arquivados. Atualize a tela para conferir a tabela.',false);
  }catch(e){reportStatus('Não foi possível limpar a tabela: '+(e?.message||e),false)}
  finally{
   clearing=false;m.disabled=false;rt.disabled=false;btn.textContent='🧹 LIMPAR TABELA';
