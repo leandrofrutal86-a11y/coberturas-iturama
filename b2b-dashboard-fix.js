@@ -27,7 +27,24 @@ function total(){
   return vals.reduce((a,s)=>({compra:a.compra+Number(s?.compra||0),recompra:a.recompra+Number(s?.recompra||0)}),{compra:0,recompra:0});
 }
 function valuesFor(rt){
-  return rt==='TEAM'?total():(stats?.routes?.[rt]||{compra:0,recompra:0});
+  const r=String(rt||'').trim().toUpperCase();
+  return ['TEAM','TODOS','TODAS'].includes(r)?total():(stats?.routes?.[r]||{compra:0,recompra:0});
+}
+function ownRoute(){
+  // O acesso da equipe geral recebe a rota TODOS, mesmo quando a seleção
+  // anterior do navegador ainda aponta para uma rota individual.
+  try{
+    if(typeof DATA!=='undefined'&&DATA){
+      const r=String(DATA.consultor?.rota||'').trim().toUpperCase();
+      if(['TEAM','TODOS','TODAS'].includes(r))return 'TEAM';
+      if(r)return r;
+    }
+  }catch{}
+  return route();
+}
+function showingTeam(){
+  try{if(typeof TAB!=='undefined'&&TAB==='equipe')return true}catch{}
+  return ['TEAM','TODOS','TODAS'].includes(String(ownRoute()||'').trim().toUpperCase());
 }
 function applyRow(r,s){
   const nome=norm(r?.nome);
@@ -45,8 +62,7 @@ function patchData(){
   if(!stats?.routes)return;
   try{
     if(typeof DATA!=='undefined'&&DATA){
-      const rt=route();
-      const ownS=valuesFor(rt);
+      const ownS=valuesFor(ownRoute());
       (DATA.own||[]).forEach(r=>applyRow(r,ownS));
       const teamS=total();
       (DATA.team||[]).forEach(r=>applyRow(r,teamS));
@@ -63,7 +79,9 @@ function patchData(){
 }
 function patchDom(){
   if(!stats?.routes)return;
-  const s=valuesFor(route());
+  // A aba Resultado da Equipe (ou o perfil de equipe geral) deve mostrar
+  // os números consolidados, nunca os números da última rota selecionada.
+  const s=showingTeam()?total():valuesFor(ownRoute());
   document.querySelectorAll('#results tbody tr').forEach(tr=>{
     const txt=norm(tr.cells?.[0]?.textContent||'');
     let n=null;
