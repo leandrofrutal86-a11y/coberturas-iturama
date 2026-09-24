@@ -5,7 +5,7 @@ const E=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt
 const money=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 const monthNow=()=>{const d=new Date(),m=String(d.getMonth()+1).padStart(2,'0');return d.getFullYear()+'-'+m};
 let state={routes:[],entries:[],documents:[]},mounted=false;
-let report=null,reportBusy=false,loadRevision=0;
+let report=null,reportBusy=false,loadRevision=0,clearing=false;
 
 function token(){return sessionStorage.getItem('admToken')||String(window.token||'')}
 async function call(body){const r=await fetch(API+'?v='+Date.now(),{method:'POST',cache:'no-store',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:token(),...body})});const j=await r.json().catch(()=>({}));if(!r.ok||j.error)throw Error(j.error||'Erro de conexão');return j}
@@ -30,6 +30,7 @@ function css(){
  #adminContracts .ctReportActions[hidden]{display:none!important}
  #adminContracts .ctReportActions .ctBtn{background:#08774b}#adminContracts .ctReportActions .ctBtn.download{background:#1464a1}
  #adminContracts .ctBtn:disabled{background:#9ba7b0!important;cursor:wait}
+ #adminContracts .ctBtn.danger{background:#ac1b25}#adminContracts .ctBtn.danger:not(:disabled):hover{background:#870c16}
  #adminContracts .ctTableWrap{overflow:auto;border:1px solid #e0e6eb;border-radius:11px}.ctTable{width:100%;border-collapse:collapse;min-width:900px}.ctTable th{background:#172534;color:#fff}.ctTable th,.ctTable td{padding:8px 7px;border-bottom:1px solid #e5eaee;font-size:11px;text-align:left}.ctTable td.num{text-align:right;font-weight:800}
  #adminContracts .ctDocs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.ctDoc{border:1px solid #dce3e9;border-radius:12px;padding:10px}.ctDoc img{width:100%;max-height:230px;object-fit:contain;border-radius:8px;background:#f4f6f8}.ctDoc h4{margin:8px 0 4px}.ctDoc small{color:#627485}.ctDocActions{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.ctDocActions a,.ctDocActions button{border:0;border-radius:8px;padding:8px 10px;font-weight:800;text-decoration:none;cursor:pointer}.ctOpen{background:#1677d2;color:#fff}.ctDel{background:#ffe1e1;color:#a31212}
  @media(max-width:760px){#adminContracts .ctGrid{grid-template-columns:1fr}.ctForm{grid-template-columns:1fr}.ctForm .full{grid-column:auto}.ctRoutes{grid-template-columns:1fr 1fr}.ctDocs{grid-template-columns:1fr}}
@@ -45,7 +46,7 @@ function shell(){
   <div class="ctPanel"><h3>Contratos feitos pela equipe</h3>
    <div class="ctForm"><div><label>MÊS</label><input id="ctAdmMonth" type="month" value="${monthNow()}"></div><div><label>ROTA</label><select id="ctAdmRoute"><option value="">TODAS AS ROTAS</option></select></div></div>
    <div id="ctAdmSummary" class="ctSummary"></div>
-   <div class="ctReportBar"><button id="ctAdmExport" class="ctBtn alt" type="button" disabled>📄 EXTRAIR RELATÓRIO</button><div id="ctAdmReportActions" class="ctReportActions" hidden><button id="ctAdmShare" class="ctBtn" type="button">📤 COMPARTILHAR PDF</button><button id="ctAdmDownload" class="ctBtn download" type="button">⬇️ BAIXAR PDF</button></div></div>
+   <div class="ctReportBar"><button id="ctAdmExport" class="ctBtn alt" type="button" disabled>📄 EXTRAIR RELATÓRIO</button><button id="ctAdmClear" class="ctBtn danger" type="button" disabled>🧹 LIMPAR TABELA</button><div id="ctAdmReportActions" class="ctReportActions" hidden><button id="ctAdmShare" class="ctBtn" type="button">📤 COMPARTILHAR PDF</button><button id="ctAdmDownload" class="ctBtn download" type="button">⬇️ BAIXAR PDF</button></div></div>
    <div id="ctAdmReportStatus" class="ctStatus" aria-live="polite"></div><div id="ctAdmEntries"></div>
   </div>
   <div class="ctPanel"><h3>Publicar contrato para consultor</h3>
@@ -84,6 +85,7 @@ function resetReport(){
  report=null;
  const actions=$('ctAdmReportActions');if(actions)actions.hidden=true;
  const button=$('ctAdmExport');if(button){button.textContent='📄 EXTRAIR RELATÓRIO';button.disabled=true}
+ const clearButton=$('ctAdmClear');if(clearButton)clearButton.disabled=true;
  reportStatus('');
 }
 function loadPdfScript(id,url,ready){
@@ -103,7 +105,7 @@ function fmtDate(s){
 }
 async function extractReport(){
  if(reportBusy)return;
- const rows=[...(state.entries||[])].map(x=>({...x})),key=reportKey();
+ const rows=[...(state.entries||[])].map(x=>({...x})),key=reportKey(),revision=loadRevision;
  if(!rows.length){reportStatus('Nenhum contrato para extrair neste filtro.',false);return}
  reportBusy=true;report=null;$('ctAdmReportActions').hidden=true;
  const button=$('ctAdmExport');button.disabled=true;button.textContent='⏳ GERANDO PDF...';
@@ -111,7 +113,7 @@ async function extractReport(){
  try{
   await loadPdfScript('ctAdmJsPdf','https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js',()=>!!window.jspdf?.jsPDF);
   await loadPdfScript('ctAdmAutoTable','https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.4/dist/jspdf.plugin.autotable.min.js',()=>typeof window.jspdf?.jsPDF?.API?.autoTable==='function');
-  if(key!==reportKey())return;
+  if(key!==reportKey()||revision!==loadRevision)return;
   const {jsPDF}=window.jspdf,doc=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
   if(typeof doc.autoTable!=='function')throw Error('A tabela do PDF não está disponível.');
   const m=$('ctAdmMonth').value||monthNow(),rt=$('ctAdmRoute').value||'';
@@ -143,14 +145,14 @@ async function extractReport(){
   });
   const name='relatorio_contratos_'+m+'_'+(rt||'todas_rotas')+'.pdf';
   const blob=doc.output('blob'),file=new File([blob],name,{type:'application/pdf'});
-  if(key!==reportKey())return;
+  if(key!==reportKey()||revision!==loadRevision)return;
   report={blob,file,name,key};
   $('ctAdmReportActions').hidden=false;
   reportStatus('PDF pronto! Escolha compartilhar ou baixar.');
  }catch(e){reportStatus(e?.message||'Não foi possível gerar o PDF.',false)}
  finally{
   reportBusy=false;
-  if(key===reportKey()){
+  if(key===reportKey()&&revision===loadRevision){
    button.textContent='📄 EXTRAIR RELATÓRIO';
    button.disabled=!(state.entries||[]).length
   }
@@ -182,10 +184,40 @@ async function load(){
   if(n!==loadRevision)return;
   state=j;fillRoutes();renderEntries();renderDocs();
   $('ctAdmExport').disabled=!(state.entries||[]).length;
+  $('ctAdmClear').disabled=clearing||!(state.entries||[]).length;
   reportStatus((state.entries||[]).length?'':'Nenhum contrato neste filtro.')
  }catch(e){
   if(n!==loadRevision)return;
+  $('ctAdmClear').disabled=true;
   reportStatus('Erro ao carregar os contratos: '+e.message,false)
+ }
+}
+async function clearTable(){
+ if(clearing||reportBusy)return reportBusy?reportStatus('Aguarde a geração do PDF antes de limpar a tabela.',false):undefined;
+ const rows=[...(state.entries||[])],key=reportKey();
+ if(!rows.length)return reportStatus('Não há contratos para limpar neste mês e rota.',false);
+ const month=$('ctAdmMonth').value||monthNow(),route=$('ctAdmRoute').value||'';
+ const monthLabel=new Date(month+'-01T12:00:00').toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+ const routeLabel=route||'TODAS AS ROTAS';
+ if(!confirm('Limpar '+rows.length+' contrato(s) de '+monthLabel+' • '+routeLabel+'?\\n\\nOs lançamentos deixarão de aparecer também para os consultores. Os documentos publicados serão mantidos.'))return;
+ const typed=prompt('Para confirmar a limpeza de '+rows.length+' contrato(s), digite LIMPAR:');
+ if(String(typed||'').trim().toUpperCase()!=='LIMPAR')return;
+ if(key!==reportKey())return reportStatus('O filtro foi alterado. Confira a tabela antes de limpar.',false);
+ clearing=true;
+ const btn=$('ctAdmClear'),exp=$('ctAdmExport'),m=$('ctAdmMonth'),rt=$('ctAdmRoute');
+ btn.disabled=true;btn.textContent='⏳ LIMPANDO...';exp.disabled=true;m.disabled=true;rt.disabled=true;
+ reportStatus('Arquivando os contratos selecionados...');
+ try{
+  const ids=rows.map(x=>Number(x.id));
+  const j=await call({action:'admin_clear_entries',month,route,ids});
+  resetReport();
+  await load();
+  reportStatus('Tabela limpa: '+Number(j.cleared||0)+' contrato(s) arquivado(s). Documentos publicados preservados.');
+ }catch(e){reportStatus('Não foi possível limpar a tabela: '+(e?.message||e),false)}
+ finally{
+  clearing=false;m.disabled=false;rt.disabled=false;btn.textContent='🧹 LIMPAR TABELA';
+  btn.disabled=!(state.entries||[]).length;
+  exp.disabled=!(state.entries||[]).length;
  }
 }
 async function upload(){
@@ -194,7 +226,7 @@ async function upload(){
  const fd=new FormData();fd.set('action','admin_upload_document');fd.set('titulo',title);fd.set('rotas',JSON.stringify(routes));fd.set('file',f);
  try{$('ctAdmUpload').disabled=true;setStatus('Enviando contrato...');await callForm(fd);$('ctAdmTitle').value='';$('ctAdmFile').value='';document.querySelectorAll('#ctAdmRoutes input').forEach(x=>x.checked=false);await load();setStatus('Contrato publicado com sucesso.')}catch(e){setStatus(e.message,false)}finally{$('ctAdmUpload').disabled=false}
 }
-function wire(){$('ctAdmBack').onclick=showHome;$('ctAdmMonth').onchange=load;$('ctAdmRoute').onchange=load;$('ctAdmUpload').onclick=upload;$('ctAdmExport').onclick=extractReport;$('ctAdmShare').onclick=shareReport;$('ctAdmDownload').onclick=downloadReport}
+function wire(){$('ctAdmBack').onclick=showHome;$('ctAdmMonth').onchange=load;$('ctAdmRoute').onchange=load;$('ctAdmUpload').onclick=upload;$('ctAdmExport').onclick=extractReport;$('ctAdmClear').onclick=clearTable;$('ctAdmShare').onclick=shareReport;$('ctAdmDownload').onclick=downloadReport}
 function boot(){css();shell();ensureCard();const mo=new MutationObserver(()=>ensureCard());mo.observe(document.body,{childList:true,subtree:true});setInterval(ensureCard,1200)}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
 })();
