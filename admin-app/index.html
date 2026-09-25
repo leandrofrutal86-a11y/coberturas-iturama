@@ -21,14 +21,20 @@ function installRobust(w){
       const r=await fetch(url+'?v='+Date.now(),{method:'POST',mode:'cors',cache:'no-store',credentials:'omit',headers:{'Content-Type':'text/plain;charset=UTF-8','Accept':'application/json'},body:JSON.stringify(payload),signal:ctrl.signal});
       let j={};try{j=await r.json()}catch{}
       if(r.ok)return j;
-      throw new Error(j.error||('Erro '+r.status));
+      const err=new Error(j.error||('Erro '+r.status));
+      if([400,401,403].includes(r.status))err.noRetry=true;
+      throw err;
     }finally{clearTimeout(to)}
   }
   async function robustPost(payload){
-    const urls=payload&&payload.action==='login'?loginUrls:adminUrls;
+    const isLogin=payload?.action==='login',urls=isLogin?[loginUrls[0],loginUrls[0],adminUrls[0],loginUrls[1]]:adminUrls;
     let last=null;
-    for(const u of urls){try{return await once(u,payload,payload?.action==='login'?6000:18000)}catch(e){last=e}}
-    throw last||new Error('Falha de conexão com o servidor.');
+    for(let i=0;i<urls.length;i++){
+      try{return await once(urls[i],payload,isLogin?7500:18000)}
+      catch(e){if(e?.noRetry)throw e;last=e;if(isLogin&&i===0)await new Promise(r=>setTimeout(r,600))}
+    }
+    const offline=typeof navigator!=='undefined'&&navigator.onLine===false;
+    throw new Error(offline?'Sem conexão com a internet. Verifique a rede e tente novamente.':isLogin?'Falha temporária de conexão com o ADM. Aguarde alguns segundos e toque em ENTRAR novamente.':'Falha temporária de conexão com o servidor. Atualize a página e tente novamente.');
   }
   w.__adminRobustPost=robustPost;w.post=robustPost;try{w.eval('post=window.__adminRobustPost')}catch(e){}
 }
@@ -44,7 +50,7 @@ frame.addEventListener('load',function(){
   installRobust(w);
   this.style.visibility='visible';
   const x=d.createElement('script');x.src='https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';d.head.appendChild(x);
-  ['admin-fetch-fix.js?v=20260917-acomp-data-04','admin-login-remember.js?v=20260916-remember-01','category-manager.js?v=20260916-b2b-config-01','quantidade-minima.js?v=20260916-b2b-config-01','b2b-admin.js?v=20260916-b2b-config-01','b2b-config-fix.js?v=20260916-b2b-config-01','coke-home.js?v=20260921-avatar-leandro-01','trio-pao-queijo-report.js?v=20260918-refpet-02','access-manager.js?v=20260920-who-accessed-02','acompanhante-access.js?v=20260914-acomp-access-01','visitas-subcanais.js?v=20260914-visitas-open-02','admin-layout-fix.js?v=20260911-visao-03','card-nav-fix.js?v=20260920-who-accessed-02','subcanais-admin-ui.js?v=20260909-subcanais-01','subcanais-standalone.js?v=20260909-subfix-01','material-manager-v2.js?v=20260919-faixa-order-02','material-display-fix.js?v=20260916-materiais-menu-01','material-faixa-bulk.js?v=20260916-faixa-bulk-01','acomp-export.js?v=20260925-download-sem-interrupcao-10','acomp-visible-render-fix.js?v=20260921-tabela-unica-share-03','conteudos-manager.js?v=20260910-conteudos-03','conteudos-cards-fix.js?v=20260920-topicos-01','b2b-dashboard-fix.js?v=20260925-recompra-rotas-03','imperdoaveis-manager.js?v=20260917-imp-report-base-01','imperdoaveis-relatorio.js?v=20260918-imp-audit-02','imperdoaveis-relatorio-manual.js?v=20260918-imp-audit-01','imperdoaveis-hide-out.js?v=20260910-imp-06','admin-pv-dia.js?v=20260923-base-imperdoaveis-03','admin-mobile-fit.js?v=20260910-mobile-01','admin-contracts.js?v=20260924-contratos-limpar-04','trio-labels.js?v=20260918-refpet-02','contatos-clientes.js?v=20260914-contatos-rotas-01','footer-credit.js?v=20260911-credit-01','exclusive-nav-fix.js?v=20260925-acomp-voltar-02','visitas-clientes-fix.js?v=20260914-visitas-fix-03','acomp-mobile-fit-v2.js?v=20260921-tabela-unica-share-03','acomp-consultor-individual.js?v=20260925-consulta-rota-01'].forEach(src=>{const s=d.createElement('script');s.src=src;d.body.appendChild(s)});
+  ['admin-fetch-fix.js?v=20260925-login-rede-05','admin-login-remember.js?v=20260916-remember-01','category-manager.js?v=20260916-b2b-config-01','quantidade-minima.js?v=20260916-b2b-config-01','b2b-admin.js?v=20260916-b2b-config-01','b2b-config-fix.js?v=20260916-b2b-config-01','coke-home.js?v=20260921-avatar-leandro-01','trio-pao-queijo-report.js?v=20260918-refpet-02','access-manager.js?v=20260920-who-accessed-02','acompanhante-access.js?v=20260914-acomp-access-01','visitas-subcanais.js?v=20260914-visitas-open-02','admin-layout-fix.js?v=20260911-visao-03','card-nav-fix.js?v=20260920-who-accessed-02','subcanais-admin-ui.js?v=20260909-subcanais-01','subcanais-standalone.js?v=20260909-subfix-01','material-manager-v2.js?v=20260919-faixa-order-02','material-display-fix.js?v=20260916-materiais-menu-01','material-faixa-bulk.js?v=20260916-faixa-bulk-01','acomp-export.js?v=20260925-download-sem-interrupcao-10','acomp-visible-render-fix.js?v=20260921-tabela-unica-share-03','conteudos-manager.js?v=20260910-conteudos-03','conteudos-cards-fix.js?v=20260920-topicos-01','b2b-dashboard-fix.js?v=20260925-recompra-rotas-03','imperdoaveis-manager.js?v=20260917-imp-report-base-01','imperdoaveis-relatorio.js?v=20260918-imp-audit-02','imperdoaveis-relatorio-manual.js?v=20260918-imp-audit-01','imperdoaveis-hide-out.js?v=20260910-imp-06','admin-pv-dia.js?v=20260923-base-imperdoaveis-03','admin-mobile-fit.js?v=20260910-mobile-01','admin-contracts.js?v=20260924-contratos-limpar-04','trio-labels.js?v=20260918-refpet-02','contatos-clientes.js?v=20260914-contatos-rotas-01','footer-credit.js?v=20260911-credit-01','exclusive-nav-fix.js?v=20260925-acomp-voltar-02','visitas-clientes-fix.js?v=20260914-visitas-fix-03','acomp-mobile-fit-v2.js?v=20260921-tabela-unica-share-03','acomp-consultor-individual.js?v=20260925-consulta-rota-01'].forEach(src=>{const s=d.createElement('script');s.src=src;d.body.appendChild(s)});
   if(returnToken){
     setTimeout(async()=>{
       try{
