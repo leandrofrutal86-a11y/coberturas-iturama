@@ -72,7 +72,7 @@ function addStyle(){
 .acompGrid .sepL{border-left:2px solid #7f8c96!important}
 .acompFooter{background:linear-gradient(180deg,#c7000b,#a70007);padding:10px 14px;display:flex;justify-content:center;gap:16px;flex-wrap:wrap}
 .acompBtn{border:0!important;border-radius:9px!important;padding:10px 18px!important;font-size:12px!important;font-weight:950!important;color:#fff!important;cursor:pointer!important;box-shadow:0 3px 7px #0003!important}
-.acompBtn.img{background:linear-gradient(#168af1,#0065bb)!important}.acompBtn.pdf{background:linear-gradient(#21b84c,#098832)!important}
+.acompBtn.img{background:linear-gradient(#168af1,#0065bb)!important}.acompBtn.share{background:linear-gradient(#20a858,#097943)!important}.acompBtn:disabled{opacity:.72!important;cursor:wait!important}.acompShareStatus{color:#fff;text-align:center;font-size:11px;font-weight:800;width:100%;min-height:12px}
 .acompBtn small{font-size:9px!important;font-weight:800!important}
 .mobileLabel{display:none}
 
@@ -101,7 +101,7 @@ function addStyle(){
  .acompGrid .sepL{border-left-width:1px!important}
  .acompGrid .teamHead{font-size:5.8px!important}
  .desktopLabel{display:none!important}.mobileLabel{display:inline!important}
- .acompFooter{padding:7px 5px;gap:5px;display:grid;grid-template-columns:1fr}
+ .acompFooter{padding:7px 5px;gap:5px;display:grid;grid-template-columns:1fr 1fr}.acompShareStatus{grid-column:1/-1;font-size:9px}
  .acompBtn{padding:8px 3px!important;font-size:7.5px!important;line-height:1.1!important;width:100%}
  .acompBtn small{font-size:6px!important}
 }
@@ -123,7 +123,7 @@ function ensureLayout(){
  const legacy=box.querySelector('table.wide')||box.querySelector('table');if(legacy)legacy.classList.add('acompLegacyTable');
  let root=q('acompSplitRoot');if(root&&root.dataset.unified==='1')return root;if(root)root.remove();
  root=document.createElement('div');root.id='acompSplitRoot';root.dataset.unified='1';
- root.innerHTML=`<section class="acompPanel"><div id="acompPoster1" class="acompPoster"><div class="acompHero"><div class="acompTitle">ACOMPANHAMENTO GERAL DA EQUIPE</div><div class="acompBadge">COBERTURAS</div></div><div class="acompGrid"><table><thead id="thAcomp1"></thead><tbody id="tbAcomp1"></tbody></table></div></div><div class="acompFooter"><button id="acompShareImageBtn" class="acompBtn img" onclick="exportarAcompImagem(1)">🖼️ BAIXAR IMAGEM <small>(ALTA RESOLUÇÃO)</small></button></div></section>`;
+ root.innerHTML=`<section class="acompPanel"><div id="acompPoster1" class="acompPoster"><div class="acompHero"><div class="acompTitle">ACOMPANHAMENTO GERAL DA EQUIPE</div><div class="acompBadge">COBERTURAS</div></div><div class="acompGrid"><table><thead id="thAcomp1"></thead><tbody id="tbAcomp1"></tbody></table></div></div><div class="acompFooter"><button id="acompDownloadImageBtn" class="acompBtn img" type="button" onclick="exportarAcompImagem()">⬇️ BAIXAR IMAGEM <small>(ALTA RESOLUÇÃO)</small></button><button id="acompShareImageBtn" class="acompBtn share" type="button" onclick="compartilharAcompImagem()">📤 COMPARTILHAR IMAGEM</button><div id="acompShareStatus" class="acompShareStatus" aria-live="polite"></div></div></section>`;
  if(legacy)legacy.insertAdjacentElement('afterend',root);else box.appendChild(root);return root;
 }
 
@@ -161,54 +161,68 @@ async function capture(id,scale=3){
  const target=1280;
  try{return await html2canvas(a,{scale,backgroundColor:'#fff',useCORS:true,logging:false,windowWidth:target+40})}finally{a.classList.remove('acompExporting');grid.style.removeProperty('overflow')}
 }
-let shareBlob=null,shareFile=null,sharePreparing=null;
-function setImageButton(state){
- const btn=q('acompShareImageBtn');if(!btn)return;
- btn.disabled=state==='preparing';
- if(state==='preparing')btn.innerHTML='⏳ PREPARANDO IMAGEM...';
- else if(state==='ready')btn.innerHTML='📤 COMPARTILHAR IMAGEM <small>TOQUE AQUI</small>';
- else if(state==='retry')btn.innerHTML='🖼️ TENTAR NOVAMENTE';
- else btn.innerHTML='🖼️ BAIXAR IMAGEM <small>(ALTA RESOLUÇÃO)</small>';
+let shareBlob=null,shareFile=null,sharePreparing=null,shareVersion=0;
+function setExportStatus(message,err=false){
+ const el=q('acompShareStatus');if(!el)return;
+ el.textContent=message||'';el.style.color=err?'#ffec91':'#fff';
+}
+function setImageButtons(preparing=false){
+ const down=q('acompDownloadImageBtn'),share=q('acompShareImageBtn');
+ if(down){down.disabled=preparing;down.innerHTML=preparing?'⏳ GERANDO IMAGEM...':'⬇️ BAIXAR IMAGEM <small>(ALTA RESOLUÇÃO)</small>'}
+ if(share){share.disabled=preparing;share.innerHTML=preparing?'⏳ PREPARANDO...':shareFile?'📤 COMPARTILHAR IMAGEM <small>(PRONTO)</small>':'📤 COMPARTILHAR IMAGEM'}
 }
 function canvasBlob(canvas){return new Promise((ok,no)=>canvas.toBlob(b=>b?ok(b):no(Error('Não foi possível gerar a imagem.')),'image/png',1))}
-function timeout(ms,msg){return new Promise((_,no)=>setTimeout(()=>no(Error(msg)),ms))}
-async function prepareShareImage(force=false){
- if(shareFile&&!force)return shareFile;
- if(sharePreparing)return sharePreparing;
- setImageButton('preparing');
- sharePreparing=(async()=>{
-  const canvas=await Promise.race([
-   capture(1,2.0),
-   timeout(25000,'A imagem demorou demais para ser gerada. Tente novamente.')
-  ]);
-  const blob=await canvasBlob(canvas);
-  shareBlob=blob;
-  shareFile=new File([blob],TABLE.file+'.png',{type:'image/png'});
-  setImageButton('ready');
-  return shareFile;
- })().catch(e=>{setImageButton('retry');throw e}).finally(()=>sharePreparing=null);
- return sharePreparing;
+function downloadBlob(blob,name){
+ const url=URL.createObjectURL(blob),a=document.createElement('a');
+ a.href=url;a.download=name;a.rel='noopener';a.style.display='none';document.body.appendChild(a);a.click();a.remove();
+ setTimeout(()=>URL.revokeObjectURL(url),30000);
 }
-window.invalidateAcompShare=()=>{shareBlob=null;shareFile=null;setImageButton('idle')};
+async function prepareAcompImage(){
+ if(shareFile)return shareFile;
+ if(sharePreparing)return sharePreparing;
+ const version=shareVersion;
+ setImageButtons(true);setExportStatus('Preparando imagem em alta resolução...');
+ const task=(async()=>{
+  const canvas=await capture(1,window.innerWidth<800?1.7:2);
+  const blob=await canvasBlob(canvas);
+  if(version!==shareVersion)throw Error('A tabela foi atualizada. Toque novamente para gerar a imagem atual.');
+  shareBlob=blob;shareFile=new File([blob],TABLE.file+'.png',{type:'image/png'});
+  setExportStatus('Imagem pronta. Escolha baixar ou compartilhar.');
+  return shareFile
+ })();
+ sharePreparing=task;
+ try{return await task}catch(e){setExportStatus(e?.message||'Não foi possível preparar a imagem.',true);throw e}
+ finally{if(sharePreparing===task)sharePreparing=null;setImageButtons(false)}
+}
+window.invalidateAcompShare=()=>{
+ shareVersion++;shareBlob=null;shareFile=null;
+ setImageButtons(false);setExportStatus('');
+};
 window.exportarAcompImagem=async()=>{
  try{
-  // Primeiro toque: gera a imagem. Depois o botão muda para COMPARTILHAR IMAGEM.
-  // O segundo toque é necessário para o Android considerar uma ação direta do usuário.
-  if(!shareFile){
-   await prepareShareImage();
-   return;
-  }
-  const file=shareFile;
-  if(navigator.share&&(!navigator.canShare||navigator.canShare({files:[file]}))){
-   try{
-    await navigator.share({files:[file],title:'Coberturas • Equipe Iturama',text:'Acompanhamento geral da equipe'});
-    return;
-   }catch(e){if(e?.name==='AbortError')return;throw e}
-  }
-  const url=URL.createObjectURL(shareBlob||file),a=document.createElement('a');
-  a.href=url;a.download=TABLE.file+'.png';a.rel='noopener';document.body.appendChild(a);a.click();a.remove();
-  setTimeout(()=>URL.revokeObjectURL(url),5000);
- }catch(e){setImageButton('retry');alert(e?.message||'Não foi possível preparar ou compartilhar a imagem.')}
+  const file=shareFile||await prepareAcompImage();
+  downloadBlob(shareBlob||file,TABLE.file+'.png');
+  setExportStatus('Imagem baixada. Você também pode compartilhar.')
+ }catch(e){alert(e?.message||'Não foi possível baixar a imagem.')}
+};
+window.compartilharAcompImagem=()=>{
+ // O compartilhamento deve ser iniciado diretamente pelo toque, sem await.
+ if(!shareFile){
+  prepareAcompImage().then(()=>setExportStatus('Imagem pronta! Toque novamente em COMPARTILHAR IMAGEM.')).catch(()=>{});
+  return
+ }
+ const file=shareFile;
+ let supported=!!navigator.share;
+ try{if(supported&&navigator.canShare)supported=navigator.canShare({files:[file]})}catch{supported=false}
+ if(!supported){
+  downloadBlob(shareBlob||file,TABLE.file+'.png');
+  setExportStatus('Seu navegador não compartilha arquivos diretamente. A imagem foi baixada para você enviar.');
+  return
+ }
+ try{
+  const result=navigator.share({files:[file],title:'Coberturas • Equipe Iturama',text:'Acompanhamento geral da equipe'});
+  Promise.resolve(result).catch(e=>{if(e?.name!=='AbortError')setExportStatus(e?.message||'Não foi possível compartilhar. Use Baixar Imagem.',true)})
+ }catch(e){setExportStatus(e?.message||'Não foi possível compartilhar. Use Baixar Imagem.',true)}
 };
 function printPdf(id){
  const t=TABLE,poster=q('acompPoster1');if(!poster)throw Error('Tabela não encontrada.');
