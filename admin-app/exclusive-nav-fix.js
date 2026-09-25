@@ -62,6 +62,21 @@
     };
   }
 
+  // No Acompanhamento, Sair volta ao menu anterior sem encerrar o acesso.
+  // A captura impede que o onclick legado sair() descarte a sessão.
+  document.addEventListener('click',e=>{
+    const btn=e.target.closest('header button[onclick]');
+    if(!btn||String(btn.getAttribute('onclick')||'').replace(/\\s+/g,'').toLowerCase()!=='sair()')return;
+    const acomp=$('acomp');
+    if(!acomp||acomp.classList.contains('hide'))return;
+    e.preventDefault();e.stopImmediatePropagation();
+    const back=$('backHome');
+    if(back){back.click();return}
+    pageIds.forEach(id=>$(id)?.classList.add('hide'));
+    $('cokeHome')?.classList.remove('hide');
+    window.scrollTo({top:0,behavior:'smooth'});
+  },true);
+
   let n=0;const timer=setInterval(()=>{bindCards();if(++n>100)clearInterval(timer)},150);
   document.addEventListener('click',e=>{if(e.target.closest('.menuCard'))setTimeout(bindCards,0)});
 })();
