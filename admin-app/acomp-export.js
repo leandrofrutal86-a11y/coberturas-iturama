@@ -155,8 +155,10 @@ function renderOne(t,d){
  const inds=(d.individual||[]).slice(),entries=catEntries(d),th=q('thAcomp1'),tb=q('tbAcomp1');if(!th||!tb)return false;
  th.innerHTML=headerHtml(inds);tb.innerHTML=entries.map(e=>categoryRow(e,inds)).join('');return true;
 }
-let lastRenderSignature='';
+let lastRenderSignature='',exportCaptureActive=false;
 function render(){
+ // Não reescreva a tabela enquanto a imagem está sendo capturada.
+ if(exportCaptureActive)return true;
  const d=getDash();if(!d)return false;addStyle();ensureLayout();
  const ok=renderOne(TABLE,d);
  if(ok){
@@ -168,12 +170,21 @@ function render(){
 
 function load(src,test){return new Promise((ok,no)=>{if(test())return ok();const s=document.createElement('script');s.src=src;s.onload=ok;s.onerror=()=>no(Error('Não foi possível carregar o recurso de exportação.'));document.head.appendChild(s)})}
 async function capture(id,scale=3){
- await load('https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js',()=>!!window.html2canvas);
- const a=q('acompPoster'+id);if(!a)throw Error('Tabela não encontrada.');
- const grid=a.querySelector('.acompGrid');
- a.classList.add('acompExporting');
- const target=1280;
- try{return await html2canvas(a,{scale,backgroundColor:'#fff',useCORS:true,logging:false,windowWidth:target+40})}finally{a.classList.remove('acompExporting');grid.style.removeProperty('overflow')}
+ // Congela somente a apresentação durante o clique; os dados continuam no painel.
+ exportCaptureActive=true;
+ let a=null,grid=null;
+ try{
+  await load('https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js',()=>!!window.html2canvas);
+  a=q('acompPoster'+id);if(!a)throw Error('Tabela não encontrada.');
+  grid=a.querySelector('.acompGrid');
+  a.classList.add('acompExporting');
+  const target=1280;
+  return await html2canvas(a,{scale,backgroundColor:'#fff',useCORS:true,logging:false,windowWidth:target+40});
+ }finally{
+  if(a)a.classList.remove('acompExporting');
+  if(grid)grid.style.removeProperty('overflow');
+  exportCaptureActive=false;
+ }
 }
 let shareBlob=null,shareFile=null,sharePreparing=null,shareVersion=0;
 function setExportStatus(message,err=false){
@@ -199,7 +210,8 @@ async function prepareAcompImage(){
  const task=(async()=>{
   const canvas=await capture(1,window.innerWidth<800?1.7:2);
   const blob=await canvasBlob(canvas);
-  if(version!==shareVersion)throw Error('A tabela foi atualizada. Toque novamente para gerar a imagem atual.');
+  // A imagem já foi capturada no clique; atualizações posteriores não cancelam o download.
+  if(version!==shareVersion){shareBlob=null;shareFile=null;}
   shareBlob=blob;shareFile=new File([blob],TABLE.file+'.png',{type:'image/png'});
   setExportStatus('Imagem pronta. Escolha baixar ou compartilhar.');
   return shareFile
