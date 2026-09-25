@@ -16,14 +16,28 @@ async function call(url,payload,ms){
     const e=new Error(j.error||('Erro '+r.status));e.status=r.status;if([400,401,403].includes(r.status))e.noRetry=true;throw e;
   }finally{clearTimeout(to)}
 }
+const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 async function robustPost(payload){
   const ms=timeoutFor(payload);
   if(payload?.action==='login'){
-    try{return await call(LOGIN,payload,ms)}catch(e){if(e?.noRetry)throw e;return await call(ADMIN,payload,6500)}
+    // Uma falha de rede não significa senha inválida: preserve a sessão e
+    // tente novamente antes de mostrar o erro ao usuário.
+    const targets=[[LOGIN,7500],[LOGIN,7500],[ADMIN,8000],[`${fallback}/admin-login-api`,8000]];
+    let last=null;
+    for(let i=0;i<targets.length;i++){
+      try{return await call(targets[i][0],payload,targets[i][1])}
+      catch(e){
+        if(e?.noRetry)throw e;
+        last=e;
+        if(i===0)await wait(600)
+      }
+    }
+    throw new Error(navigator.onLine===false?'Sem conexão com a internet. Verifique a rede e tente novamente.':'Não foi possível conectar ao ADM. Aguarde alguns segundos e toque em ENTRAR novamente.');
   }
   try{return await call(ADMIN,payload,ms)}catch(e){
     if(e?.noRetry)throw e;
-    return await call(FALLBACK_ADMIN,payload,Math.min(ms,15000));
+    try{return await call(FALLBACK_ADMIN,payload,Math.min(ms,15000))}
+    catch(err){if(err?.noRetry)throw err;throw new Error(navigator.onLine===false?'Sem conexão com a internet. Verifique a rede.':'Falha temporária de conexão com o ADM. Atualize a página e tente novamente.')}
   }
 }
 
