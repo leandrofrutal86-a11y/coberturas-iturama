@@ -47,9 +47,9 @@ function ensureStyle(){
 #results .pct-bad{color:#d71920;font-weight:900}
 #results .meta-dia{font-weight:950;color:#075fae;font-size:12px}
 #consultorDailyInfo{margin:6px 0 5px;padding:7px 9px;border-radius:9px;background:#eef5fb;color:#28465f;font-size:9px;font-weight:900;text-align:center}
-#consultorDownloadBar{margin:6px 0 4px}
-#consultorDownloadTable{display:block;width:100%;border:0;border-radius:12px;padding:11px 12px;background:#087d37;color:#fff;font-size:11px;font-weight:950;cursor:pointer}
-#consultorDownloadTable:disabled{background:#aeb8bf}
+#consultorDownloadBar{margin:6px 0 4px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+#consultorDownloadTable,#consultorShareTable{display:block;width:100%;border:0;border-radius:12px;padding:11px 12px;background:#087d37;color:#fff;font-size:11px;font-weight:950;cursor:pointer}#consultorShareTable{background:#1264b5}#consultorExportStatus{grid-column:1/-1;font-size:10px;font-weight:800;color:#354b5d;text-align:center;min-height:10px}
+#consultorDownloadTable:disabled,#consultorShareTable:disabled{background:#aeb8bf}
 @media(max-width:760px){
  .panel{padding:6px!important}
  .head{gap:4px!important}
@@ -58,7 +58,7 @@ function ensureStyle(){
  .head select{padding:7px!important;font-size:11px!important}
  #consultorDailyInfo{font-size:8px!important;margin:5px 0 4px!important;padding:6px!important}
  #consultorDownloadBar{margin:5px 0 4px!important}
- #consultorDownloadTable{font-size:10px!important;padding:10px 8px!important;border-radius:10px!important}
+ #consultorDownloadTable,#consultorShareTable{font-size:10px!important;padding:10px 8px!important;border-radius:10px!important}
  #results .tableWrap{width:100%!important;max-width:100%!important;overflow:hidden!important;margin-top:5px!important;border-radius:8px!important}
  #results table{display:table!important;width:100%!important;max-width:100%!important;min-width:0!important;table-layout:fixed!important;border-collapse:collapse!important}
  #results thead{display:table-header-group!important}
@@ -97,9 +97,10 @@ function ensureControls(){
   if(!bar){
     bar=document.createElement('div');
     bar.id='consultorDownloadBar';
-    bar.innerHTML='<button id="consultorDownloadTable" type="button">⬇️ BAIXAR TABELA</button>';
+    bar.innerHTML='<button id="consultorDownloadTable" type="button">⬇️ BAIXAR IMAGEM</button><button id="consultorShareTable" type="button">📤 COMPARTILHAR IMAGEM</button><div id="consultorExportStatus" aria-live="polite"></div>';
     results.insertAdjacentElement('beforebegin',bar);
     $('consultorDownloadTable').onclick=baixarPrimeiraTabela;
+    $('consultorShareTable').onclick=compartilharPrimeiraTabela;
   }
 }
 function decorateResults(){
@@ -113,6 +114,7 @@ function decorateResults(){
   if(info)info.style.display=meu?'block':'none';
   if(bar)bar.style.display=meu?'block':'none';
   if(!table)return;
+  if(exportFile&&exportSignature!==tableSignature()){exportFile=null;exportBlob=null;updateExportButtons(false);exportStatus('')}
   const head=table.querySelector('thead tr');
   if(meu&&head&&head.cells.length===5){
     const th=document.createElement('th');
@@ -153,88 +155,93 @@ function loadScript(src,test){
 function escHtml(v){
   return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
-async function baixarPrimeiraTabela(){
+let exportFile=null,exportBlob=null,exportSignature='',exportPreparing=null;
+function tableSignature(){
+ const table=$('results')?.querySelector('table');
+ if(!table)return '';
+ const c=consultor();
+ return String(c.rota||'')+'|'+String(c.nome||'')+'|'+String(typeof TAB!=='undefined'?TAB:'')+'|'+table.textContent;
+}
+function exportStatus(message,err=false){
+ const el=$('consultorExportStatus');if(el){el.textContent=message||'';el.style.color=err?'#bd1720':'#354b5d'}
+}
+function updateExportButtons(busy=false){
+ const d=$('consultorDownloadTable'),s=$('consultorShareTable');
+ if(d){d.disabled=busy;d.textContent=busy?'⏳ PREPARANDO IMAGEM...':'⬇️ BAIXAR IMAGEM'}
+ if(s){s.disabled=busy;s.textContent=busy?'⏳ PREPARANDO IMAGEM...':exportFile?'📤 COMPARTILHAR (PRONTO)':'📤 COMPARTILHAR IMAGEM'}
+}
+function saveExportBlob(blob,name){
+ const url=URL.createObjectURL(blob),a=document.createElement('a');
+ a.href=url;a.download=name;a.rel='noopener';a.style.display='none';
+ document.body.appendChild(a);a.click();a.remove();
+ setTimeout(()=>URL.revokeObjectURL(url),30000)
+}
+async function prepareConsultorImage(){
+ const signature=tableSignature();
+ if(!signature)throw Error('Tabela de acompanhamento não encontrada.');
+ if(exportFile&&exportSignature===signature)return exportFile;
+ if(exportPreparing)return exportPreparing;
+ exportFile=null;exportBlob=null;updateExportButtons(true);exportStatus('Preparando tabela em alta resolução...');
+ const task=(async()=>{
+  await loadScript('https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js',()=>!!window.html2canvas);
   const table=$('results')?.querySelector('table');
-  if(!table)return;
-  const btn=$('consultorDownloadTable');
-  if(btn){btn.disabled=true;btn.textContent='GERANDO IMAGEM...'}
+  if(!table)throw Error('Tabela não encontrada.');
+  const consultant=consultor(),dias=diasUteisRestantes();
+  const headers=[...table.querySelectorAll('thead th')].map(x=>x.textContent.trim());
+  const rows=[...table.querySelectorAll('tbody tr')].map(tr=>[...tr.cells].map(td=>td.textContent.trim()));
   let stage=null;
-  let objectUrl=null;
   try{
-    await loadScript('https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js',()=>!!window.html2canvas);
-    const c=consultor();
-    const dias=diasUteisRestantes();
-    const headers=[...table.querySelectorAll('thead th')].map(x=>x.textContent.trim());
-    const rows=[...table.querySelectorAll('tbody tr')].map(tr=>[...tr.cells].map(td=>td.textContent.trim()));
-    stage=document.createElement('div');
-    stage.style.cssText='position:fixed;left:-10000px;top:0;width:1400px;background:#fff;color:#142236;font-family:Arial,sans-serif;padding:0;z-index:-1';
-    const headHtml=headers.map((h,i)=>`<th style="background:#c3000b;color:#fff;padding:14px 10px;border:1px solid #a90009;text-align:${i===0?'left':'center'}">${escHtml(h)}</th>`).join('');
-    const bodyHtml=rows.map((r,ri)=>`<tr>${r.map((v,i)=>`<td style="padding:13px 10px;border:1px solid #d6dde4;text-align:${i===0?'left':'center'};font-weight:${i===0?'900':'800'};background:${ri%2?'#f4f7f9':'#fff'}">${escHtml(v)}</td>`).join('')}</tr>`).join('');
-    stage.innerHTML=`
-      <div style="background:linear-gradient(180deg,#d90914,#ad0008);color:#fff;padding:24px 28px">
-        <div style="font-size:29px;font-weight:900">ACOMPANHAMENTO DE COBERTURAS</div>
-        <div style="font-size:16px;font-weight:800;margin-top:8px">${escHtml(c.rota||'')} ${escHtml(c.nome||'')}</div>
-        <div style="font-size:14px;font-weight:700;margin-top:7px">Dias úteis restantes: ${dias} • segunda a sexta • último dia do mês não considerado</div>
-      </div>
-      <div style="padding:22px 24px 28px">
-        <table style="width:100%;border-collapse:collapse;table-layout:fixed;font-size:18px">
-          <thead><tr>${headHtml}</tr></thead>
-          <tbody>${bodyHtml}</tbody>
-        </table>
-      </div>`;
-    document.body.appendChild(stage);
-
-    const canvas=await window.html2canvas(stage,{
-      scale:3,
-      backgroundColor:'#ffffff',
-      useCORS:true,
-      logging:false,
-      width:1400,
-      windowWidth:1400
-    });
-
-    const blob=await new Promise(ok=>canvas.toBlob(ok,'image/png',1));
-    if(!blob)throw Error('Não foi possível criar a imagem.');
-
-    const nomeArquivo=`tabela_coberturas_${String(c.rota||'consultor').replace(/[^a-z0-9_-]/gi,'_')}_${new Date().toISOString().slice(0,10)}.png`;
-    const file=new File([blob],nomeArquivo,{type:'image/png'});
-
-    if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
-      try{
-        await navigator.share({
-          files:[file],
-          title:'Tabela de Coberturas',
-          text:'Tabela de coberturas'
-        });
-        return;
-      }catch(err){
-        if(err?.name==='AbortError')return;
-      }
-    }
-
-    objectUrl=URL.createObjectURL(blob);
-    const a=document.createElement('a');
-    a.href=objectUrl;
-    a.download=nomeArquivo;
-    a.rel='noopener';
-    a.style.display='none';
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-
-    setTimeout(()=>{
-      try{
-        const w=window.open(objectUrl,'_blank');
-        if(!w) location.href=objectUrl;
-      }catch{}
-    },900);
-  }catch(e){
-    alert('Erro ao baixar tabela: '+(e?.message||e));
-  }finally{
-    stage?.remove();
-    if(btn){btn.disabled=false;btn.textContent='⬇️ BAIXAR TABELA'}
-    if(objectUrl)setTimeout(()=>URL.revokeObjectURL(objectUrl),15000);
-  }
+   stage=document.createElement('div');
+   stage.style.cssText='position:fixed;left:-10000px;top:0;width:1400px;background:#fff;color:#142236;font-family:Arial,sans-serif;padding:0;z-index:-1';
+   const headHtml=headers.map((h,i)=>`<th style="background:#c3000b;color:#fff;padding:14px 10px;border:1px solid #a90009;text-align:${i===0?'left':'center'}">${escHtml(h)}</th>`).join('');
+   const bodyHtml=rows.map((r,ri)=>`<tr>${r.map((v,i)=>`<td style="padding:13px 10px;border:1px solid #d6dde4;text-align:${i===0?'left':'center'};font-weight:${i===0?'900':'800'};background:${ri%2?'#f4f7f9':'#fff'}">${escHtml(v)}</td>`).join('')}</tr>`).join('');
+   stage.innerHTML=`
+     <div style="background:linear-gradient(180deg,#d90914,#ad0008);color:#fff;padding:24px 28px">
+      <div style="font-size:29px;font-weight:900">ACOMPANHAMENTO DE COBERTURAS</div>
+      <div style="font-size:16px;font-weight:800;margin-top:8px">${escHtml(consultant.rota||'')} ${escHtml(consultant.nome||'')}</div>
+      <div style="font-size:14px;font-weight:700;margin-top:7px">Dias úteis restantes: ${dias} • segunda a sexta • último dia do mês não considerado</div>
+     </div>
+     <div style="padding:22px 24px 28px">
+      <table style="width:100%;border-collapse:collapse;table-layout:fixed;font-size:18px">
+       <thead><tr>${headHtml}</tr></thead><tbody>${bodyHtml}</tbody>
+      </table>
+     </div>`;
+   document.body.appendChild(stage);
+   const canvas=await window.html2canvas(stage,{scale:window.innerWidth<800?1.7:2,backgroundColor:'#ffffff',useCORS:true,logging:false,width:1400,windowWidth:1400});
+   const blob=await new Promise((ok,no)=>canvas.toBlob(b=>b?ok(b):no(Error('Não foi possível gerar a imagem.')),'image/png',1));
+   if(signature!==tableSignature())throw Error('A tabela foi atualizada. Toque novamente para gerar os dados atuais.');
+   const name=`tabela_coberturas_${String(consultant.rota||'consultor').replace(/[^a-z0-9_-]/gi,'_')}_${new Date().toISOString().slice(0,10)}.png`;
+   exportBlob=blob;exportFile=new File([blob],name,{type:'image/png'});exportSignature=signature;
+   exportStatus('Imagem pronta. Escolha baixar ou compartilhar.');
+   return exportFile
+  }finally{stage?.remove()}
+ })();
+ exportPreparing=task;
+ try{return await task}catch(e){exportStatus(e?.message||'Não foi possível preparar a imagem.',true);throw e}
+ finally{if(exportPreparing===task)exportPreparing=null;updateExportButtons(false)}
+}
+async function baixarPrimeiraTabela(){
+ try{const file=await prepareConsultorImage();saveExportBlob(exportBlob||file,file.name);exportStatus('Imagem baixada. Também pode compartilhar.')}
+ catch(e){alert(e?.message||'Não foi possível baixar a imagem.')}
+}
+function compartilharPrimeiraTabela(){
+ // navigator.share precisa ser executado dentro do toque, nunca após await.
+ if(!exportFile||exportSignature!==tableSignature()){
+  prepareConsultorImage().then(()=>exportStatus('Imagem pronta! Toque novamente em COMPARTILHAR IMAGEM.')).catch(()=>{});
+  return
+ }
+ const file=exportFile;
+ let supported=!!navigator.share;
+ try{if(supported&&navigator.canShare)supported=navigator.canShare({files:[file]})}catch{supported=false}
+ if(!supported){
+  saveExportBlob(exportBlob||file,file.name);
+  exportStatus('Compartilhamento indisponível neste navegador. A imagem foi baixada para você enviar.');
+  return
+ }
+ try{
+  const promise=navigator.share({files:[file],title:'Tabela de Coberturas',text:'Acompanhamento de coberturas'});
+  Promise.resolve(promise).catch(e=>{if(e?.name!=='AbortError')exportStatus(e?.message||'Não foi possível compartilhar. Use Baixar Imagem.',true)})
+ }catch(e){exportStatus(e?.message||'Não foi possível compartilhar. Use Baixar Imagem.',true)}
 }
 
 function schedule(){
