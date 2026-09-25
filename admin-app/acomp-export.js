@@ -82,6 +82,20 @@ function addStyle(){
 .acompPoster.acompExporting .acompGrid table{min-width:1280px!important;width:1280px!important}
 .acompPoster.acompExporting .desktopLabel{display:inline!important}
 .acompPoster.acompExporting .mobileLabel{display:none!important}
+/* Força layout amplo também quando o ajuste mobile é carregado depois. */
+#acomp .acompPoster.acompExporting{width:1280px!important;min-width:1280px!important;max-width:none!important;overflow:visible!important}
+#acomp .acompPoster.acompExporting .acompGrid{width:1280px!important;max-width:none!important;overflow:visible!important}
+#acomp .acompPoster.acompExporting .acompGrid table{width:1280px!important;min-width:1280px!important;max-width:none!important}
+#acomp .acompPoster.acompExporting .acompGrid .catHead{width:22%!important;min-width:210px!important;max-width:none!important;font-size:12px!important}
+#acomp .acompPoster.acompExporting .acompGrid .catCell{width:22%!important;min-width:210px!important;max-width:none!important;font-size:12px!important;padding:5px 12px!important}
+#acomp .acompPoster.acompExporting .acompGrid .metaCell,#acomp .acompPoster.acompExporting .acompGrid .realCell,#acomp .acompPoster.acompExporting .acompGrid .teamMeta,#acomp .acompPoster.acompExporting .acompGrid .teamReal{font-size:14px!important;padding:5px 4px!important}
+#acomp .acompPoster.acompExporting .acompGrid thead tr:first-child th{font-size:12px!important;padding:5px 4px!important}
+#acomp .acompPoster.acompExporting .acompGrid thead tr:nth-child(2) th{font-size:10px!important;padding:5px 4px!important}
+#acomp .acompPoster.acompExporting .acompHero{grid-template-columns:1fr 150px!important;min-height:64px!important;padding:8px 16px!important}
+#acomp .acompPoster.acompExporting .acompTitle{font-size:24px!important;text-align:center!important}
+#acomp .acompPoster.acompExporting .acompBadge{font-size:22px!important;padding:8px 12px!important}
+#acomp .acompPoster.acompExporting .desktopLabel{display:inline!important}
+#acomp .acompPoster.acompExporting .mobileLabel{display:none!important}
 
 @media(max-width:800px){
  #acomp .box{padding:2px!important}
