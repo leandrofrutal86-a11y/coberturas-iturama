@@ -5,7 +5,7 @@ let running=false;
 const api='https://harlrfhukjvhpufwhtep.supabase.co/functions/v1/admin-api';
 const pause=ms=>new Promise(ok=>setTimeout(ok,ms));
 function status(text,ok=false){
- const el=$('statusVendas');if(el){el.className=ok?'ok':'bad';el.textContent=text}
+ const el=$('statusVendas');if(el){el.className=ok?'ok':/^(Falha|Erro|Não foi possível)/i.test(text)?'bad':'notice';el.textContent=text}
 }
 function sessionToken(){
  try{return String(typeof token!=='undefined'?token:sessionStorage.getItem('admToken')||'')}
@@ -78,11 +78,21 @@ async function resilientImport(){
   status('Iniciando envio seguro de '+totalBatches+' partes...');
   const start=await retry('import_vendas_inicio',{total:rows.length,lotes:totalBatches},3);
   id=start.import_id;
-  for(let i=0;i<totalBatches;i++){
-   const part=rows.slice(i*batchSize,(i+1)*batchSize);
-   status('Enviando vendas: parte '+(i+1)+' de '+totalBatches+' ('+Math.min((i+1)*batchSize,rows.length).toLocaleString('pt-BR')+' / '+rows.length.toLocaleString('pt-BR')+' linhas)...');
-   await retry('import_vendas_parte',{import_id:id,parte:i,rows:part},4,27000)
-  }
+  let nextPart=0,partsSent=0,uploadError=null;
+  const workers=Array.from({length:Math.min(5,totalBatches)},()=>async()=>{
+   while(!uploadError){
+    const partIndex=nextPart++;
+    if(partIndex>=totalBatches)return;
+    try{
+     await retry('import_vendas_parte',{import_id:id,parte:partIndex,rows:rows.slice(partIndex*batchSize,(partIndex+1)*batchSize)},4,27000);
+     partsSent++;
+     status('Enviando vendas: '+partsSent+' de '+totalBatches+' partes concluídas ('+Math.min(partsSent*batchSize,rows.length).toLocaleString('pt-BR')+' / '+rows.length.toLocaleString('pt-BR')+' linhas)...');
+    }catch(e){uploadError=e;return}
+   }
+  });
+  await Promise.all(workers.map(worker=>worker()));
+  if(uploadError)throw uploadError;
+  if(partsSent!==totalBatches)throw Error('O envio não confirmou todos os lotes.');
   status('Todas as partes recebidas. Gravando e conferindo a base completa...');
   try{
    const done=await request('import_vendas_concluir',{import_id:id},125000);
@@ -95,9 +105,10 @@ async function resilientImport(){
   }
   status('✓ Atualização concluída e confirmada: '+rows.length.toLocaleString('pt-BR')+' vendas gravadas. Metas e demais cadastros preservados.',true);
   try{
-   if(typeof window.__refreshAdminData==='function')await window.__refreshAdminData(true);
+   const fresh=window.__refreshAdminData?.(true);
+   if(fresh&&typeof fresh.catch==='function')fresh.catch(e=>console.warn('Base gravada; painel ainda não recarregou.',e));
    else if(typeof renderBase==='function'&&typeof dash!=='undefined'&&dash)renderBase()
-  }catch(e){console.warn('Atualização gravada, mas não foi possível atualizar o painel imediatamente.',e)}
+  }catch(e){console.warn('Base gravada; painel ainda não recarregou.',e)}
  }catch(e){
   if(id&&!committed){
    const confirmed=await checkFinished(id,rows.length);
@@ -106,6 +117,7 @@ async function resilientImport(){
   status('Falha no envio: '+String(e?.message||e)+'. A base anterior foi preservada se a confirmação não foi concluída. Tente novamente.');
  }finally{running=false;if(btn)btn.disabled=false}
 }
+window.__resilientImportVendas=resilientImport;
 window.atualizarVendas=resilientImport;
 try{atualizarVendas=resilientImport}catch(e){}
 })();
