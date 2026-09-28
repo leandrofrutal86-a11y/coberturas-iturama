@@ -47,7 +47,7 @@ function ensureStyle(){
 #results .pct-bad{color:#d71920;font-weight:900}
 #results .meta-dia{font-weight:950;color:#075fae;font-size:12px}
 #consultorDailyInfo{margin:6px 0 5px;padding:7px 9px;border-radius:9px;background:#eef5fb;color:#28465f;font-size:9px;font-weight:900;text-align:center}
-#consultorDownloadBar{margin:6px 0 4px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+#consultorDownloadBar{margin:16px 0 8px;display:grid;grid-template-columns:1fr;gap:8px}
 #consultorDownloadTable,#consultorShareTable{display:block;width:100%;border:0;border-radius:12px;padding:11px 12px;background:#087d37;color:#fff;font-size:11px;font-weight:950;cursor:pointer}#consultorShareTable{background:#1264b5}#consultorExportStatus{grid-column:1/-1;font-size:10px;font-weight:800;color:#354b5d;text-align:center;min-height:10px}
 #consultorDownloadTable:disabled,#consultorShareTable:disabled{background:#aeb8bf}
 @media(max-width:760px){
@@ -97,8 +97,8 @@ function ensureControls(){
   if(!bar){
     bar=document.createElement('div');
     bar.id='consultorDownloadBar';
-    bar.innerHTML='<button id="consultorDownloadTable" type="button">⬇️ BAIXAR IMAGEM</button><button id="consultorShareTable" type="button">📤 COMPARTILHAR IMAGEM</button><div id="consultorExportStatus" aria-live="polite"></div>';
-    results.insertAdjacentElement('beforebegin',bar);
+    bar.innerHTML='<button id="consultorDownloadTable" type="button">📷 BAIXAR PRINT DO RELATÓRIO</button><div id="consultorExportStatus" aria-live="polite"></div>';
+    $('clients').insertAdjacentElement('afterend',bar);
     $('consultorDownloadTable').onclick=baixarPrimeiraTabela;
     $('consultorShareTable').onclick=compartilharPrimeiraTabela;
   }
@@ -112,7 +112,7 @@ function decorateResults(){
   const info=$('consultorDailyInfo');
   const bar=$('consultorDownloadBar');
   if(info)info.style.display=meu?'block':'none';
-  if(bar)bar.style.display=meu?'block':'none';
+  if(bar)bar.style.display=meu&&$('cat')?.value!=='ALL'&&!!$('clients')?.querySelector('table')?'block':'none';
   if(!table)return;
   if(exportFile&&exportSignature!==tableSignature()){exportFile=null;exportBlob=null;updateExportButtons(false);exportStatus('')}
   const head=table.querySelector('thead tr');
@@ -160,7 +160,7 @@ function tableSignature(){
  const table=$('results')?.querySelector('table');
  if(!table)return '';
  const c=consultor();
- return String(c.rota||'')+'|'+String(c.nome||'')+'|'+String(typeof TAB!=='undefined'?TAB:'')+'|'+table.textContent;
+ return String(c.rota||'')+'|'+String(c.nome||'')+'|'+String(typeof TAB!=='undefined'?TAB:'')+'|'+String($('cat')?.value||'')+'|'+table.textContent+'|'+String($('clients')?.textContent||'');
 }
 function exportStatus(message,err=false){
  const el=$('consultorExportStatus');if(el){el.textContent=message||'';el.style.color=err?'#bd1720':'#354b5d'}
@@ -206,13 +206,13 @@ async function prepareConsultorImage(){
        <thead><tr>${headHtml}</tr></thead><tbody>${bodyHtml}</tbody>
       </table>
      </div>`;
-   document.body.appendChild(stage);
+   const clientTable=$('clients')?.querySelector('table');if(clientTable){const heading=$('clients')?.querySelector('h3')?.textContent||'Clientes do incentivo';const block=document.createElement('div');block.style.cssText='padding:12px 24px 30px;background:#fff';const h=document.createElement('h2');h.textContent=heading;block.appendChild(h);const clone=clientTable.cloneNode(true);clone.style.cssText='width:100%;table-layout:auto;border-collapse:collapse;font-size:16px';clone.querySelectorAll('th,td').forEach(el=>{el.style.cssText='padding:10px;border:1px solid #d6dde4;text-align:left;white-space:normal;overflow-wrap:break-word;font-size:16px'});block.appendChild(clone);stage.appendChild(block)}\n   document.body.appendChild(stage);
    const canvas=await window.html2canvas(stage,{scale:window.innerWidth<800?1.7:2,backgroundColor:'#ffffff',useCORS:true,logging:false,width:1400,windowWidth:1400});
    const blob=await new Promise((ok,no)=>canvas.toBlob(b=>b?ok(b):no(Error('Não foi possível gerar a imagem.')),'image/png',1));
    if(signature!==tableSignature())throw Error('A tabela foi atualizada. Toque novamente para gerar os dados atuais.');
    const name=`tabela_coberturas_${String(consultant.rota||'consultor').replace(/[^a-z0-9_-]/gi,'_')}_${new Date().toISOString().slice(0,10)}.png`;
    exportBlob=blob;exportFile=new File([blob],name,{type:'image/png'});exportSignature=signature;
-   exportStatus('Imagem pronta. Escolha baixar ou compartilhar.');
+   exportStatus('Imagem pronta para salvar.');
    return exportFile
   }finally{stage?.remove()}
  })();
