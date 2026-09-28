@@ -18,7 +18,7 @@ function catEntries(d){
  return ids.map(id=>{
   const idx=cats.findIndex(cat=>Number(cat.id)===Number(id));
   return idx>=0?{cat:cats[idx],idx}:null;
- }).filter(Boolean);
+ }).filter(Boolean).sort((a,b)=>Number(a.cat.posicao_acomp||a.cat.ordem||999)-Number(b.cat.posicao_acomp||b.cat.ordem||999)||Number(a.cat.id)-Number(b.cat.id));
 }
 function findResult(ind,entry){
  const arr=ind?.resultados||[];
