@@ -27,6 +27,26 @@
   #acomp .acompBtn small{font-size:6px!important}
 }
 `;
+  s.textContent += `
+#acomp .acompGrid .faltaHead{color:#c81020!important;background:#fff0f1!important}
+#acomp .acompGrid .faltaCell,#acomp .acompGrid .teamFalta{color:#c81020!important;background:#ffe7e9!important;font-weight:950!important}
+#acomp .acompGrid .faltaCell.ok,#acomp .acompGrid .teamFalta.ok{color:#087a3c!important;background:#e1f7e8!important}
+#acomp .acompGrid tbody td.faltaCell,#acomp .acompGrid tbody td.teamFalta{background:#ffe7e9!important}
+#acomp .acompGrid tbody td.faltaCell.ok,#acomp .acompGrid tbody td.teamFalta.ok{background:#e1f7e8!important}
+@media(max-width:800px){
+#acomp .acompGrid{overflow-x:auto!important;overflow-y:visible!important;-webkit-overflow-scrolling:touch!important}
+#acomp .acompGrid table{width:1500px!important;min-width:1500px!important;max-width:none!important;table-layout:fixed!important}
+#acomp .acompGrid .catHead,#acomp .acompGrid .catCell{position:sticky!important;left:0!important;width:160px!important;min-width:160px!important;max-width:160px!important;z-index:2!important;background:#fff!important;font-size:10px!important;padding:5px!important}
+#acomp .acompGrid .catHead{z-index:3!important;background:#edf5fa!important}
+#acomp .acompGrid thead tr:first-child th:not(.catHead){font-size:10px!important}
+#acomp .acompGrid thead tr:nth-child(2) th{font-size:9px!important;white-space:nowrap!important}
+#acomp .acompGrid .metaCell,#acomp .acompGrid .realCell,#acomp .acompGrid .faltaCell,#acomp .acompGrid .teamMeta,#acomp .acompGrid .teamReal,#acomp .acompGrid .teamFalta{font-size:11px!important;padding:5px 2px!important}
+#acomp .acompPoster.acompExporting{width:1800px!important;min-width:1800px!important;max-width:none!important}
+#acomp .acompPoster.acompExporting .acompGrid{width:1800px!important;overflow:visible!important}
+#acomp .acompPoster.acompExporting .acompGrid table{width:1800px!important;min-width:1800px!important}
+#acomp .acompPoster.acompExporting .acompGrid .catHead,#acomp .acompPoster.acompExporting .acompGrid .catCell{position:static!important;width:210px!important;min-width:210px!important}
+}
+`;
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install);else install();
 })();
