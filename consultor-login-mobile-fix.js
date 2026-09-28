@@ -58,6 +58,8 @@
     #login{justify-content:flex-start!important;overflow-y:auto!important}
     #login .loginCard{padding:12px 24px!important}
   }
+  /* A tela de acesso deve desaparecer após a autenticação, inclusive no desktop. */
+  #login.hidden{display:none!important;visibility:hidden!important}
   #consultorLoadingAccess{margin:18px 0;padding:18px;border-radius:16px;background:#fff;color:#142236;font-weight:900;text-align:center;box-shadow:0 4px 16px #0001}
   #consultorLoadingAccess small{display:block;margin-top:6px;color:#68778a;font-weight:700}
   `;
