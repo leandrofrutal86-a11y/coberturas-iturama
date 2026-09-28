@@ -121,15 +121,14 @@ function renderPanel(){
  let box=b.body.querySelector('.pvDiaBox');
  if(!box){box=document.createElement('div');box.className='pvDiaBox';b.body.insertBefore(box,b.body.firstChild)}
  const dayBtns=DAYS.map(d=>`<button type="button" class="pvDayChoice ${d.code===selectedDay?'active':''}" data-day="${d.code}">${d.code}</button>`).join('');
- const cliOpts=(selectedDay==='TODOS'?baseClients:clients).map(c=>`<option value="${esc(c.pv)}">${effectiveRoute()==='TODOS'?esc(c.rota)+' • ':''}${esc(c.pv)} • ${esc(c.razao)}</option>`).join('');
- const routePicker=isRogerioMulti()?`<div class="pvDiaFilters" style="margin-bottom:10px"><div><label>ROTA DA PESQUISA</label><select id="pvDiaRoute" class="pvDiaSelect" ${loading||baseLoading?'disabled':''}><option value="TODOS">TODAS AS ROTAS</option>${availableRoutes().map(x=>`<option value="${esc(x.rota)}" ${effectiveRoute()===String(x.rota)?'selected':''}>${esc(x.rota)} - ${esc(x.nome||'')}</option>`).join('')}</select></div></div>`:'';
- box.innerHTML=`<div class="pvDiaHead"><b>📍 Pesquisa de clientes</b><span class="pvDiaCount">${esc(routeLabel(effectiveRoute()))} • ${baseClients.length} na BASE GERAL</span></div>
+  const routePicker=isRogerioMulti()?`<div class="pvDiaFilters" style="margin-bottom:10px"><div><label>ROTA DA PESQUISA</label><select id="pvDiaRoute" class="pvDiaSelect" ${loading||baseLoading?'disabled':''}><option value="TODOS">TODAS AS ROTAS</option>${availableRoutes().map(x=>`<option value="${esc(x.rota)}" ${effectiveRoute()===String(x.rota)?'selected':''}>${esc(x.rota)} - ${esc(x.nome||'')}</option>`).join('')}</select></div></div>`:'';
+ box.innerHTML=`<div class="pvDiaHead"><b>📍 Pesquisa de clientes</b><span class="pvDiaCount">${esc(routeLabel(effectiveRoute()))} • ${selectedDay==='TODOS'?baseClients.length:clients.length} cliente(s)</span></div>
  ${routePicker}
- <div class="pvDiaFilters"><div><label>${effectiveRoute()==='TODOS'?'CLIENTES DE TODAS AS ROTAS / BASE GERAL':'CLIENTES DA ROTA / BASE GERAL'}</label><button type="button" id="pvDiaClientTrigger" class="pvDiaSelect" style="text-align:left" ${baseLoading||loading?'disabled':''}>${baseLoading||loading?'Carregando clientes...':'Selecione um cliente... ▾'}</button></div></div>
- <div class="pvDiaHint">Escolha o dia e toque na lista para pesquisar por PV ou razão social. Todos mostra a base geral da rota.</div>
  <div class="pvDayChoices">${dayBtns}</div>
- <div class="pvDiaDayStat">${esc(dayLabel(selectedDay))} • ${clients.length} cliente(s) programado(s) para visita</div>
- <button id="pvDiaReportBtn" class="pvDiaReportBtn" ${loading||!clients.length?'disabled':''}>📋 GERAR RELATÓRIO • ${esc(dayLabel(selectedDay).toUpperCase())}</button>`;
+ <div class="pvDiaFilters"><div><label>${selectedDay==='TODOS'?'CLIENTES DA ROTA / BASE GERAL':'CLIENTES DA ROTA / '+dayLabel(selectedDay).toUpperCase()}</label><button type="button" id="pvDiaClientTrigger" class="pvDiaSelect" style="text-align:left" ${baseLoading||loading?'disabled':''}>${baseLoading||loading?'Carregando clientes...':'Selecione um cliente... ▾'}</button></div></div>
+ <div class="pvDiaHint">Escolha Todos ou um dia da semana e abra a lista para buscar por PV ou razão social. Para gerar o relatório, selecione um dia.</div>
+ <div class="pvDiaDayStat">${esc(dayLabel(selectedDay))} • ${selectedDay==='TODOS'?baseClients.length:clients.length} cliente(s) ${selectedDay==='TODOS'?'na base geral':'programado(s) para visita'}</div>
+ <button id="pvDiaReportBtn" class="pvDiaReportBtn" ${loading||selectedDay==='TODOS'||!clients.length?'disabled':''}>📋 GERAR RELATÓRIO • ${esc(dayLabel(selectedDay).toUpperCase())}</button>`;
  const rs=box.querySelector('#pvDiaRoute');if(rs){rs.value=effectiveRoute();rs.onchange=()=>setSelectedRoute(rs.value)}
  box.querySelectorAll('[data-day]').forEach(btn=>btn.onclick=()=>setSelectedDay(btn.dataset.day));
  const cs=box.querySelector('#pvDiaClientTrigger');if(cs)cs.onclick=openClientPicker;
