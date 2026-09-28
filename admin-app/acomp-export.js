@@ -142,14 +142,14 @@ function ensureLayout(){
 }
 
 function headerHtml(inds){
- return '<tr><th class="catHead" rowspan="2">CATEGORIA</th>'+inds.map(i=>`<th class="sepL" colspan="2">${esc(i.rota)} ${esc(i.nome)}</th>`).join('')+'<th class="teamHead sepL" colspan="2">EQUIPE</th></tr><tr>'+inds.map(()=>'<th class="sepL">META</th><th><span class="desktopLabel">REALIZADO</span><span class="mobileLabel">REAL</span></th>').join('')+'<th class="teamHead sepL">META</th><th class="teamHead"><span class="desktopLabel">REALIZADO</span><span class="mobileLabel">REAL</span></th></tr>';
+ return '<tr><th class="catHead" rowspan="2">CATEGORIA</th>'+inds.map(i=>`<th class="sepL" colspan="3">${esc(i.rota)} ${esc(i.nome)}</th>`).join('')+'<th class="teamHead sepL" colspan="3">EQUIPE</th></tr><tr>'+inds.map(()=>'<th class="sepL">META</th><th>REALIZADO</th><th class="faltaHead">FALTA</th>').join('')+'<th class="teamHead sepL">META</th><th class="teamHead">REALIZADO</th><th class="teamHead faltaHead">FALTA</th></tr>';
 }
 function categoryRow(entry,inds){
  let teamMeta=0,teamReal=0,found=false;
- const cells=inds.map(i=>{const r=findResult(i,entry);if(!r)return '<td class="metaCell sepL">—</td><td class="realCell">—</td>';found=true;const m=Number(r.meta||0),v=Number(r.realizado||0),ok=v>=m;teamMeta+=m;teamReal+=v;return `<td class="metaCell sepL">${m}</td><td class="realCell ${ok?'ok':''}">${v}</td>`}).join('');
+ const cells=inds.map(i=>{const r=findResult(i,entry);if(!r)return '<td class="metaCell sepL">—</td><td class="realCell">—</td><td class="faltaCell">—</td>';found=true;const m=Number(r.meta||0),v=Number(r.realizado||0),ok=v>=m;teamMeta+=m;teamReal+=v;return `<td class="metaCell sepL">${m}</td><td class="realCell ${ok?'ok':''}">${v}</td><td class="faltaCell ${ok?'ok':''}">${Math.max(0,m-v)}</td>`}).join('');
  const teamOk=found&&teamReal>=teamMeta;
  const nome=String(entry.cat?.nome||'').toUpperCase();
- return `<tr><td class="catCell">${esc(nome)}</td>${cells}<td class="teamMeta sepL">${found?teamMeta:'—'}</td><td class="teamReal ${teamOk?'ok':''}">${found?teamReal:'—'}</td></tr>`;
+ return `<tr><td class="catCell">${esc(nome)}</td>${cells}<td class="teamMeta sepL">${found?teamMeta:'—'}</td><td class="teamReal ${teamOk?'ok':''}">${found?teamReal:'—'}</td><td class="teamFalta ${teamOk?'ok':''}">${found?Math.max(0,teamMeta-teamReal):'—'}</td></tr>`;
 }
 function renderOne(t,d){
  const inds=(d.individual||[]).slice(),entries=catEntries(d),th=q('thAcomp1'),tb=q('tbAcomp1');if(!th||!tb)return false;
