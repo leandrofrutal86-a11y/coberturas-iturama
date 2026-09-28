@@ -13,9 +13,9 @@ const css=d.createElement('style');css.textContent=`
 #cvB2BTop h2{margin:0;font-size:20px}#cvB2BTop button{border:0;border-radius:10px;padding:11px;background:white;color:#222;font-weight:800}
 #cvB2BBody{padding:13px 13px 90px}#cvB2BBody .panelBox{background:white;border:1px solid #e1e7ee;border-radius:15px;padding:13px;margin-bottom:12px}
 #cvB2BBody select,#cvB2BBody input{width:100%;min-width:0;padding:12px;border:1px solid #cbd5df;border-radius:10px;background:white;font-size:15px;box-sizing:border-box}
-#cvB2BBody label{display:block;font-weight:800;margin:0 0 7px}#cvB2BStats{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-#cvB2BStats>div{background:#f0f5fb;border-radius:10px;padding:10px;min-width:0}#cvB2BStats b{display:block;margin-bottom:7px}
-#cvB2BStats small{display:block;font-size:12px;line-height:1.7}#cvB2BStats strong{font-size:18px}
+#cvB2BBody label{display:block;font-weight:800;margin:0 0 7px}#cvB2BStats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;width:100%}
+#cvB2BStats .cvB2BMetric{background:#f7f9fc;border:1px solid #e5eaf1;border-radius:12px;padding:10px;min-width:0}#cvB2BStats .cvB2BMetric h4{margin:0 0 9px;font-size:15px}#cvB2BStats .cvB2BMetricCells{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}#cvB2BStats .cvB2BMetricCells>div{background:#f0f5fb;padding:10px 5px;text-align:center;border-radius:9px;min-width:0}#cvB2BStats .cvB2BMetricCells small{display:block;font-size:11px;line-height:1.3}#cvB2BStats .cvB2BMetricCells strong{display:block;font-size:20px;margin-top:5px}
+@media(max-width:550px){#cvB2BStats{grid-template-columns:1fr}}
 #cvB2BTable{width:100%;min-width:0;table-layout:fixed;border-collapse:collapse;font-size:12px}
 #cvB2BTable th,#cvB2BTable td{padding:10px 5px;text-align:left;border-bottom:1px solid #e4e9ef;overflow-wrap:break-word}
 #cvB2BTable th:first-child,#cvB2BTable td:first-child{width:23%;white-space:nowrap;font-weight:800}
@@ -49,7 +49,7 @@ function status(x,mode){return mode==='oportunidades'?'Sem compra B2B':mode==='p
 function render(){if(!ready)return;const mode=$('cvB2BMode').value,term=N($('cvB2BSearch').value),titles={compra:'🛒 Clientes com Compra B2B',recompra:'🔁 Clientes com Recompra B2B',pendente:'⏳ Compraram e faltam recomprar',oportunidades:'🎯 Oportunidades sem Compra B2B'};
 rows=(allRows[mode]||[]).filter(x=>N(pv(x)+' '+(x.razao||x.razao_social||x.nome||'')).includes(term));
 $('cvB2BTitle').textContent=titles[mode]+' ('+rows.length+')';
-$('cvB2BStats').innerHTML='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'+[['🛒 Compra B2B',metrics.compra],['🔁 Recompra B2B',metrics.recompra]].map(([title,[meta,real]])=>'<div style="background:#f0f5fb;border-radius:10px;padding:10px"><b>'+title+'</b><small>Meta: <strong>'+meta+'</strong></small><small>Realizado: <strong>'+real+'</strong></small><small>Falta: <strong>'+Math.max(meta-real,0)+'</strong></small></div>').join('')+'</div>';
+$('cvB2BStats').innerHTML=[['🛒 Compra B2B',metrics.compra],['🔁 Recompra B2B',metrics.recompra]].map(([title,[meta,real]])=>'<div class="cvB2BMetric"><h4>'+title+'</h4><div class="cvB2BMetricCells"><div><small>Meta</small><strong>'+meta+'</strong></div><div><small>Realizado</small><strong>'+real+'</strong></div><div><small>Falta</small><strong>'+Math.max(meta-real,0)+'</strong></div></div></div>').join('');
 $('cvB2BRows').innerHTML=rows.map(x=>'<tr><td>'+E(pv(x))+'</td><td>'+E(x.razao||x.razao_social||x.nome||'')+'</td><td>'+E(status(x,mode))+'</td></tr>').join('')||'<tr><td colspan="3">Nenhum cliente nesta consulta.</td></tr>';
 $('cvB2BImage').disabled=false;
 }
