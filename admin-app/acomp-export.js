@@ -9,7 +9,7 @@ function getDash(){try{return typeof dash!=='undefined'&&dash?dash:(window.dash|
 const TABLE1_IDS=[1,2,12,16,17,21,13,18,19,20];
 const TABLE2_BASE_IDS=[4,6,7,15,14,8,9,10,11];
 const ALL_BASE_IDS=[...TABLE1_IDS,...TABLE2_BASE_IDS];
-const TABLE={id:1,title:'COBERTURAS',file:'acompanhamento-geral-coberturas-iturama'};
+const TABLE={id:1,title:'PRIORIDADE',file:'acompanhamento-equipe-prioridade'};
 
 function catEntries(d){
  const cats=d?.categorias||[];
@@ -137,8 +137,9 @@ function ensureLayout(){
  const legacy=box.querySelector('table.wide')||box.querySelector('table');if(legacy)legacy.classList.add('acompLegacyTable');
  let root=q('acompSplitRoot');if(root&&root.dataset.unified==='1')return root;if(root)root.remove();
  root=document.createElement('div');root.id='acompSplitRoot';root.dataset.unified='1';
- root.innerHTML=`<section class="acompPanel"><div id="acompPoster1" class="acompPoster"><div class="acompHero"><div class="acompTitle">ACOMPANHAMENTO GERAL DA EQUIPE</div><div class="acompBadge">COBERTURAS</div></div><div class="acompGrid"><table><thead id="thAcomp1"></thead><tbody id="tbAcomp1"></tbody></table></div></div><div class="acompFooter"><button id="acompDownloadImageBtn" class="acompBtn img" type="button" onclick="exportarAcompImagem()">⬇️ BAIXAR IMAGEM <small>(ALTA RESOLUÇÃO)</small></button><button id="acompShareImageBtn" class="acompBtn share" type="button" onclick="compartilharAcompImagem()">📤 COMPARTILHAR IMAGEM</button><div id="acompShareStatus" class="acompShareStatus" aria-live="polite"></div></div></section>`;
- if(legacy)legacy.insertAdjacentElement('afterend',root);else box.appendChild(root);return root;
+ root.innerHTML=`<section class="acompPanel"><div id="acompPoster1" class="acompPoster"><div class="acompHero"><div class="acompTitle">ACOMPANHAMENTO DA EQUIPE - PRIORIDADE</div><div class="acompBadge">PRIORIDADE</div></div><div class="acompGrid"><table><thead id="thAcomp1"></thead><tbody id="tbAcomp1"></tbody></table></div></div><div class="acompFooter"><button id="acompDownloadImageBtn" class="acompBtn img" type="button" onclick="exportarAcompImagem()">⬇️ BAIXAR IMAGEM <small>(ALTA RESOLUÇÃO)</small></button><button id="acompShareImageBtn" class="acompBtn share" type="button" onclick="compartilharAcompImagem()">📤 COMPARTILHAR IMAGEM</button><div id="acompShareStatus" class="acompShareStatus" aria-live="polite"></div></div></section>`;
+ if(legacy)legacy.insertAdjacentElement('afterend',root);else box.appendChild(root);
+ const second=root.querySelector('.acompPanel').cloneNode(true);second.querySelectorAll('[id]').forEach(el=>el.id=el.id.replace(/1$/, '2').replace('acompDownloadImageBtn','acompDownloadImageBtn2').replace('acompShareImageBtn','acompShareImageBtn2').replace('acompShareStatus','acompShareStatus2'));second.querySelector('.acompTitle').textContent='ACOMPANHAMENTO DA EQUIPE - PRIORIDADE 2';second.querySelector('.acompBadge').textContent='PRIORIDADE 2';second.querySelector('.acompBtn.img').setAttribute('onclick','exportarAcompImagemPrioridade2()');second.querySelector('.acompBtn.share').setAttribute('onclick','compartilharAcompImagemPrioridade2()');root.appendChild(second);return root;
 }
 
 function headerHtml(inds){
@@ -153,7 +154,8 @@ function categoryRow(entry,inds){
 }
 function renderOne(t,d){
  const inds=(d.individual||[]).slice(),entries=catEntries(d),th=q('thAcomp1'),tb=q('tbAcomp1');if(!th||!tb)return false;
- th.innerHTML=headerHtml(inds);tb.innerHTML=entries.map(e=>categoryRow(e,inds)).join('');return true;
+ th.innerHTML=headerHtml(inds);tb.innerHTML=entries.filter(e=>Number(e.cat.prioridade_acomp||2)===1).map(e=>categoryRow(e,inds)).join('');
+ const th2=q('thAcomp2'),tb2=q('tbAcomp2');if(th2&&tb2){th2.innerHTML=headerHtml(inds);tb2.innerHTML=entries.filter(e=>Number(e.cat.prioridade_acomp||2)===2).map(e=>categoryRow(e,inds)).join('')}return true;
 }
 let lastRenderSignature='',exportCaptureActive=false;
 function render(){
@@ -250,6 +252,9 @@ window.compartilharAcompImagem=()=>{
   Promise.resolve(result).catch(e=>{if(e?.name!=='AbortError')setExportStatus(e?.message||'Não foi possível compartilhar. Use Baixar Imagem.',true)})
  }catch(e){setExportStatus(e?.message||'Não foi possível compartilhar. Use Baixar Imagem.',true)}
 };
+window.exportarAcompImagemPrioridade2=async()=>{try{const canvas=await capture(2,window.innerWidth<800?1.7:2);const blob=await canvasBlob(canvas);downloadBlob(blob,'acompanhamento-equipe-prioridade-2.png')}catch(e){alert(e?.message||'Não foi possível baixar a imagem.')}};
+let shareFile2=null;
+window.compartilharAcompImagemPrioridade2=()=>{if(!shareFile2){capture(2,window.innerWidth<800?1.7:2).then(canvas=>canvasBlob(canvas)).then(blob=>{shareFile2=new File([blob],'acompanhamento-equipe-prioridade-2.png',{type:'image/png'});q('acompShareStatus2').textContent='Imagem pronta! Toque novamente para compartilhar.'}).catch(e=>alert(e.message));return}const f=shareFile2;if(navigator.share&&(!navigator.canShare||navigator.canShare({files:[f]}))){navigator.share({files:[f],title:'Acompanhamento da Equipe - Prioridade 2'}).catch(e=>{if(e.name!=='AbortError')alert(e.message)})}else downloadBlob(f,'acompanhamento-equipe-prioridade-2.png')};
 function printPdf(id){
  const t=TABLE,poster=q('acompPoster1');if(!poster)throw Error('Tabela não encontrada.');
  const w=window.open('','_blank');if(!w)throw Error('O navegador bloqueou a janela do PDF. Libere pop-ups e tente novamente.');
