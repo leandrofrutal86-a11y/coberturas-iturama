@@ -109,7 +109,7 @@ function ensureControls(){
     bar.innerHTML='<button id="consultorDownloadTable" type="button">📷 BAIXAR PRINT DO RELATÓRIO</button><div id="consultorExportStatus" aria-live="polite"></div>';
     $('clients').insertAdjacentElement('afterend',bar);
     $('consultorDownloadTable').onclick=baixarPrimeiraTabela;
-    $('consultorShareTable').onclick=compartilharPrimeiraTabela;
+    const shareButton=$('consultorShareTable');if(shareButton)shareButton.onclick=compartilharPrimeiraTabela;
   }
 }
 function aplicarCoresTodasCategorias(){
@@ -117,7 +117,7 @@ function aplicarCoresTodasCategorias(){
  if(!table)return;
  table.querySelectorAll('tbody tr').forEach(tr=>{
   const c=tr.cells;if(!c||c.length<5)return;
-  const num=el=>Number(String(el?.textContent||'').replace(/[^\\d,.-]/g,'').replace(',','.'))||0;
+  const num=el=>Number(String(el?.textContent||'').replace(/[^\d,.-]/g,'').replace(',','.'))||0;
   const meta=num(c[1]),real=num(c[2]),falta=Math.max(0,meta-real),ok=real>=meta;
   c[1].classList.add('meta-num');
   c[2].classList.remove('res-ok','res-bad');c[2].classList.add(ok?'res-ok':'res-bad');
