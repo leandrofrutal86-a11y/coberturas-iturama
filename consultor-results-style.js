@@ -42,6 +42,13 @@ function ensureStyle(){
 #results .res-ok{color:#0b8a46;font-weight:900}
 #results .res-bad{color:#d71920;font-weight:900}
 #results tbody td.meta-num{color:#075fae!important;font-weight:900!important}
+/* Cores de desempenho com prioridade sobre estilos antigos da tabela. */
+#results tbody tr td:nth-child(2),#results tbody tr td.meta-num{color:#075fae!important;font-weight:900!important}
+#results tbody tr td:nth-child(3).res-bad,#results tbody tr td:nth-child(5).pct-bad{color:#c5161d!important;font-weight:900!important}
+#results tbody tr td:nth-child(3).res-ok,#results tbody tr td:nth-child(5).pct-ok{color:#087249!important;font-weight:900!important}
+#results tbody tr td:nth-child(4).falta-num{color:#c5161d!important;font-weight:900!important}
+#results tbody tr td:nth-child(4).falta-zero{color:#087249!important;font-weight:900!important}
+
 #results tbody td.res-ok,#results tbody td.pct-ok{color:#087249!important;font-weight:900!important}
 #results tbody td.res-bad,#results tbody td.pct-bad{color:#c5161d!important;font-weight:900!important}
 #results .falta-num{font-weight:900;color:#c5161d}
@@ -134,7 +141,8 @@ function decorateResults(){
     tr.cells[2].classList.remove('res-ok','res-bad');
     tr.cells[4].classList.remove('pct-ok','pct-bad');
     tr.cells[2].classList.add(ok?'res-ok':'res-bad');
-    tr.cells[3].classList.add('falta-num');
+    tr.cells[3].classList.remove('falta-num','falta-zero');
+    tr.cells[3].classList.add(falta>0?'falta-num':'falta-zero');
     tr.cells[4].classList.add(ok?'pct-ok':'pct-bad');
     if(meu&&tr.cells.length===5){
       const b=tr.insertCell();
