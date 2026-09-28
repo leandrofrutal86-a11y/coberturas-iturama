@@ -178,47 +178,43 @@ function saveExportBlob(blob,name){
 }
 async function prepareConsultorImage(){
  const signature=tableSignature();
- if(!signature)throw Error('Tabela de acompanhamento não encontrada.');
+ const clients=$('clients'),clientTable=clients?.querySelector('table');
+ if(!clientTable||!clientTable.querySelector('tbody tr'))throw Error('Selecione um incentivo para gerar o relatório de clientes.');
  if(exportFile&&exportSignature===signature)return exportFile;
  if(exportPreparing)return exportPreparing;
- exportFile=null;exportBlob=null;updateExportButtons(true);exportStatus('Preparando tabela em alta resolução...');
+ exportFile=null;exportBlob=null;updateExportButtons(true);exportStatus('Preparando relatório completo dos clientes...');
  const task=(async()=>{
   await loadScript('https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js',()=>!!window.html2canvas);
-  const table=$('results')?.querySelector('table');
-  if(!table)throw Error('Tabela não encontrada.');
-  const consultant=consultor(),dias=diasUteisRestantes();
-  const headers=[...table.querySelectorAll('thead th')].map(x=>x.textContent.trim());
-  const rows=[...table.querySelectorAll('tbody tr')].map(tr=>[...tr.cells].map(td=>td.textContent.trim()));
   let stage=null;
   try{
+   const consultant=consultor(),category=$('cat')?.selectedOptions?.[0]?.textContent?.trim()||'Incentivo';
    stage=document.createElement('div');
-   stage.style.cssText='position:fixed;left:-10000px;top:0;width:1400px;background:#fff;color:#142236;font-family:Arial,sans-serif;padding:0;z-index:-1';
-   const headHtml=headers.map((h,i)=>`<th style="background:#c3000b;color:#fff;padding:14px 10px;border:1px solid #a90009;text-align:${i===0?'left':'center'}">${escHtml(h)}</th>`).join('');
-   const bodyHtml=rows.map((r,ri)=>`<tr>${r.map((v,i)=>`<td style="padding:13px 10px;border:1px solid #d6dde4;text-align:${i===0?'left':'center'};font-weight:${i===0?'900':'800'};background:${ri%2?'#f4f7f9':'#fff'}">${escHtml(v)}</td>`).join('')}</tr>`).join('');
-   stage.innerHTML=`
-     <div style="background:linear-gradient(180deg,#d90914,#ad0008);color:#fff;padding:24px 28px">
-      <div style="font-size:29px;font-weight:900">ACOMPANHAMENTO DE COBERTURAS</div>
-      <div style="font-size:16px;font-weight:800;margin-top:8px">${escHtml(consultant.rota||'')} ${escHtml(consultant.nome||'')}</div>
-      <div style="font-size:14px;font-weight:700;margin-top:7px">Dias úteis restantes: ${dias} • segunda a sexta • último dia do mês não considerado</div>
-     </div>
-     <div style="padding:22px 24px 28px">
-      <table style="width:100%;border-collapse:collapse;table-layout:fixed;font-size:18px">
-       <thead><tr>${headHtml}</tr></thead><tbody>${bodyHtml}</tbody>
-      </table>
-     </div>`;
-   const clientTable=$('clients')?.querySelector('table');if(clientTable){const heading=$('clients')?.querySelector('h3')?.textContent||'Clientes do incentivo';const block=document.createElement('div');block.style.cssText='padding:12px 24px 30px;background:#fff';const h=document.createElement('h2');h.textContent=heading;block.appendChild(h);const clone=clientTable.cloneNode(true);clone.style.cssText='width:100%;table-layout:auto;border-collapse:collapse;font-size:16px';clone.querySelectorAll('th,td').forEach(el=>{el.style.cssText='padding:10px;border:1px solid #d6dde4;text-align:left;white-space:normal;overflow-wrap:break-word;font-size:16px'});block.appendChild(clone);stage.appendChild(block)}
-   document.body.appendChild(stage);
-   const canvas=await window.html2canvas(stage,{scale:window.innerWidth<800?1.7:2,backgroundColor:'#ffffff',useCORS:true,logging:false,width:1400,windowWidth:1400});
-   const blob=await new Promise((ok,no)=>canvas.toBlob(b=>b?ok(b):no(Error('Não foi possível gerar a imagem.')),'image/png',1));
-   if(signature!==tableSignature())throw Error('A tabela foi atualizada. Toque novamente para gerar os dados atuais.');
-   const name=`tabela_coberturas_${String(consultant.rota||'consultor').replace(/[^a-z0-9_-]/gi,'_')}_${new Date().toISOString().slice(0,10)}.png`;
+   stage.style.cssText='position:fixed;left:-10000px;top:0;width:1100px;max-width:none;background:#fff;color:#142236;font-family:Arial,sans-serif;padding:0;z-index:-1';
+   const header=document.createElement('div');
+   header.style.cssText='background:#b70712;color:white;padding:24px 28px';
+   const heading=document.createElement('div');heading.style.cssText='font-size:29px;font-weight:900';heading.textContent='RELATÓRIO DE CLIENTES • '+category;
+   const sub=document.createElement('div');sub.style.cssText='font-size:18px;margin-top:8px';sub.textContent=[consultant.rota,consultant.nome].filter(Boolean).join(' • ');
+   header.append(heading,sub);stage.appendChild(header);
+   const block=document.createElement('div');block.style.cssText='padding:20px 25px 30px;background:#fff';
+   const title=document.createElement('h2');title.style.cssText='font-size:25px;margin:0 0 18px';title.textContent=clients.querySelector('h3')?.textContent?.trim()||'Clientes do incentivo';block.appendChild(title);
+   const clone=clientTable.cloneNode(true);
+   clone.style.cssText='display:table!important;width:100%!important;max-width:none!important;min-width:0!important;table-layout:fixed!important;border-collapse:collapse!important;font-size:17px!important';
+   clone.querySelectorAll('thead,tbody,tr').forEach(el=>{el.style.display='';el.style.width='auto'});
+   clone.querySelectorAll('th,td').forEach(el=>{el.style.cssText='display:table-cell!important;box-sizing:border-box!important;padding:12px 10px!important;border:1px solid #d6dde4!important;text-align:left!important;white-space:normal!important;overflow-wrap:break-word!important;word-break:normal!important;font-size:17px!important;line-height:1.4!important;color:#142236!important'});
+   clone.querySelectorAll('th').forEach(el=>{el.style.background='#edf2f7';el.style.fontWeight='900'});
+   clone.querySelectorAll('td:first-child,th:first-child').forEach(el=>{el.style.width='16%';el.style.whiteSpace='nowrap'});
+   block.appendChild(clone);stage.appendChild(block);document.body.appendChild(stage);
+   const canvas=await window.html2canvas(stage,{scale:1.7,backgroundColor:'#ffffff',useCORS:true,logging:false,width:1100,windowWidth:1100});
+   const blob=await new Promise((ok,no)=>canvas.toBlob(v=>v?ok(v):no(Error('Não foi possível gerar a imagem.')),'image/png'));
+   if(signature!==tableSignature())throw Error('O relatório foi atualizado. Toque novamente para baixar a lista atual.');
+   const name='relatorio_clientes_'+String(category).normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9_-]/gi,'_')+'_'+String(consultant.rota||'consultor').replace(/[^a-z0-9_-]/gi,'_')+'.png';
    exportBlob=blob;exportFile=new File([blob],name,{type:'image/png'});exportSignature=signature;
-   exportStatus('Imagem pronta para salvar.');
-   return exportFile
+   exportStatus('Relatório completo pronto para salvar.');
+   return exportFile;
   }finally{stage?.remove()}
  })();
  exportPreparing=task;
- try{return await task}catch(e){exportStatus(e?.message||'Não foi possível preparar a imagem.',true);throw e}
+ try{return await task}catch(e){exportStatus(e?.message||'Não foi possível preparar o relatório.',true);throw e}
  finally{if(exportPreparing===task)exportPreparing=null;updateExportButtons(false)}
 }
 async function baixarPrimeiraTabela(){
