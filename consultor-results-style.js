@@ -41,7 +41,9 @@ function ensureStyle(){
 #results tbody td:first-child{text-align:left;font-weight:900;color:#10263a}
 #results .res-ok{color:#0b8a46;font-weight:900}
 #results .res-bad{color:#d71920;font-weight:900}
-#results .meta-num{font-weight:900}
+#results tbody td.meta-num{color:#075fae!important;font-weight:900!important}
+#results tbody td.res-ok,#results tbody td.pct-ok{color:#087249!important;font-weight:900!important}
+#results tbody td.res-bad,#results tbody td.pct-bad{color:#c5161d!important;font-weight:900!important}
 #results .falta-num{font-weight:900;color:#c5161d}
 #results .pct-ok{color:#0b8a46;font-weight:900}
 #results .pct-bad{color:#d71920;font-weight:900}
@@ -129,6 +131,8 @@ function decorateResults(){
     const falta=Math.max(Number(String(tr.cells[3].textContent).replace(',','.'))||0,0);
     const ok=real>=meta;
     tr.cells[1].classList.add('meta-num');
+    tr.cells[2].classList.remove('res-ok','res-bad');
+    tr.cells[4].classList.remove('pct-ok','pct-bad');
     tr.cells[2].classList.add(ok?'res-ok':'res-bad');
     tr.cells[3].classList.add('falta-num');
     tr.cells[4].classList.add(ok?'pct-ok':'pct-bad');
