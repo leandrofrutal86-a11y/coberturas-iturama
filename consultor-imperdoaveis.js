@@ -71,14 +71,30 @@ async function prepareImpPdf(rows){
   const b=$('impReportPdfBtn');if(b){b.disabled=false;b.textContent='📄 BAIXAR PDF'}
  }catch(e){const b=$('impReportPdfBtn');if(b){b.disabled=false;b.textContent='TENTAR PDF NOVAMENTE'}}
 }
-function downloadImpPdf(){if(reportPdfDoc){try{reportPdfDoc.save(reportPdfName)}catch{alert('Não foi possível iniciar o download do PDF.')}return}prepareImpPdf(reportRowsCache)}
+function printImpReport(){
+ if(!document.getElementById('impReportPrintStyle')){
+  const st=document.createElement('style');st.id='impReportPrintStyle';st.textContent='@media print{@page{size:A4 landscape;margin:9mm}body>*:not(#impReportOverlay){display:none!important}#impReportOverlay{display:block!important;position:static!important;overflow:visible!important;background:#fff!important}#impReportOverlay .impReportTop,#impReportOverlay .impReportActions{display:none!important}#impReportOverlay .impReportBody{width:100%!important;margin:0!important}#impReportOverlay .impReportTableWrap{overflow:visible!important}#impReportOverlay table{width:100%!important;min-width:0!important;font-size:9px!important}#impReportOverlay tr{break-inside:avoid!important}#impReportOverlay td{white-space:normal!important;overflow-wrap:anywhere!important}}';document.head.appendChild(st);
+ }
+ window.print();
+}
+async function downloadImpPdf(){
+ const b=$('impReportPdfBtn');if(b){b.disabled=true;b.textContent='📄 GERANDO PDF...'}
+ try{
+  if(!reportPdfDoc)await prepareImpPdf(reportRowsCache);
+  if(!reportPdfDoc)throw Error('Biblioteca de PDF indisponível');
+  const blob=reportPdfDoc.output('blob'),url=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=url;a.download=reportPdfName||'relatorio_imperdoaveis.pdf';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);
+  if(b)b.textContent='📄 BAIXAR PDF';
+ }catch(e){if(b)b.textContent='🖨️ IMPRIMIR / SALVAR PDF';printImpReport()}
+ finally{if(b)b.disabled=false}
+}
 function openImpReport(){
  const rows=reportRowsNow();reportRowsCache=rows;reportPdfDoc=null;reportPdfName='';
  const o=$('impReportOverlay'),box=$('impReportContent');if(!o||!box)return;
  o.classList.add('show');
  const totalMiss=rows.reduce((s,x)=>s+x.miss.length,0),rt=route()==='TEAM'?'Toda a Equipe':route();
  const table=rows.length?`<div class="impReportTableWrap"><table class="impReportTable"><thead><tr><th>PV</th><th>CLIENTE</th><th>ROTA</th><th>SUBCANAL</th><th>SITUAÇÃO</th><th>PRODUTOS QUE FALTAM</th></tr></thead><tbody>${rows.map(x=>`<tr><td>${esc(x.pv)}</td><td><b>${esc(x.razao)}</b></td><td>${esc(x.rota)}</td><td>${esc(x.subcanal)}</td><td><b>${reportResta(x.faltam)}</b></td><td class="impReportMissing">${x.miss.map(esc).join('<br>')}</td></tr>`).join('')}</tbody></table></div>`:'<div class="impEmpty">Nenhum cliente neste filtro.</div>';
- box.innerHTML=`<div class="impReportInfo"><b>${esc(rt)} • ${esc(dayLabel(state.day))} • ${esc(state.cat)}</b><div style="font-size:11px;margin-top:4px">Situação: ${esc(selectedOpportunityLabel())}</div><div class="impReportSummary"><span class="impReportChip">CLIENTES: ${rows.length}</span><span class="impReportChip">PRODUTOS FALTANTES: ${totalMiss}</span></div><div class="impReportActions"><button class="impReportBtn pdf" id="impReportPdfBtn" ${rows.length?'disabled':''}>📄 ${rows.length?'PREPARANDO PDF...':'SEM DADOS PARA PDF'}</button><button class="impReportBtn" id="impReportBackBtn">← VOLTAR AOS FILTROS</button></div></div>${table}`;
+ box.innerHTML=`<div class="impReportInfo"><b>${esc(rt)} • ${esc(dayLabel(state.day))} • ${esc(state.cat)}</b><div style="font-size:11px;margin-top:4px">Situação: ${esc(selectedOpportunityLabel())}</div><div class="impReportSummary"><span class="impReportChip">CLIENTES: ${rows.length}</span><span class="impReportChip">PRODUTOS FALTANTES: ${totalMiss}</span></div><div class="impReportActions"><button class="impReportBtn pdf" id="impReportPdfBtn" ${rows.length?'':'disabled'}>📄 ${rows.length?'BAIXAR PDF':'SEM DADOS PARA PDF'}</button><button class="impReportBtn" id="impReportBackBtn">← VOLTAR AOS FILTROS</button></div></div>${table}`;
  $('#impReportBackBtn').onclick=()=>o.classList.remove('show');
  const pb=$('impReportPdfBtn');if(pb)pb.onclick=downloadImpPdf;
  if(rows.length)prepareImpPdf(rows);
