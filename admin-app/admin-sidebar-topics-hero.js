@@ -29,6 +29,7 @@ const s=d.createElement('style');s.id='admSidebarTopicsHero';s.textContent=`
 }
 @media(max-width:365px){#app .homeHello{grid-template-columns:54px minmax(0,1fr)!important;gap:9px!important}#app .homeAvatar{width:54px!important;height:54px!important}#app .homeHello h1{font-size:21px!important}#app .homeHero .adminBadge{margin-left:63px!important}}
 `;d.head.appendChild(s);
+const brand=d.querySelector('#app .homeHello .cokeBrand');if(brand)brand.remove();
 const nav=d.getElementById('admSideNav'),app=d.getElementById('app');
 if(!nav||!app)return;
 let rendering=false;
