@@ -112,6 +112,23 @@ function ensureControls(){
     $('consultorShareTable').onclick=compartilharPrimeiraTabela;
   }
 }
+function aplicarCoresTodasCategorias(){
+ const table=$('results')?.querySelector('table');
+ if(!table)return;
+ table.querySelectorAll('tbody tr').forEach(tr=>{
+  const c=tr.cells;if(!c||c.length<5)return;
+  const num=el=>Number(String(el?.textContent||'').replace(/[^\\d,.-]/g,'').replace(',','.'))||0;
+  const meta=num(c[1]),real=num(c[2]),falta=Math.max(0,meta-real),ok=real>=meta;
+  c[1].classList.add('meta-num');
+  c[2].classList.remove('res-ok','res-bad');c[2].classList.add(ok?'res-ok':'res-bad');
+  c[3].classList.remove('falta-num','falta-zero');c[3].classList.add(falta>0?'falta-num':'falta-zero');
+  c[4].classList.remove('pct-ok','pct-bad');c[4].classList.add(ok?'pct-ok':'pct-bad');
+  for(const [cell,color] of [[c[1],'#075fae'],[c[2],ok?'#087249':'#c5161d'],[c[3],falta>0?'#c5161d':'#087249'],[c[4],ok?'#087249':'#c5161d']]){
+   cell.style.setProperty('color',color,'important');cell.style.setProperty('font-weight','900','important');
+   cell.querySelectorAll('b,strong,span').forEach(el=>{el.style.setProperty('color',color,'important');el.style.setProperty('font-weight','900','important')});
+  }
+ });
+}
 function decorateResults(){
   if(!painelAberto())return;
   ensureControls();
@@ -150,6 +167,7 @@ function decorateResults(){
       b.textContent=String(metaDiaria(falta,dias));
     }
   });
+  aplicarCoresTodasCategorias();
   if(info&&meu)info.textContent=`Dias úteis restantes: ${dias}. Meta/dia calculada de segunda a sexta, sem contar o último dia do mês.`;
   const old=$('consultorRelatorio');
   if(old)old.remove();
