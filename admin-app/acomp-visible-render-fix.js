@@ -12,7 +12,7 @@ function entries(d){
  const cats=d?.categorias||[];
  const used=new Set(ALL_BASE_IDS.map(Number));
  const ids=[...ALL_BASE_IDS,...cats.filter(c=>!used.has(Number(c.id))).map(c=>Number(c.id))];
- return ids.map(cid=>{const idx=cats.findIndex(c=>Number(c.id)===Number(cid));return idx>=0?{cat:cats[idx],idx}:null}).filter(Boolean)
+ return ids.map(cid=>{const idx=cats.findIndex(c=>Number(c.id)===Number(cid));return idx>=0?{cat:cats[idx],idx}:null}).filter(Boolean).sort((a,b)=>Number(a.cat.posicao_acomp||a.cat.ordem||999)-Number(b.cat.posicao_acomp||b.cat.ordem||999)||Number(a.cat.id)-Number(b.cat.id))
 }
 function result(ind,e){const arr=ind?.resultados||[];return arr.find(r=>Number(r?.categoria_id)===Number(e.cat?.id))||arr.find(r=>norm(r?.nome)===norm(e.cat?.nome))||arr[e.idx]||null}
 function head(inds){return '<tr><th class="catHead" rowspan="2">CATEGORIA</th>'+inds.map(i=>`<th class="sepL" colspan="3">${esc(i.rota)} ${esc(i.nome)}</th>`).join('')+'<th class="teamHead sepL" colspan="3">EQUIPE</th></tr><tr>'+inds.map(()=>'<th class="sepL">META</th><th>REALIZADO</th><th class="faltaHead">FALTA</th>').join('')+'<th class="teamHead sepL">META</th><th class="teamHead">REALIZADO</th><th class="teamHead faltaHead">FALTA</th></tr>'}
