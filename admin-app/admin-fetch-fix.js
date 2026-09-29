@@ -6,7 +6,7 @@ const LOGIN=`${primary}/admin-login-api`;
 const ADMIN=`${primary}/admin-api`;
 const FALLBACK_ADMIN=`${fallback}/admin-api`;
 
-const timeoutFor=p=>p?.action==='login'?5000:p?.action==='dashboard'?30000:p?.action==='admin_config'?18000:22000;
+const timeoutFor=p=>p?.action==='login'?15000:p?.action==='dashboard'?30000:p?.action==='admin_config'?18000:22000;
 async function call(url,payload,ms){
   const ctrl=new AbortController(),to=setTimeout(()=>ctrl.abort(),ms);
   try{
@@ -22,14 +22,14 @@ async function robustPost(payload){
   if(payload?.action==='login'){
     // Uma falha de rede não significa senha inválida: preserve a sessão e
     // tente novamente antes de mostrar o erro ao usuário.
-    const targets=[[LOGIN,7500],[LOGIN,7500],[ADMIN,8000],[`${fallback}/admin-login-api`,8000]];
+    const targets=[[LOGIN,15000],[LOGIN,15000],[`${fallback}/admin-login-api`,15000],[ADMIN,15000]];
     let last=null;
     for(let i=0;i<targets.length;i++){
       try{return await call(targets[i][0],payload,targets[i][1])}
       catch(e){
         if(e?.noRetry)throw e;
         last=e;
-        if(i===0)await wait(600)
+        await wait(Math.min(800*(i+1),2400))
       }
     }
     throw new Error(navigator.onLine===false?'Sem conexão com a internet. Verifique a rede e tente novamente.':'Não foi possível conectar ao ADM. Aguarde alguns segundos e toque em ENTRAR novamente.');
@@ -97,7 +97,7 @@ try{post=robustPost;carregarTudo=fastCarregarTudo}catch{}
 window.carregarTudo=fastCarregarTudo;
 try{if(typeof dash!=='undefined'&&dash)publishDash(dash)}catch{}
 
-fetch(LOGIN+'?warm='+Date.now(),{method:'GET',mode:'cors',cache:'no-store',credentials:'omit'}).catch(()=>{});
+// Não enviar GET de aquecimento à função POST de autenticação.
 
 let n=0;const guard=setInterval(()=>{
   window.post=robustPost;window.carregarTudo=fastCarregarTudo;
