@@ -12,8 +12,8 @@ async function call(url,payload,ms){
   try{
     const r=await fetch(url+'?v='+Date.now(),{method:'POST',mode:'cors',cache:'no-store',credentials:'omit',headers:{'Content-Type':'text/plain;charset=UTF-8','Accept':'application/json'},body:JSON.stringify(payload),signal:ctrl.signal});
     let j={};try{j=await r.json()}catch{}
-    if(r.ok)return j;
-    const e=new Error(j.error||('Erro '+r.status));e.status=r.status;if([400,401,403].includes(r.status))e.noRetry=true;throw e;
+    if(r.ok&&!j.error)return j;
+    const e=new Error(j.error||('Erro '+r.status));e.status=r.status;if([400,401,403].includes(r.status)||/senha inv[aá]lida|credenciais inv[aá]lidas|acesso negado|n[aã]o autorizado/i.test(String(j.error||'')))e.noRetry=true;throw e;
   }finally{clearTimeout(to)}
 }
 const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
@@ -22,7 +22,7 @@ async function robustPost(payload){
   if(payload?.action==='login'){
     // Uma falha de rede não significa senha inválida: preserve a sessão e
     // tente novamente antes de mostrar o erro ao usuário.
-    const targets=[[LOGIN,15000],[LOGIN,15000],[`${fallback}/admin-login-api`,15000],[ADMIN,15000]];
+    const targets=[[LOGIN,15000],[`${fallback}/admin-login-api`,15000],[LOGIN,20000],[`${fallback}/admin-login-api`,20000]];
     let last=null;
     for(let i=0;i<targets.length;i++){
       try{return await call(targets[i][0],payload,targets[i][1])}
