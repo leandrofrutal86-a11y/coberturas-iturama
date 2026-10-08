@@ -49,27 +49,6 @@ frame.addEventListener('load',function(){
   }catch(e){}
   installRobust(w);
 
-  // Exibir atalhos compactos somente na tela inicial após autenticação.
-  const shortcuts=d.createElement('div');
-  shortcuts.id='adm-official-shortcuts';
-  shortcuts.style.cssText='display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;align-items:center';
-  [['📱 Incentivo APP','https://painel-incentivo-urla.pages.dev/'],['✅ Imperdoáveis','https://imperdoaveis-urla.pages.dev/']].forEach(([label,url])=>{
-    const a=d.createElement('a');a.textContent=label;a.href=url;a.target='_blank';a.rel='noopener noreferrer';a.style.cssText='display:inline-flex;align-items:center;padding:5px 9px;border:1px solid #dce3e9;border-radius:7px;background:#fff;color:#23384e;text-decoration:none;font:700 11px Arial,sans-serif;line-height:1.2';shortcuts.appendChild(a);
-  });
-  function placeShortcuts(){
-    const home=d.getElementById('cokeHome');
-    const hero=home?.querySelector('.homeHero');
-    const heading=hero?.querySelector('.homeHello h1');
-    const app=d.getElementById('app');
-    const loggedIn=!!app&&!app.classList.contains('hide')&&!!home&&!home.classList.contains('hide');
-    shortcuts.hidden=!loggedIn;
-    const subtitle=hero?.querySelector('.homeHello p');
-    if(subtitle&&shortcuts.previousElementSibling!==subtitle)subtitle.insertAdjacentElement('afterend',shortcuts);
-    else if(!subtitle&&heading&&shortcuts.previousElementSibling!==heading)heading.insertAdjacentElement('afterend',shortcuts);
-  }
-  const shortcutsStyle=d.createElement('style');shortcutsStyle.textContent='#adm-official-shortcuts[hidden]{display:none!important}';d.head.appendChild(shortcutsStyle);
-  const observer=new MutationObserver(placeShortcuts);observer.observe(d.body,{subtree:true,childList:true,attributes:true,attributeFilter:['class']});
-  placeShortcuts();
   this.style.visibility='visible';
   const x=d.createElement('script');x.src='https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';d.head.appendChild(x);
   ['admin-fetch-fix.js?v=20260929-rede-06','admin-login-remember.js?v=20260916-remember-01','category-manager.js?v=20261008-ocultar-categorias-01','quantidade-minima.js?v=20260916-b2b-config-01','b2b-admin.js?v=20260916-b2b-config-01','b2b-config-fix.js?v=20260916-b2b-config-01','coke-home.js?v=20260927-sem-marca-03','trio-pao-queijo-report.js?v=20260918-refpet-02','access-manager.js?v=20260920-who-accessed-02','acompanhante-access.js?v=20260914-acomp-access-01','visitas-subcanais.js?v=20260914-visitas-open-02','admin-layout-fix.js?v=20260911-visao-03','card-nav-fix.js?v=20260920-who-accessed-02','subcanais-admin-ui.js?v=20260909-subcanais-01','subcanais-standalone.js?v=20260909-subfix-01','material-manager-v2.js?v=20260919-faixa-order-02','material-display-fix.js?v=20260916-materiais-menu-01','material-faixa-bulk.js?v=20260916-faixa-bulk-01','acomp-export.js?v=20260927-posicao-02','acomp-visible-render-fix.js?v=20260927-posicao-02','conteudos-manager.js?v=20260910-conteudos-03','conteudos-cards-fix.js?v=20260920-topicos-01','b2b-dashboard-fix.js?v=20260925-recompra-rotas-03','imperdoaveis-manager.js?v=20260917-imp-report-base-01','imperdoaveis-relatorio.js?v=20260918-imp-audit-02','imperdoaveis-relatorio-manual.js?v=20260918-imp-audit-01','imperdoaveis-hide-out.js?v=20260910-imp-06','admin-pv-dia.js?v=20260927-pesquisa-dentro-lista-05','admin-mobile-fit.js?v=20260910-mobile-01','admin-contracts.js?v=20260924-contratos-limpar-04','trio-labels.js?v=20260918-refpet-02','contatos-clientes.js?v=20260914-contatos-rotas-01','footer-credit.js?v=20260911-credit-01','exclusive-nav-fix.js?v=20260925-acomp-voltar-02','visitas-clientes-fix.js?v=20260914-visitas-fix-03','acomp-mobile-fit-v2.js?v=20260927-tres-colunas-01','acomp-consultor-individual.js?v=20260925-consulta-rota-01','vendas-upload-resiliente.js?v=20260927-importacao-paralela-02','vendas-relatorios.js?v=20260929-duas-categorias-10','admin-sidebar-layout.js?v=20260927-sidebar-01','admin-sidebar-topics-hero.js?v=20260927-materiais-imagens-02','incentivo-b2b-consulta.js?v=20260928-celular-01'].forEach(src=>{const s=d.createElement('script');s.src=src;d.body.appendChild(s)});
