@@ -63,7 +63,9 @@ frame.addEventListener('load',function(){
     const app=d.getElementById('app');
     const loggedIn=!!app&&!app.classList.contains('hide')&&!!home&&!home.classList.contains('hide');
     shortcuts.hidden=!loggedIn;
-    if(heading&&shortcuts.parentNode!==heading.parentNode)heading.insertAdjacentElement('afterend',shortcuts);
+    const subtitle=hero?.querySelector('.homeHello p');
+    if(subtitle&&shortcuts.previousElementSibling!==subtitle)subtitle.insertAdjacentElement('afterend',shortcuts);
+    else if(!subtitle&&heading&&shortcuts.previousElementSibling!==heading)heading.insertAdjacentElement('afterend',shortcuts);
   }
   const shortcutsStyle=d.createElement('style');shortcutsStyle.textContent='#adm-official-shortcuts[hidden]{display:none!important}';d.head.appendChild(shortcutsStyle);
   const observer=new MutationObserver(placeShortcuts);observer.observe(d.body,{subtree:true,childList:true,attributes:true,attributeFilter:['class']});
