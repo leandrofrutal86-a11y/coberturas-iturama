@@ -1,0 +1,19 @@
+{
+  "id": "./",
+  "name": "Meu Personal — Leandro e Davi",
+  "short_name": "Meu Personal",
+  "description": "Treinos e histórico compartilhado de Leandro e Davi",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#071512",
+  "theme_color": "#071512",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
