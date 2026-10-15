@@ -14,7 +14,7 @@ function ensureCss(){
 @media(max-width:760px){.ipaRow{grid-template-columns:1fr 1fr}.ipaRow .ipaMain{grid-column:1/-1}.ipaActions{grid-column:1/-1}.ipaAdd{grid-template-columns:1fr}}
 `;document.head.appendChild(s)
 }
-function configData(){try{return window.config||null}catch{return null}}
+function configData(){try{return (typeof config!=='undefined'&&config)?config:(window.config||null)}catch{return window.config||null}}
 function homeCard(){
  const grid=document.querySelector('.topicIncentivos .menuGrid');if(!grid||$('incentivePriorityCard'))return;
  const b=document.createElement('button');b.id='incentivePriorityCard';b.className='menuCard';b.innerHTML='<span class="mi" style="background:#0b63ce">🎛️</span><span><b>Prioridade dos Incentivos</b><small>Escolher, ocultar e ordenar botões dos consultores</small></span>';
@@ -38,8 +38,10 @@ function addBack(){
  b.onclick=()=>{$('incentivePriorityAdmin')?.classList.add('hide');$('cokeHome')?.classList.remove('hide');b.remove();window.scrollTo({top:0,behavior:'smooth'})};
  wrap.insertBefore(b,wrap.firstChild)
 }
-function openPanel(){
- if(!ensurePanel())return;hideOthers();$('incentivePriorityAdmin').classList.remove('hide');addBack();render();window.scrollTo({top:0,behavior:'smooth'})
+async function openPanel(){
+ if(!ensurePanel())return;hideOthers();$('incentivePriorityAdmin').classList.remove('hide');addBack();
+ try{if(!configData()?.incentivo_botoes){setStatus('Carregando configuração...');await refresh()}}catch(e){setStatus(e.message||'Não foi possível carregar os incentivos.')}
+ render();window.scrollTo({top:0,behavior:'smooth'})
 }
 function cats(){
  const c=configData()?.categorias||[];
