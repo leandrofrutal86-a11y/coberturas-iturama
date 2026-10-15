@@ -64,8 +64,6 @@ function tick(){
  const sig=signature();if(sig&&sig!==last){last=sig;apply();return}
  if(sig)apply()
 }
-const observer=new MutationObserver(()=>{if(config().length)apply()});
-observer.observe(document.documentElement,{childList:true,subtree:true});
 setInterval(tick,2500);
 let n=0;const t=setInterval(()=>{tick();if(++n>80)clearInterval(t)},250);
 })();
