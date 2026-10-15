@@ -121,3 +121,4 @@ window.__resilientImportVendas=resilientImport;
 window.atualizarVendas=resilientImport;
 try{atualizarVendas=resilientImport}catch(e){}
 })();
+;(()=>{if(document.getElementById('mesAnteriorB2BLoader'))return;const s=document.createElement('script');s.id='mesAnteriorB2BLoader';s.src='vendas-mes-anterior-b2b.js?v=20261015-recompra-anterior-01';s.async=false;document.head.appendChild(s)})();
