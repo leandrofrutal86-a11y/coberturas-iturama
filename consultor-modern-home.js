@@ -48,6 +48,148 @@ html,body{max-width:100%!important;overflow-x:hidden!important}
 #dash .tabs{margin-top:13px!important}.cmGraph{background:#fff;border:1px solid #e0e7ed;border-radius:17px;padding:13px;margin:0 0 12px;box-shadow:0 5px 15px #172b400d}.cmGraphTop{display:flex;align-items:center;gap:12px}.cmDonut{--p:0;width:88px;height:88px;border-radius:50%;background:conic-gradient(#0b9b57 calc(var(--p)*1%),#edf1f4 0);display:grid;place-items:center;flex:0 0 auto}.cmDonut:after{content:attr(data-p);width:65px;height:65px;border-radius:50%;background:#fff;display:grid;place-items:center;font-size:18px;font-weight:950;color:#163046}.cmGraphText{min-width:0}.cmGraphText h3{font-size:16px;margin:0 0 7px;color:#172736;line-height:1.15}.cmGraphStats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:11px}.cmGraphStat{background:#f5f8fa;border-radius:10px;padding:8px;text-align:center}.cmGraphStat small{display:block;font-size:9px;color:#687987;font-weight:800}.cmGraphStat b{display:block;font-size:16px;margin-top:2px}
 .cvPrioritySection,.cvPriorityWrap,.cvHomePriorities,#cvPriorityBlock{display:none!important}
 @media(max-width:380px){#dash .wrap{padding-left:7px!important;padding-right:7px!important}.cmSearchRow{grid-template-columns:1fr!important}.cmSearchRow button{width:100%!important;font-size:11px!important}.cmCat{flex-basis:120px!important;width:120px!important;min-width:120px!important;max-width:120px!important}.cmAct{font-size:12px}}
+
+/* FINAL PORTRAIT FIX */
+@media (orientation:portrait){
+  #consultorModernHome{
+    box-sizing:border-box!important;
+    display:block!important;
+    width:calc(100vw - 20px)!important;
+    min-width:0!important;
+    max-width:calc(100vw - 20px)!important;
+    margin:0 auto!important;
+    padding:0!important;
+    overflow:visible!important;
+  }
+  #consultorModernHome > *{
+    box-sizing:border-box!important;
+    width:100%!important;
+    min-width:0!important;
+    max-width:100%!important;
+  }
+  #consultorModernHome .cmSearchHero{
+    box-sizing:border-box!important;
+    display:block!important;
+    width:100%!important;
+    min-width:0!important;
+    max-width:100%!important;
+    margin:0!important;
+    padding:12px!important;
+    overflow:hidden!important;
+    contain:layout paint!important;
+  }
+  #consultorModernHome .cmSearchTitle{
+    min-width:0!important;
+    max-width:100%!important;
+  }
+  #consultorModernHome .cmSearchTitle>div:last-child{
+    min-width:0!important;
+    max-width:calc(100% - 58px)!important;
+  }
+  #consultorModernHome .cmSearchTitle b{
+    font-size:20px!important;
+    line-height:1.05!important;
+    white-space:nowrap!important;
+  }
+  #consultorModernHome .cmSearchTitle small{
+    font-size:10px!important;
+    white-space:normal!important;
+  }
+  #consultorModernHome .cmSearchRow,
+  #consultorModernHome .cmPvControls{
+    box-sizing:border-box!important;
+    display:block!important;
+    width:100%!important;
+    min-width:0!important;
+    max-width:100%!important;
+    overflow:hidden!important;
+  }
+  #consultorModernHome .cmSearchRow input{
+    box-sizing:border-box!important;
+    display:block!important;
+    width:100%!important;
+    min-width:0!important;
+    max-width:100%!important;
+    height:48px!important;
+    padding:10px 12px!important;
+    font-size:14px!important;
+  }
+  #consultorModernHome .cmWeekDays{
+    box-sizing:border-box!important;
+    display:grid!important;
+    grid-template-columns:repeat(5,minmax(0,1fr))!important;
+    gap:4px!important;
+    width:100%!important;
+    min-width:0!important;
+    max-width:100%!important;
+    overflow:hidden!important;
+  }
+  #consultorModernHome .cmWeekDay{
+    box-sizing:border-box!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    width:100%!important;
+    min-width:0!important;
+    max-width:100%!important;
+    height:32px!important;
+    margin:0!important;
+    padding:0!important;
+    font-size:9px!important;
+    line-height:1!important;
+    border-radius:7px!important;
+    overflow:hidden!important;
+  }
+  #consultorModernHome .cmClientListBtn{
+    box-sizing:border-box!important;
+    display:block!important;
+    width:100%!important;
+    min-width:0!important;
+    max-width:100%!important;
+    margin-top:7px!important;
+    padding:10px!important;
+    white-space:normal!important;
+  }
+  #consultorModernHome .cmActions{
+    width:100%!important;
+    max-width:100%!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+  #consultorModernHome .cmCarouselViewport{
+    box-sizing:border-box!important;
+    width:100%!important;
+    min-width:0!important;
+    max-width:100%!important;
+    overflow:visible!important;
+  }
+  #consultorModernHome .cmCarousel{
+    box-sizing:border-box!important;
+    display:flex!important;
+    flex-flow:row nowrap!important;
+    gap:9px!important;
+    width:100%!important;
+    min-width:0!important;
+    max-width:100%!important;
+    overflow-x:auto!important;
+    overflow-y:hidden!important;
+    padding:2px 22px 10px 1px!important;
+    -webkit-overflow-scrolling:touch!important;
+    touch-action:pan-x!important;
+    overscroll-behavior-x:contain!important;
+    scroll-snap-type:x proximity!important;
+    scrollbar-width:none!important;
+  }
+  #consultorModernHome .cmCarousel::-webkit-scrollbar{display:none!important}
+  #consultorModernHome .cmCat{
+    flex:0 0 126px!important;
+    width:126px!important;
+    min-width:126px!important;
+    max-width:126px!important;
+    scroll-snap-align:start!important;
+    touch-action:pan-x!important;
+  }
+}
+
 `;document.head.appendChild(s);
 }
 function clickExisting(id,text){const el=id?document.getElementById(id):null;if(el){el.click();return}const x=QA('#dash button,#dash .tile,#dash a').find(v=>String(v.textContent||'').toLowerCase().includes(String(text||'').toLowerCase()));if(x)x.click()}
@@ -62,27 +204,13 @@ function renderGraph(cat){
 function chooseWithGraph(cat){try{choose(cat)}catch{}setTimeout(()=>renderGraph(cat),30)}
 function hideOldPriority(){QA('#dash .wrap > section,#dash .wrap > div').forEach(el=>{if(el.id==='consultorModernHome'||el.classList.contains('tabs')||el.classList.contains('panel')||el.classList.contains('footer'))return;const t=String(el.textContent||'').trim().toUpperCase();if(t.includes('INCENTIVOS PRIORITÁRIOS')&&t.length<160)el.style.setProperty('display','none','important')})}
 function build(){const wrap=Q('#dash .wrap');if(!wrap)return false;css();let home=document.getElementById('consultorModernHome');if(!home){home=document.createElement('section');home.id='consultorModernHome';home.className='cmHome';const tabs=Q('#dash .tabs');wrap.insertBefore(home,tabs||wrap.firstChild)}return true}
-function bindCarouselDrag(){
- const vp=document.querySelector('.cmCarouselViewport');if(!vp||vp.dataset.dragBound==='1')return;
- vp.dataset.dragBound='1';let startX=0,startScroll=0,active=false,moved=false;
- const begin=x=>{active=true;moved=false;startX=x;startScroll=vp.scrollLeft};
- const move=(x,e)=>{if(!active)return;const dx=x-startX;if(Math.abs(dx)>3){moved=true;vp.scrollLeft=startScroll-dx;if(e?.cancelable)e.preventDefault()}};
- const end=()=>{active=false;setTimeout(()=>{moved=false},80)};
- vp.addEventListener('touchstart',e=>{const t=e.touches[0];if(t)begin(t.clientX)},{passive:true});
- vp.addEventListener('touchmove',e=>{const t=e.touches[0];if(t)move(t.clientX,e)},{passive:false});
- vp.addEventListener('touchend',end,{passive:true});
- vp.addEventListener('pointerdown',e=>{begin(e.clientX);try{vp.setPointerCapture(e.pointerId)}catch{}});
- vp.addEventListener('pointermove',e=>move(e.clientX,e));
- vp.addEventListener('pointerup',end);vp.addEventListener('pointercancel',end);
- vp.addEventListener('click',e=>{if(moved){e.preventDefault();e.stopPropagation()}},true);
-}
 function render(){
  if(!build())return;const d=D();if(!d?.own)return;
  const name=d.consultor?.nome||'Consultor';
  const cards=(d.own||[]).map(x=>'<button class="cmCat" type="button" data-cat="'+E(x.nome)+'"><span class="emoji">'+icon(x.nome)+'</span><b>'+E(x.nome)+'</b><small>'+num(x.realizado)+' / '+num(x.meta)+' realizados</small></button>').join('');
  const h=document.getElementById('consultorModernHome');
  h.innerHTML='<div class="cmHello"><div class="cmAvatar">👤</div><div><strong>Olá, '+E(String(name).split(' ')[0])+'</strong><small>Bora conquistar mais hoje! 🚀</small></div></div>'+
- '<div class="cmSearchHero"><div class="cmSearchTitle"><div class="cmSearchIcon">🔎</div><div><b>Pesquisa de PV</b><small>Pesquise PV, cliente ou razão social</small></div></div><div class="cmSearchRow"><input id="cmPvInput" inputmode="numeric" placeholder="Digite o PV do cliente"></div><div class="cmPvControls"><div class="cmPvLabel">📍 Escolha o dia da visita</div><div class="cmWeekDays">'+['SEG','TER','QUA','QUI','SEX'].map(d=>'<button type="button" class="cmWeekDay" data-day="'+d+'">'+d+'</button>').join('')+'</div><button type="button" id="cmClientListBtn" class="cmClientListBtn">Listar clientes do dia ▾</button></div></div>'+
+ '<div class="cmSearchHero"><div class="cmSearchTitle"><div class="cmSearchIcon">🔎</div><div><b>Pesquisa de PV</b><small>Pesquise PV, cliente ou razão social</small></div></div><div class="cmSearchRow"><input id="cmPvInput" inputmode="numeric" placeholder="Digite o PV do cliente"></div><div class="cmPvControls"><div class="cmPvLabel">📍 Escolha o dia da visita</div><div class="cmWeekDays">'+['SEG','TER','QUA','QUI','SEX'].map(d=>'<span role="button" tabindex="0" class="cmWeekDay" data-day="'+d+'">'+d+'</span>').join('')+'</div><button type="button" id="cmClientListBtn" class="cmClientListBtn">Listar clientes do dia ▾</button></div></div>'+
  '<div><div class="cmSectionTitle"><h3>Acesso rápido</h3><small>Ferramentas da rota</small></div><div class="cmActions">'+
  '<button class="cmAct" data-act="contratos"><span class="ic">📄</span>Contratos</button>'+
  '<button class="cmAct blue" data-act="visitas"><span class="ic">📅</span>Visita de Clientes</button>'+
@@ -93,12 +221,11 @@ function render(){
  '<div><div class="cmSectionTitle"><h3>Coberturas dos Incentivos</h3><small>↔ arraste para o lado</small></div><div class="cmCarouselViewport"><div class="cmCarousel">'+cards+'</div></div></div>';
  document.getElementById('cmPvInput').onkeydown=e=>{if(e.key==='Enter')searchPvHome()};
  const savedDay=(sessionStorage.getItem('pv_dia_visita')||'SEG').toUpperCase();
- QA('#consultorModernHome .cmWeekDay').forEach(b=>{b.classList.toggle('active',b.dataset.day===savedDay);b.onclick=async()=>{QA('#consultorModernHome .cmWeekDay').forEach(x=>x.classList.remove('active'));b.classList.add('active');sessionStorage.setItem('pv_dia_visita',b.dataset.day);try{await window.__setPvHomeDay?.(b.dataset.day)}catch{}}});
+ QA('#consultorModernHome .cmWeekDay').forEach(b=>{b.classList.toggle('active',b.dataset.day===savedDay);const pick=async()=>{QA('#consultorModernHome .cmWeekDay').forEach(x=>x.classList.remove('active'));b.classList.add('active');sessionStorage.setItem('pv_dia_visita',b.dataset.day);try{await window.__setPvHomeDay?.(b.dataset.day)}catch{}};b.onclick=pick;b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();pick()}}});
  const listBtn=document.getElementById('cmClientListBtn');if(listBtn)listBtn.onclick=()=>{try{window.__openPvHomePicker?.()}catch{}};
 
  QA('#consultorModernHome .cmCat').forEach(b=>b.onclick=()=>chooseWithGraph(b.dataset.cat));
  QA('#consultorModernHome .cmAct').forEach(b=>b.onclick=()=>{const a=b.dataset.act;if(a==='contratos')clickExisting('cvContractsBtn','Contratos');else if(a==='visitas')clickExisting('cvVisitBtn','Visita de Clientes');else if(a==='subcanais')clickExisting('cvSubBtn','Subcanais');else if(a==='materiais')clickExisting(null,'Materiais de Apoio');else if(a==='contatos')clickExisting('contClientesBtn','Contato dos Clientes')});
- bindCarouselDrag();
  hideOldPriority();
  try{window.__renderPvHomePanel?.()}catch{}
 }
