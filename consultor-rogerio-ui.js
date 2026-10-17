@@ -41,7 +41,16 @@
     if(s.dataset.rogerioSig!==sig){s.innerHTML=options();s.dataset.rogerioSig=sig}
     s.value=getCtx();
   }
-  function sync(){document.querySelectorAll('.rogerioUiSelect').forEach(fillSelect);try{applyTeamLabels(getCtx())}catch{}}
+  function forceRogerioGreeting(){
+    if(!isRogerio())return;
+    const hello=document.querySelector('#consultorModernHome .cmHello strong');
+    if(hello)hello.textContent='Olá, Rogério';
+  }
+  function sync(){
+    document.querySelectorAll('.rogerioUiSelect').forEach(fillSelect);
+    try{applyTeamLabels(getCtx())}catch{}
+    forceRogerioGreeting();
+  }
 
   function addStyle(){
     if(document.getElementById('rogerioUiStyle'))return;
@@ -109,6 +118,7 @@
       }
       if(typeof fill==='function')fill();
       if(typeof render==='function')render();
+      forceRogerioGreeting();
       if(typeof summary==='function')summary();
       applyTeamLabels(v);
       addResultSelector();
@@ -234,6 +244,7 @@
     if(typeof TAB!=='undefined')TAB='equipe';
     applyTeamLabels(TEAM);
     if(typeof render==='function')render();
+    forceRogerioGreeting();
     addOverlaySelectors();
     addResultSelector();
     document.addEventListener('click',()=>setTimeout(()=>{addOverlaySelectors();addResultSelector();patchChoose()},80),true);
@@ -248,5 +259,5 @@
   },250);
   if(document.readyState!=='loading')activateOnce();
   else document.addEventListener('DOMContentLoaded',activateOnce,{once:true});
-  setInterval(()=>{if(isRogerio()){document.getElementById('dash')?.classList.add('rogerioMode');sync();addResultSelector();patchChoose()}},700);
+  setInterval(()=>{if(isRogerio()){document.getElementById('dash')?.classList.add('rogerioMode');sync();forceRogerioGreeting();addResultSelector();patchChoose()}},500);
 })();
