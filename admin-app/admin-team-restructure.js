@@ -53,6 +53,91 @@ function css(){
 .acvResults{background:#fff;border:1px solid #e0e7ed;border-radius:18px;padding:13px;box-shadow:0 5px 15px #172b400d}.acvTableWrap{overflow:auto;border:1px solid #e2e8ed;border-radius:12px}.acvTable{width:100%;border-collapse:collapse;min-width:720px}.acvTable th,.acvTable td{padding:10px 8px;border-bottom:1px solid #edf0f2;text-align:center;font-size:12px}.acvTable th{background:#f5f7f9}.acvTable th:first-child,.acvTable td:first-child{text-align:left;font-weight:900}.good{color:#087249;font-weight:950}.bad{color:#b3141c;font-weight:950}
 @media(max-width:900px){.acvActions{grid-template-columns:repeat(3,minmax(0,1fr))}.acvTopIn{flex-wrap:wrap}.acvBrand{flex-basis:calc(100% - 125px)}.acvSupervisor{order:3}.acvMainGrid{grid-template-columns:1fr}.acvHello{align-items:flex-start;flex-wrap:wrap}.acvRouteBox{width:100%;min-width:0}.acvStats{grid-template-columns:1fr 1fr}}
 @media(max-width:520px){.acvActions{grid-template-columns:1fr}.acvWrap{width:calc(100% - 14px);margin-top:8px}.acvTop{padding:10px}.acvBrand b{font-size:16px}.acvBrand small{font-size:9px}.acvBack{font-size:11px;padding:8px 10px}.acvSupervisor{font-size:10px;padding:6px 9px}.acvSearchRow{grid-template-columns:1fr}.acvSearchRow button{padding:11px}.acvCat{flex-basis:148px;height:220px}.acvProd{height:118px}.acvSecTitle h3{font-size:18px}}
+
+/* RESPONSIVO FINAL - celular retrato + desktop */
+#admConsultorView,#admConsultorView *{box-sizing:border-box}
+#admConsultorView{max-width:100vw;overflow-x:hidden}
+.acvWrap{max-width:1180px;min-width:0}
+.acvMainGrid,.acvSearch,.acvQuickBox,.acvResults,.acvHello,.acvCarouselShell,.acvCarousel{min-width:0;max-width:100%}
+.acvSearch{width:100%;background:linear-gradient(135deg,#df0010,#bd000a 75%,#990006)!important}
+.acvSearchRow{width:100%;max-width:100%;min-width:0}
+.acvSearchRow input{min-width:0;max-width:100%;width:100%}
+.acvPvControls{width:100%;max-width:100%;min-width:0;overflow:hidden}
+.acvDays{width:100%;max-width:100%;min-width:0}
+.acvDay{min-width:0;width:100%;padding:0}
+.acvList{width:100%;max-width:100%}
+.acvQuickBox{width:100%}
+.acvActions{width:100%}
+.acvAct{min-width:0;width:100%}
+.acvCarousel{width:100%;max-width:100%;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch}
+.acvResults{width:100%;overflow:hidden}
+.acvTableWrap{max-width:100%;overflow-x:auto;overflow-y:hidden}
+.acvTable{width:max-content;min-width:100%}
+@media(min-width:901px){
+  .acvWrap{width:min(1180px,calc(100% - 40px));margin:18px auto 72px}
+  .acvMainGrid{grid-template-columns:minmax(0,1.25fr) minmax(320px,.75fr)}
+  .acvSearch{align-self:stretch}
+  .acvQuickBox{align-self:stretch}
+  .acvActions{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .acvCat{flex:0 0 188px;height:270px}
+  .acvProd{height:150px}
+}
+@media(max-width:900px){
+  .acvWrap{width:calc(100% - 16px);margin:10px auto 64px}
+  .acvMainGrid{grid-template-columns:1fr}
+  .acvHello{flex-direction:column;align-items:stretch}
+  .acvHello>.acvAvatar{align-self:flex-start}
+  .acvRouteBox{width:100%}
+  .acvActions{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(orientation:portrait) and (max-width:700px){
+  html,body{overflow-x:hidden!important}
+  #admConsultorView{width:100vw;max-width:100vw}
+  .acvTop{padding:9px 8px}
+  .acvTopIn{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px}
+  .acvBrand{min-width:0}
+  .acvBrand b{font-size:15px;line-height:1.05;white-space:normal}
+  .acvBrand small{font-size:9px;line-height:1.15}
+  .acvSupervisor{grid-column:1/2;justify-self:start;font-size:9px;padding:6px 8px}
+  .acvBack{grid-column:2/3;grid-row:1/3;align-self:center;font-size:10px;padding:8px 9px}
+  .acvWrap{width:calc(100vw - 12px);max-width:calc(100vw - 12px);margin:7px auto 58px;gap:9px}
+  .acvHello{width:100%;max-width:100%;padding:10px 11px;display:grid;grid-template-columns:44px minmax(0,1fr);gap:9px}
+  .acvAvatar{width:44px;height:44px;font-size:21px}
+  .acvHelloText{min-width:0}
+  .acvHelloText strong{font-size:18px;white-space:nowrap}
+  .acvHelloText small{font-size:11px}
+  .acvRouteBox{grid-column:1/-1;width:100%;min-width:0}
+  .acvRoute{width:100%;min-width:0;max-width:100%}
+  .acvMainGrid{width:100%;max-width:100%;display:block}
+  .acvSearch{width:100%;max-width:100%;padding:12px;border-radius:18px;overflow:hidden}
+  .acvSearchTitle{min-width:0}
+  .acvSearchTitle>div:last-child{min-width:0}
+  .acvSearchTitle b{font-size:20px;white-space:nowrap}
+  .acvSearchTitle small{font-size:10px;white-space:normal}
+  .acvSearchRow{display:block;width:100%;max-width:100%;overflow:hidden}
+  .acvSearchRow input{display:block;width:100%;max-width:100%;min-width:0;height:46px;padding:10px 12px;font-size:14px}
+  .acvSearchRow button{display:block;width:100%;max-width:100%;margin-top:7px;padding:10px 12px}
+  .acvPvControls{margin-top:9px;padding:9px}
+  .acvDays{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px}
+  .acvDay{height:34px;font-size:9px;border-radius:7px}
+  .acvList{margin-top:7px;padding:10px;font-size:12px}
+  .acvQuickBox{margin-top:9px;width:100%;max-width:100%;padding:11px}
+  .acvActions{grid-template-columns:1fr!important;gap:8px}
+  .acvAct{min-height:74px;padding:11px;font-size:13px}
+  .acvAct .ic{width:36px;height:36px;font-size:19px;margin-bottom:6px}
+  .acvSecTitle h3{font-size:18px}
+  .acvSecTitle small{font-size:10px}
+  .acvCarouselShell{width:100%;max-width:100%;overflow:hidden}
+  .acvCarousel{width:100%;max-width:100%;padding:2px 18px 10px 0;gap:8px;overflow-x:auto}
+  .acvCat{flex:0 0 142px;width:142px;min-width:142px;max-width:142px;height:218px}
+  .acvProd{height:116px}
+  .acvCat b{font-size:13px}
+  .acvStats{grid-template-columns:1fr 1fr;gap:7px}
+  .acvStat{padding:10px}
+  .acvStat b{font-size:19px}
+  .acvResults{padding:10px;border-radius:16px}
+  .acvTableWrap{width:100%;max-width:100%;overflow-x:auto}
+}
 `;d.head.appendChild(s);
 }
 
