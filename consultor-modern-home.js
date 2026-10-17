@@ -4,6 +4,24 @@ const Q=s=>document.querySelector(s),QA=s=>[...document.querySelectorAll(s)];
 const E=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const num=v=>Number(v||0);
 function D(){try{return typeof DATA!=='undefined'?DATA:null}catch{return null}}
+
+function productMeta(name){
+ const s=String(name||'').toUpperCase();
+ if(s.includes('PERFETTI'))return{img:'assets/incentivos/perfetti.svg',theme:'blue'};
+ if(s.includes('FINI'))return{img:'assets/incentivos/fini.svg',theme:'pink'};
+ if(s.includes('BLACK LABEL'))return{img:'assets/incentivos/black-label.svg',theme:'black'};
+ if(s.includes('WHITE HORSE'))return{img:'assets/incentivos/white-horse.svg',theme:'gold'};
+ if(s.includes('OLD PARR'))return{img:'assets/incentivos/old-parr.svg',theme:'brown'};
+ if(s.includes('FRUT')||s.includes('DEL VALLE'))return{img:'assets/incentivos/del-valle-frut.svg',theme:'green'};
+ if(s.includes('ESTRELLA'))return{img:'assets/incentivos/estrella.svg',theme:'red'};
+ if(s.includes('PÃO DE QUEIJO'))return{img:'assets/incentivos/trio-pao-de-queijo.svg',theme:'red'};
+ if(s.includes('TANQUERAY'))return{img:'assets/incentivos/tanqueray.svg',theme:'green'};
+ if(s.includes('B2B'))return{img:'assets/incentivos/b2b.svg',theme:s.includes('RECOMPRA')?'purple':'cyan'};
+ if(s.includes('CAMPARI'))return{img:'assets/incentivos/campari.svg',theme:'navy'};
+ if(s.includes('APEROL'))return{img:'assets/incentivos/aperol.svg',theme:'orange'};
+ return{img:'',theme:'red'};
+}
+
 function icon(name){
  const s=String(name||'').toUpperCase();
  if(s.includes('FINI'))return '🍬'; if(s.includes('PERFETTI'))return '🍭'; if(s.includes('PÃO DE QUEIJO'))return '🧀';
@@ -43,8 +61,27 @@ html,body{max-width:100%!important;overflow-x:hidden!important}
 .cmCarouselViewport{box-sizing:border-box!important;width:100%!important;max-width:100%!important;min-width:0!important;overflow-x:scroll!important;overflow-y:hidden!important;-webkit-overflow-scrolling:touch!important;touch-action:none!important;overscroll-behavior-x:contain!important;scrollbar-width:none!important}
 .cmCarousel{box-sizing:border-box!important;display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;gap:9px!important;width:max-content!important;min-width:max-content!important;max-width:none!important;overflow:visible!important;padding:2px 24px 10px 1px!important;touch-action:none!important;cursor:grab}
 .cmCarouselViewport::-webkit-scrollbar{display:none!important}.cmCarousel:active{cursor:grabbing}
-.cmCat{box-sizing:border-box;flex:0 0 132px!important;width:132px!important;min-width:132px!important;max-width:132px!important;min-height:132px!important;border:0!important;border-radius:17px!important;padding:12px!important;color:#fff!important;text-align:left!important;scroll-snap-align:start!important;position:relative!important;box-shadow:0 6px 15px #172b4020!important;overflow:hidden!important;touch-action:none!important}
-.cmCat .emoji{font-size:26px;display:block;margin-bottom:12px}.cmCat b{font-size:13px;line-height:1.1;display:block}.cmCat small{display:block;margin-top:6px;color:#fffde8;font-size:9.5px}.cmCat:after{content:'›';position:absolute;right:8px;bottom:8px;width:25px;height:25px;border-radius:50%;background:#fff;color:#d20a14;display:grid;place-items:center;font-size:20px}.cmCat:nth-child(6n+1){background:linear-gradient(145deg,#ee2a61,#cf0050)}.cmCat:nth-child(6n+2){background:linear-gradient(145deg,#ff8b00,#e65c00)}.cmCat:nth-child(6n+3){background:linear-gradient(145deg,#0f7c3e,#075f2d)}.cmCat:nth-child(6n+4){background:linear-gradient(145deg,#1559c8,#0b3c9e)}.cmCat:nth-child(6n+5){background:linear-gradient(145deg,#d70b15,#a40008)}.cmCat:nth-child(6n+6){background:linear-gradient(145deg,#7f2cc7,#562091)}
+.cmCat{box-sizing:border-box!important;flex:0 0 148px!important;width:148px!important;min-width:148px!important;max-width:148px!important;height:248px!important;border:0!important;border-radius:20px!important;padding:0 10px 12px!important;color:#fff!important;text-align:left!important;scroll-snap-align:start!important;position:relative!important;box-shadow:0 12px 24px rgba(18,31,45,.20)!important;overflow:hidden!important;touch-action:pan-x!important;display:flex!important;flex-direction:column!important;justify-content:flex-end!important;background:linear-gradient(165deg,#d50a18,#7a0007)!important}
+.cmCat .cmProd{position:absolute;left:0;right:0;top:0;height:132px;display:flex;align-items:center;justify-content:center;padding:8px;background:linear-gradient(180deg,rgba(255,255,255,.18),rgba(255,255,255,.03));overflow:hidden}
+.cmCat .cmProd:after{content:'';position:absolute;inset:auto 0 0;height:46px;background:linear-gradient(transparent,rgba(0,0,0,.22))}
+.cmCat .cmProd img{display:block;max-width:100%;max-height:118px;width:auto;height:auto;object-fit:contain;filter:drop-shadow(0 7px 8px rgba(0,0,0,.22));position:relative;z-index:1}
+.cmCat .cmFallback{font-size:42px;position:relative;z-index:1}
+.cmCat b{font-size:15px!important;line-height:1.05!important;display:block!important;text-transform:uppercase!important;margin-top:138px!important;min-height:33px!important;text-shadow:0 1px 2px rgba(0,0,0,.22)}
+.cmCat small{display:block!important;margin-top:7px!important;color:#fff!important;font-size:11px!important;line-height:1.15!important}
+.cmCat .cmProgress{height:6px;border-radius:999px;background:rgba(255,255,255,.25);overflow:hidden;margin-top:8px;margin-right:40px}
+.cmCat .cmProgress i{display:block;height:100%;border-radius:inherit;background:rgba(255,255,255,.84)}
+.cmCat .cmArrow{position:absolute;right:9px;bottom:9px;width:34px;height:34px;border-radius:50%;background:#fff;color:#e30613;display:grid;place-items:center;font-size:25px;font-weight:900;box-shadow:0 4px 10px rgba(0,0,0,.18)}
+.cmCat.cmTheme-blue{background:linear-gradient(160deg,#138fe8,#073c9d)!important}
+.cmCat.cmTheme-pink{background:linear-gradient(160deg,#ff2a7f,#ca0056)!important}
+.cmCat.cmTheme-black{background:linear-gradient(160deg,#252525,#030303)!important}
+.cmCat.cmTheme-gold{background:linear-gradient(160deg,#ffc91d,#e28b00)!important}
+.cmCat.cmTheme-brown{background:linear-gradient(160deg,#7b4a25,#3d1e0c)!important}
+.cmCat.cmTheme-green{background:linear-gradient(160deg,#1ca44d,#056027)!important}
+.cmCat.cmTheme-cyan{background:linear-gradient(160deg,#19a7ed,#0758ae)!important}
+.cmCat.cmTheme-purple{background:linear-gradient(160deg,#9337ea,#55139e)!important}
+.cmCat.cmTheme-navy{background:linear-gradient(160deg,#173b6b,#061d3b)!important}
+.cmCat.cmTheme-orange{background:linear-gradient(160deg,#ff8d1c,#e63a0a)!important}
+.cmCat.cmTheme-red{background:linear-gradient(160deg,#f21a2b,#a6000b)!important}
 #dash .tabs{margin-top:13px!important}.cmGraph{background:#fff;border:1px solid #e0e7ed;border-radius:17px;padding:13px;margin:0 0 12px;box-shadow:0 5px 15px #172b400d}.cmGraphTop{display:flex;align-items:center;gap:12px}.cmDonut{--p:0;width:88px;height:88px;border-radius:50%;background:conic-gradient(#0b9b57 calc(var(--p)*1%),#edf1f4 0);display:grid;place-items:center;flex:0 0 auto}.cmDonut:after{content:attr(data-p);width:65px;height:65px;border-radius:50%;background:#fff;display:grid;place-items:center;font-size:18px;font-weight:950;color:#163046}.cmGraphText{min-width:0}.cmGraphText h3{font-size:16px;margin:0 0 7px;color:#172736;line-height:1.15}.cmGraphStats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:11px}.cmGraphStat{background:#f5f8fa;border-radius:10px;padding:8px;text-align:center}.cmGraphStat small{display:block;font-size:9px;color:#687987;font-weight:800}.cmGraphStat b{display:block;font-size:16px;margin-top:2px}
 .cvPrioritySection,.cvPriorityWrap,.cvHomePriorities,#cvPriorityBlock{display:none!important}
 @media(max-width:380px){#dash .wrap{padding-left:7px!important;padding-right:7px!important}.cmSearchRow{grid-template-columns:1fr!important}.cmSearchRow button{width:100%!important;font-size:11px!important}.cmCat{flex-basis:120px!important;width:120px!important;min-width:120px!important;max-width:120px!important}.cmAct{font-size:12px}}
@@ -181,12 +218,7 @@ html,body{max-width:100%!important;overflow-x:hidden!important}
   }
   #consultorModernHome .cmCarousel::-webkit-scrollbar{display:none!important}
   #consultorModernHome .cmCat{
-    flex:0 0 126px!important;
-    width:126px!important;
-    min-width:126px!important;
-    max-width:126px!important;
-    scroll-snap-align:start!important;
-    touch-action:pan-x!important;
+    flex:0 0 148px!important;width:148px!important;min-width:148px!important;max-width:148px!important;height:248px!important;scroll-snap-align:start!important;touch-action:pan-x!important;
   }
 }
 
@@ -207,7 +239,7 @@ function build(){const wrap=Q('#dash .wrap');if(!wrap)return false;css();let hom
 function render(){
  if(!build())return;const d=D();if(!d?.own)return;
  const name=d.consultor?.nome||'Consultor';
- const cards=(d.own||[]).map(x=>'<button class="cmCat" type="button" data-cat="'+E(x.nome)+'"><span class="emoji">'+icon(x.nome)+'</span><b>'+E(x.nome)+'</b><small>'+num(x.realizado)+' / '+num(x.meta)+' realizados</small></button>').join('');
+ const cards=(d.own||[]).map(x=>{const pm=productMeta(x.nome),meta=num(x.meta),real=num(x.realizado),pct=meta?Math.min(100,Math.round(real/meta*100)):0;return '<button class="cmCat cmTheme-'+pm.theme+'" type="button" data-cat="'+E(x.nome)+'"><span class="cmProd">'+(pm.img?'<img loading="lazy" src="'+pm.img+'" alt="">':'<span class="cmFallback">'+icon(x.nome)+'</span>')+'</span><b>'+E(x.nome)+'</b><small>'+real+' / '+meta+' realizados</small><span class="cmProgress"><i style="width:'+pct+'%"></i></span><span class="cmArrow">›</span></button>'}).join('');
  const h=document.getElementById('consultorModernHome');
  h.innerHTML='<div class="cmHello"><div class="cmAvatar">👤</div><div><strong>Olá, '+E(String(name).split(' ')[0])+'</strong><small>Bora conquistar mais hoje! 🚀</small></div></div>'+
  '<div class="cmSearchHero"><div class="cmSearchTitle"><div class="cmSearchIcon">🔎</div><div><b>Pesquisa de PV</b><small>Pesquise PV, cliente ou razão social</small></div></div><div class="cmSearchRow"><input id="cmPvInput" inputmode="numeric" placeholder="Digite o PV do cliente"></div><div class="cmPvControls"><div class="cmPvLabel">📍 Escolha o dia da visita</div><div class="cmWeekDays">'+['SEG','TER','QUA','QUI','SEX'].map(d=>'<span role="button" tabindex="0" class="cmWeekDay" data-day="'+d+'">'+d+'</span>').join('')+'</div><button type="button" id="cmClientListBtn" class="cmClientListBtn">Listar clientes do dia ▾</button></div></div>'+
