@@ -159,6 +159,37 @@ function css(){
   .acvResults{padding:10px;border-radius:16px}
   .acvTableWrap{width:100%;max-width:100%;overflow-x:auto}
 }
+
+/* HARD RESET DE VIEWPORT - impede qualquer estouro horizontal */
+html,body{width:100%!important;max-width:100%!important;overflow-x:hidden!important}
+#admConsultorView{inset:0!important;width:100vw!important;max-width:100vw!important;min-width:0!important;overflow-x:hidden!important}
+#admConsultorView .acvTop{width:100%!important;max-width:100vw!important}
+#admConsultorView .acvTopIn{width:min(1180px,calc(100vw - 24px))!important;max-width:calc(100vw - 24px)!important;min-width:0!important}
+#admConsultorView .acvWrap{width:min(1180px,calc(100vw - 24px))!important;max-width:calc(100vw - 24px)!important;min-width:0!important;margin-left:auto!important;margin-right:auto!important}
+#admConsultorView .acvMainGrid{display:grid!important;width:100%!important;max-width:100%!important;min-width:0!important;grid-template-columns:minmax(0,1fr) minmax(300px,390px)!important}
+#admConsultorView .acvSearch,#admConsultorView .acvQuickBox{width:100%!important;max-width:100%!important;min-width:0!important}
+#admConsultorView .acvSearchRow{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;width:100%!important;max-width:100%!important;min-width:0!important}
+#admConsultorView .acvSearchRow input{width:100%!important;max-width:100%!important;min-width:0!important}
+#admConsultorView .acvPvControls,#admConsultorView .acvDays{width:100%!important;max-width:100%!important;min-width:0!important}
+#admConsultorView .acvDays{grid-template-columns:repeat(5,minmax(0,1fr))!important}
+#admConsultorView .acvDay{width:100%!important;min-width:0!important;max-width:100%!important}
+#admConsultorView .acvList{width:100%!important;max-width:100%!important}
+#admConsultorView .acvCarouselShell{width:100%!important;max-width:100%!important;min-width:0!important}
+#admConsultorView .acvCarouselViewport{display:block!important;width:100%!important;max-width:100%!important;min-width:0!important;overflow-x:auto!important;overflow-y:hidden!important;-webkit-overflow-scrolling:touch!important;scroll-behavior:smooth!important;touch-action:pan-x!important;overscroll-behavior-x:contain!important}
+#admConsultorView .acvCarousel{display:flex!important;flex-flow:row nowrap!important;width:max-content!important;min-width:max-content!important;max-width:none!important;overflow:visible!important}
+@media(max-width:900px){
+ #admConsultorView .acvWrap{width:calc(100vw - 12px)!important;max-width:calc(100vw - 12px)!important}
+ #admConsultorView .acvTopIn{width:calc(100vw - 16px)!important;max-width:calc(100vw - 16px)!important}
+ #admConsultorView .acvMainGrid{display:block!important;width:100%!important;max-width:100%!important}
+ #admConsultorView .acvSearch{display:block!important;margin:0!important}
+ #admConsultorView .acvQuickBox{display:block!important;margin-top:9px!important}
+ #admConsultorView .acvSearchRow{display:block!important}
+ #admConsultorView .acvSearchRow button{display:block!important;width:100%!important;margin-top:7px!important;padding:11px!important}
+ #admConsultorView .acvDays{grid-template-columns:repeat(5,minmax(0,1fr))!important}
+ #admConsultorView .acvCarouselShell{padding:0!important;overflow:visible!important}
+ #admConsultorView .acvCarouselViewport{width:100%!important;max-width:100%!important;overflow-x:auto!important;touch-action:pan-x!important}
+ #admConsultorView .acvCarouselNav{display:none!important}
+}
 `;d.head.appendChild(s);
 }
 
@@ -213,9 +244,10 @@ function options(){
  return '<option value="TEAM">👥 Toda a Equipe</option>'+getTeam().map(x=>'<option value="'+E(x.rota)+'">👤 '+E(x.rota)+' - '+E(x.nome||'Consultor')+'</option>').join('');
 }
 function rowsFor(route){
- if(route==='TEAM')return getCats().map(x=>({nome:x.nome,meta:n(x.meta),realizado:n(x.realizado),falta:n(x.falta),percentual:n(x.percentual)}));
+ const clean=a=>(a||[]).filter(x=>!norm(x?.nome).includes('imperdo')).map(x=>({nome:x.nome,meta:n(x.meta),realizado:n(x.realizado),falta:n(x.falta),percentual:n(x.percentual)}));
+ if(route==='TEAM')return clean(getCats());
  const p=getTeam().find(x=>String(x.rota)===route);
- return (p?.resultados||[]).map(x=>({nome:x.nome,meta:n(x.meta),realizado:n(x.realizado),falta:n(x.falta),percentual:n(x.percentual)}));
+ return clean(p?.resultados);
 }
 function ensureView(){
  let v=d.getElementById('admConsultorView');if(v)return v;
@@ -229,8 +261,19 @@ function ensureView(){
  $$('.acvDay',v).forEach(b=>b.onclick=()=>{$$('.acvDay',v).forEach(x=>x.classList.remove('on'));b.classList.add('on');try{sessionStorage.setItem('pv_dia_visita',b.dataset.day)}catch{}});
  $('#acvListDay').onclick=()=>openAdminFeature('Visita de Clientes');
  const cv=$('.acvCarouselViewport',v),prev=$('.acvCarouselPrev',v),next=$('.acvCarouselNext',v);
- const moveCarousel=dir=>{if(!cv)return;const amount=Math.max(420,Math.floor(cv.clientWidth*.72));cv.scrollBy({left:dir*amount,behavior:'smooth'})};
- if(prev)prev.onclick=()=>moveCarousel(-1);if(next)next.onclick=()=>moveCarousel(1);
+ const moveCarousel=dir=>{
+   if(!cv)return;
+   const max=Math.max(0,cv.scrollWidth-cv.clientWidth);
+   const amount=Math.max(320,Math.floor(cv.clientWidth*.72));
+   const target=Math.max(0,Math.min(max,cv.scrollLeft+(dir*amount)));
+   if(typeof cv.scrollTo==='function')cv.scrollTo({left:target,behavior:'smooth'});else cv.scrollLeft=target;
+ };
+ if(prev)prev.onclick=e=>{e.preventDefault();e.stopPropagation();moveCarousel(-1)};
+ if(next)next.onclick=e=>{e.preventDefault();e.stopPropagation();moveCarousel(1)};
+ let dragging=false,startX=0,startLeft=0;
+ cv.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'){dragging=true;startX=e.clientX;startLeft=cv.scrollLeft;try{cv.setPointerCapture(e.pointerId)}catch{}}});
+ cv.addEventListener('pointermove',e=>{if(!dragging)return;cv.scrollLeft=startLeft-(e.clientX-startX)});
+ const stop=()=>{dragging=false};cv.addEventListener('pointerup',stop);cv.addEventListener('pointercancel',stop);cv.addEventListener('pointerleave',stop);
  $$('.acvAct',v).forEach(b=>b.onclick=()=>{const a=b.dataset.act;if(a==='visitas')openAdminFeature('Visita de Clientes');if(a==='subcanais')openAdminFeature('Subcanais');if(a==='contatos')openAdminFeature('Contato dos Clientes')});
  return v;
 }
@@ -270,7 +313,7 @@ function renderView(cat){
  renderResult(cat||'');
 }
 function renderResult(cat){
- const route=$('#acvRoute')?.value||'TEAM',team=getTeam(),cats=getCats();
+ const route=$('#acvRoute')?.value||'TEAM',team=getTeam(),cats=getCats().filter(x=>!norm(x?.nome).includes('imperdo'));
  const body=$('#acvResultBody');if(!body)return;
  if(route==='TEAM'){
   const use=cat?cats.filter(x=>x.nome===cat):cats;
@@ -290,7 +333,7 @@ setInterval(()=>{
  const v=d.getElementById('admConsultorView');
  if(!v||v.hidden)return;
  const x=getDash();
- const sig=x?JSON.stringify([(x.consultores||[]).map(a=>[a.rota,a.nome]),(x.team||[]).map(a=>[a.nome,a.meta,a.realizado]),(x.individual||[]).map(a=>[a.rota,(a.resultados||[]).map(r=>[r.nome,r.meta,r.realizado])])]):'';
+ const sig=x?JSON.stringify([(x.consultores||[]).map(a=>[a.rota,a.nome]),(x.team||[]).filter(a=>!norm(a?.nome).includes('imperdo')).map(a=>[a.nome,a.meta,a.realizado]),(x.individual||[]).map(a=>[a.rota,(a.resultados||[]).filter(r=>!norm(r?.nome).includes('imperdo')).map(r=>[r.nome,r.meta,r.realizado])])]):'';
  if(sig&&sig!==liveSig){
    liveSig=sig;
    const sel=d.getElementById('acvRoute'),old=sel?.value||'TEAM';
