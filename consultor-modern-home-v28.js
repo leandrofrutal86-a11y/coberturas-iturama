@@ -357,6 +357,23 @@ html,body{max-width:100%!important;overflow-x:hidden!important}
   .cmCarouselNav:hover{background:#d50712!important;color:#fff!important}
 }
 
+/* Página separada de detalhe da cobertura */
+#cmCoveragePage{position:fixed;inset:0;z-index:30000;background:#f3f6f8;overflow:auto;color:#172736;font-family:Arial,sans-serif}
+#cmCoveragePage[hidden]{display:none!important}
+.cmCoverageTop{position:sticky;top:0;z-index:5;background:linear-gradient(118deg,#ff1717 0%,#d0000b 42%,#050505 100%);color:#fff;padding:13px 16px;box-shadow:0 5px 18px #0003}
+.cmCoverageTopIn{width:min(1080px,100%);margin:auto;display:flex;align-items:center;gap:12px}
+.cmCoverageTopText{min-width:0;flex:1}.cmCoverageTopText b{display:block;font-size:21px;line-height:1.08}.cmCoverageTopText small{display:block;margin-top:3px;color:#ffe4e7;font-size:11px}
+.cmCoverageBack{border:0;border-radius:11px;background:#202020;color:#fff;padding:10px 13px;font-weight:900;white-space:nowrap}
+.cmCoverageBody{width:min(1080px,calc(100% - 18px));margin:14px auto 70px;display:grid;gap:12px}
+.cmCoverageGraph{background:#fff;border:1px solid #e0e7ed;border-radius:18px;padding:14px;box-shadow:0 5px 15px #172b400d}
+.cmCoverageGraphTop{display:flex;align-items:center;gap:14px}.cmCoverageDonut{--p:0;width:112px;height:112px;border-radius:50%;background:conic-gradient(#0b9b57 calc(var(--p)*1%),#edf1f4 0);display:grid;place-items:center;flex:0 0 auto}
+.cmCoverageDonut:after{content:attr(data-p);width:80px;height:80px;border-radius:50%;background:#fff;display:grid;place-items:center;font-size:20px;font-weight:950;color:#163046}
+.cmCoverageGraph h2{margin:0 0 4px;font-size:22px}.cmCoverageGraph p{margin:0;color:#6b7986;font-size:12px}
+.cmCoverageStats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:13px}.cmCoverageStat{background:#f4f7f9;border-radius:12px;padding:10px;text-align:center}.cmCoverageStat small{display:block;font-size:9px;color:#687987;font-weight:900}.cmCoverageStat b{display:block;font-size:19px;margin-top:3px}
+.cmCoverageResults{background:#fff;border:1px solid #e0e7ed;border-radius:18px;padding:13px;box-shadow:0 5px 15px #172b400d}.cmCoverageResults h3{margin:0 0 10px;font-size:18px}
+.cmCoverageTableWrap{overflow:auto;border:1px solid #dbe2e8;border-radius:12px}.cmCoverageTable{width:100%;min-width:620px;border-collapse:collapse}.cmCoverageTable th{background:#d90000;color:#fff;text-align:left;padding:9px;font-size:11px}.cmCoverageTable td{padding:9px;border-bottom:1px solid #dde5eb;font-size:11px}.cmCoverageTable tbody tr:nth-child(odd){background:#eef5fa}.cmCoverageEmpty{text-align:center;padding:25px;color:#677987;font-weight:800}
+@media(max-width:600px){.cmCoverageTop{padding:10px}.cmCoverageTopText b{font-size:17px}.cmCoverageBody{width:calc(100% - 12px);margin-top:8px}.cmCoverageGraphTop{align-items:flex-start}.cmCoverageDonut{width:92px;height:92px}.cmCoverageDonut:after{width:66px;height:66px;font-size:17px}.cmCoverageStats{grid-template-columns:1fr 1fr}.cmCoverageGraph h2{font-size:18px}}
+
 `;document.head.appendChild(s);
 }
 function clickExisting(id,text){const el=id?document.getElementById(id):null;if(el){el.click();return}const x=QA('#dash button,#dash .tile,#dash a').find(v=>String(v.textContent||'').toLowerCase().includes(String(text||'').toLowerCase()));if(x)x.click()}
@@ -367,14 +384,31 @@ function renderSalesPeriodHeader(d){
  const p=d?.sales_period||{};el.textContent=p.inicio&&p.fim?'Vendas atualizadas: '+fmtSalesDate(p.inicio)+' a '+fmtSalesDate(p.fim):'Vendas atualizadas: sem período';
 }
 function searchPvHome(){const input=document.getElementById('cmPvInput');if(!input)return;const v=input.value.trim();try{openPv()}catch{}setTimeout(()=>{const p=document.getElementById('pv');if(p){p.value=v;if(v)try{searchPv()}catch{}}},80)}
-function renderGraph(cat){
- const panel=Q('#dash .panel');if(!panel||!cat||cat==='ALL')return;
- let g=document.getElementById('cmCategoryGraph');if(!g){g=document.createElement('div');g.id='cmCategoryGraph';g.className='cmGraph';const res=document.getElementById('results');panel.insertBefore(g,res||panel.firstChild)}
- const row=(D()?.own||[]).find(x=>x.nome===cat);if(!row){g.remove();return}
- const meta=num(row.meta),real=num(row.realizado),falta=Math.max(0,num(row.falta)),pct=meta?Math.round(real/meta*100):num(row.percentual);
- g.innerHTML='<div class="cmGraphTop"><div class="cmDonut" style="--p:'+Math.min(100,pct)+'" data-p="'+pct+'%"></div><div class="cmGraphText"><h3>'+E(cat)+'</h3><small>Andamento da cobertura deste incentivo</small></div></div><div class="cmGraphStats"><div class="cmGraphStat"><small>META</small><b>'+meta+'</b></div><div class="cmGraphStat"><small>REALIZADO</small><b>'+real+'</b></div><div class="cmGraphStat"><small>FALTA</small><b>'+falta+'</b></div></div>';
+function ensureCoveragePage(){
+ let p=document.getElementById('cmCoveragePage');if(p)return p;
+ p=document.createElement('section');p.id='cmCoveragePage';p.hidden=true;
+ p.innerHTML='<header class="cmCoverageTop"><div class="cmCoverageTopIn"><div class="cmCoverageTopText"><b id="cmCoverageTitle">Cobertura</b><small>Detalhes do incentivo e clientes realizados</small></div><button type="button" id="cmCoverageBack" class="cmCoverageBack">← Voltar</button></div></header><main id="cmCoverageBody" class="cmCoverageBody"></main>';
+ document.body.appendChild(p);document.getElementById('cmCoverageBack').onclick=()=>{p.hidden=true};return p
 }
-function chooseWithGraph(cat){try{choose(cat)}catch{}setTimeout(()=>renderGraph(cat),30)}
+function clientStatus(c,row){
+ if(c?.completo===false){
+   if(row?.tipo_regra==='grupos')return 'PARCIAL • '+num(c.vendidos)+' grupo(s)';
+   if(row?.tipo_regra==='quantidade')return 'PARCIAL • '+num(c.quantidade)+' cx';
+   if(row?.tipo_regra==='recompra')return 'PARCIAL • '+num(c.compras)+' compra(s)';
+   return 'PARCIAL';
+ }
+ return 'REALIZADO'
+}
+function openCoveragePage(cat){
+ const row=(D()?.own||[]).find(x=>x.nome===cat);if(!row)return;
+ const p=ensureCoveragePage(),body=document.getElementById('cmCoverageBody');
+ document.getElementById('cmCoverageTitle').textContent=cat;
+ const meta=num(row.meta),real=num(row.realizado),falta=Math.max(0,num(row.falta)),pct=meta?Math.round(real/meta*100):num(row.percentual);
+ const clients=(row.clientes||[]).slice().sort((a,b)=>(Number(b.completo!==false)-Number(a.completo!==false))||String(a.razao||'').localeCompare(String(b.razao||''),'pt-BR'));
+ body.innerHTML='<section class="cmCoverageGraph"><div class="cmCoverageGraphTop"><div class="cmCoverageDonut" style="--p:'+Math.min(100,pct)+'" data-p="'+pct+'%"></div><div><h2>'+E(cat)+'</h2><p>Andamento da cobertura deste incentivo</p></div></div><div class="cmCoverageStats"><div class="cmCoverageStat"><small>META</small><b>'+meta+'</b></div><div class="cmCoverageStat"><small>REALIZADO</small><b>'+real+'</b></div><div class="cmCoverageStat"><small>FALTA</small><b>'+falta+'</b></div><div class="cmCoverageStat"><small>ATINGIMENTO</small><b>'+pct+'%</b></div></div></section>'+
+ '<section class="cmCoverageResults"><h3>Resultados da cobertura</h3>'+(clients.length?'<div class="cmCoverageTableWrap"><table class="cmCoverageTable"><thead><tr><th>PV</th><th>Cliente</th><th>Subcanal</th><th>Situação</th></tr></thead><tbody>'+clients.map(c=>'<tr><td><b>'+E(c.cliente||c.pv||'')+'</b></td><td>'+E(c.razao||'')+'</td><td>'+E(c.subcanal||'')+'</td><td><b>'+E(clientStatus(c,row))+'</b></td></tr>').join('')+'</tbody></table></div>':'<div class="cmCoverageEmpty">Nenhum cliente realizado nesta cobertura.</div>')+'</section>';
+ p.hidden=false;try{p.scrollTo(0,0)}catch{}
+}
 function hideOldPriority(){QA('#dash .wrap > section,#dash .wrap > div').forEach(el=>{if(el.id==='consultorModernHome'||el.classList.contains('tabs')||el.classList.contains('panel')||el.classList.contains('footer'))return;const t=String(el.textContent||'').trim().toUpperCase();if(t.includes('INCENTIVOS PRIORITÁRIOS')&&t.length<160)el.style.setProperty('display','none','important')})}
 function build(){const wrap=Q('#dash .wrap');if(!wrap)return false;css();let home=document.getElementById('consultorModernHome');if(!home){home=document.createElement('section');home.id='consultorModernHome';home.className='cmHome';const tabs=Q('#dash .tabs');wrap.insertBefore(home,tabs||wrap.firstChild)}return true}
 function render(){
@@ -403,7 +437,7 @@ function render(){
  if(prev)prev.onclick=()=>moveCarousel(-1);
  if(next)next.onclick=()=>moveCarousel(1);
 
- QA('#consultorModernHome .cmCat').forEach(b=>b.onclick=()=>chooseWithGraph(b.dataset.cat));
+ QA('#consultorModernHome .cmCat').forEach(b=>b.onclick=()=>openCoveragePage(b.dataset.cat));
  QA('#consultorModernHome .cmAct').forEach(b=>b.onclick=()=>{const a=b.dataset.act;if(a==='contratos')clickExisting('cvContractsBtn','Contratos');else if(a==='visitas')clickExisting('cvVisitBtn','Visita de Clientes');else if(a==='subcanais')clickExisting('cvSubBtn','Subcanais');else if(a==='contatos')clickExisting('contClientesBtn','Contato dos Clientes')});
  hideOldPriority();
  renderSalesPeriodHeader(d);

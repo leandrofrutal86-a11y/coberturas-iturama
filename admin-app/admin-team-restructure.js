@@ -195,17 +195,17 @@ html,body{width:100%!important;max-width:100%!important;overflow-x:hidden!import
 }
 
 
-.acvDetailOverlay{display:none;position:fixed;inset:0;z-index:31000;background:#0009;padding:12px}.acvDetailOverlay.show{display:flex;align-items:center;justify-content:center}
-.acvDetailSheet{width:min(1050px,100%);max-height:96dvh;overflow:auto;background:#f4f6f8;border-radius:20px}
-.acvDetailTop{position:sticky;top:0;z-index:4;background:linear-gradient(135deg,#090909,#9f0000);color:#fff;padding:15px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.acvDetailOverlay{display:none;position:fixed;inset:0;z-index:31000;background:#f3f6f8;overflow:auto}.acvDetailOverlay.show{display:block}
+.acvDetailSheet{width:100%;min-height:100dvh;background:#f4f6f8}
+.acvDetailTop{position:sticky;top:0;z-index:4;background:linear-gradient(118deg,#ff1717 0%,#d0000b 42%,#050505 100%);color:#fff;padding:15px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px}
 .acvDetailTop h2{margin:0;font-size:21px}.acvDetailTop small{display:block;margin-top:4px;color:#ffe4e7;font-size:11px}.acvDetailTop button{border:0;border-radius:10px;background:#fff;padding:10px 14px;font-weight:950}
-.acvDetailBody{padding:14px 14px 100px}.acvDetailFilters{display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:end;background:#fff;border:1px solid #dce4ea;border-radius:16px;padding:13px}
+.acvDetailBody{width:min(1080px,calc(100% - 18px));margin:14px auto 80px;padding:0}.acvDetailGraph{background:#fff;border:1px solid #dce4ea;border-radius:18px;padding:14px;margin-bottom:12px}.acvDetailGraphTop{display:flex;align-items:center;gap:14px}.acvDetailDonut{--p:0;width:112px;height:112px;border-radius:50%;background:conic-gradient(#0b9b57 calc(var(--p)*1%),#edf1f4 0);display:grid;place-items:center;flex:0 0 auto}.acvDetailDonut:after{content:attr(data-p);width:80px;height:80px;border-radius:50%;background:#fff;display:grid;place-items:center;font-size:20px;font-weight:950;color:#163046}.acvDetailGraph h3{margin:0;font-size:22px}.acvDetailGraph small{display:block;margin-top:4px;color:#687987}.acvDetailStats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:13px}.acvDetailStat{background:#f3f6f8;border-radius:12px;padding:10px;text-align:center}.acvDetailStat small{font-size:9px;font-weight:900;color:#687987}.acvDetailStat b{display:block;margin-top:3px;font-size:19px}.acvDetailFilters{display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:end;background:#fff;border:1px solid #dce4ea;border-radius:16px;padding:13px}
 .acvDetailFilters label{display:block;font-size:10px;font-weight:950;color:#607386;margin-bottom:5px}.acvDetailFilters select{width:100%;height:44px;border:1px solid #cbd6df;border-radius:10px;background:#fff;padding:0 10px;font-weight:900}
 .acvDetailGo{height:44px;border:0;border-radius:10px;background:#e30613;color:#fff;padding:0 18px;font-weight:950}.acvDetailSummary{margin-top:11px;background:#fff;border:1px solid #dce4ea;border-radius:14px;padding:11px;display:flex;gap:8px;flex-wrap:wrap}
 .acvDetailChip{background:#edf3f7;border-radius:999px;padding:6px 9px;font-size:11px;font-weight:900}.acvDetailTableWrap{margin-top:11px;overflow:auto;background:#fff;border:1px solid #dce4ea;border-radius:14px}
 .acvDetailTable{width:100%;min-width:760px;border-collapse:collapse}.acvDetailTable th{background:#d90000;color:#fff;padding:9px;text-align:left;font-size:11px}.acvDetailTable td{padding:9px;border-bottom:1px solid #dce4ea;font-size:11px}
 .acvDetailTable tbody tr:nth-child(odd){background:#edf5fb}.acvDetailTable tbody tr:nth-child(even){background:#fff}.acvDetailEmpty{text-align:center;padding:25px;color:#66798a;font-weight:800}
-@media(max-width:700px){.acvDetailOverlay{padding:0}.acvDetailSheet{width:100%;height:100dvh;max-height:100dvh;border-radius:0}.acvDetailFilters{grid-template-columns:1fr}.acvDetailGo{width:100%}}
+@media(max-width:700px){.acvDetailFilters{grid-template-columns:1fr}.acvDetailGo{width:100%}.acvDetailBody{width:calc(100% - 12px);margin-top:8px}.acvDetailStats{grid-template-columns:1fr 1fr}.acvDetailDonut{width:92px;height:92px}.acvDetailDonut:after{width:66px;height:66px;font-size:17px}.acvDetailGraph h3{font-size:18px}}
 
 .acvOppSection{width:100%;max-width:100%;min-width:0}
 .acvOppBtn{width:100%;border:1px solid #d6e1ea;background:linear-gradient(135deg,#fff,#eef7ff);border-radius:18px;padding:14px;display:flex;align-items:center;gap:12px;text-align:left;color:#17344f;box-shadow:0 5px 15px #172b400d}
@@ -361,16 +361,26 @@ async function loadIncentiveDetail(){
    (rows.length?'<div class="acvDetailTableWrap"><table class="acvDetailTable"><thead><tr><th>Rota</th><th>Consultor</th><th>PV</th><th>Cliente</th><th>Subcanal</th></tr></thead><tbody>'+rows.map(x=>'<tr><td><b>'+E(x.rota)+'</b></td><td>'+E(x.consultor)+'</td><td><b>'+E(x.pv)+'</b></td><td>'+E(x.razao)+'</td><td>'+E(x.subcanal)+'</td></tr>').join('')+'</tbody></table></div>':'<div class="acvDetailEmpty">Nenhum cliente realizou esta cobertura neste filtro.</div>');
  }catch(e){body.innerHTML='<div class="acvDetailEmpty">Não foi possível carregar os clientes: '+E(e?.message||'Erro')+'</div>'}
 }
+function renderDetailGraph(cat,route){
+ const host=d.getElementById('acvDetailGraph');if(!host)return;
+ let row=null;
+ if(route==='TEAM')row=getCats().find(x=>String(x.nome)===cat);
+ else row=(getTeam().find(x=>String(x.rota)===route)?.resultados||[]).find(x=>String(x.nome)===cat);
+ if(!row){host.innerHTML='';return}
+ const meta=n(row.meta),real=n(row.realizado),falta=Math.max(0,n(row.falta)),pct=meta?Math.round(real/meta*100):n(row.percentual);
+ host.innerHTML='<div class="acvDetailGraphTop"><div class="acvDetailDonut" style="--p:'+Math.min(100,pct)+'" data-p="'+pct+'%"></div><div><h3>'+E(cat)+'</h3><small>Andamento da cobertura selecionada</small></div></div><div class="acvDetailStats"><div class="acvDetailStat"><small>META</small><b>'+meta+'</b></div><div class="acvDetailStat"><small>REALIZADO</small><b>'+real+'</b></div><div class="acvDetailStat"><small>FALTA</small><b>'+falta+'</b></div><div class="acvDetailStat"><small>ATINGIMENTO</small><b>'+pct+'%</b></div></div>'
+}
 function openIncentiveDetail(cat){
  const ov=ensureIncentiveDetail(),body=d.getElementById('acvDetailBody'),current=d.getElementById('acvRoute')?.value||'TEAM';
  d.getElementById('acvDetailTitle').textContent=cat;
- body.innerHTML='<div class="acvDetailFilters"><div><label>VISUALIZAR</label><select id="acvDetailRoute">'+detailRouteOptions(current)+'</select></div><div><label>DIA DA SEMANA</label><select id="acvDetailDay">'+detailDayOptions()+'</select></div><button type="button" id="acvDetailGo" class="acvDetailGo">Ver clientes</button></div><input type="hidden" id="acvDetailCategory" value="'+E(cat)+'"><div id="acvDetailResult"></div>';
+ body.innerHTML='<section id="acvDetailGraph" class="acvDetailGraph"></section><div class="acvDetailFilters"><div><label>VISUALIZAR</label><select id="acvDetailRoute">'+detailRouteOptions(current)+'</select></div><div><label>DIA DA SEMANA</label><select id="acvDetailDay">'+detailDayOptions()+'</select></div><button type="button" id="acvDetailGo" class="acvDetailGo">Ver clientes</button></div><input type="hidden" id="acvDetailCategory" value="'+E(cat)+'"><div id="acvDetailResult"></div>';
  const r=d.getElementById('acvDetailRoute');if(r&&[...r.options].some(o=>o.value===current))r.value=current;
  d.getElementById('acvDetailDay').value='ALL';
- d.getElementById('acvDetailGo').onclick=loadIncentiveDetail;
- d.getElementById('acvDetailRoute').onchange=loadIncentiveDetail;
+ const refresh=()=>{renderDetailGraph(cat,d.getElementById('acvDetailRoute')?.value||'TEAM');loadIncentiveDetail()};
+ d.getElementById('acvDetailGo').onclick=refresh;
+ d.getElementById('acvDetailRoute').onchange=refresh;
  d.getElementById('acvDetailDay').onchange=loadIncentiveDetail;
- ov.classList.add('show');loadIncentiveDetail();
+ ov.classList.add('show');try{ov.scrollTo(0,0)}catch{}refresh();
 }
 
 let admOppVisits=[],admOppVisitsLoaded=false,admOppScanId=0;
