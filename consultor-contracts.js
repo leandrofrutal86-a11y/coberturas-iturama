@@ -56,8 +56,10 @@ function ensureButton(){
  const q=document.querySelector('.quick');if(!q||$('cvContractsBtn'))return false;
  const b=document.createElement('button');b.id='cvContractsBtn';b.className='q cvTopBtn';b.innerHTML='Contratos<br><small>Criar, editar e acompanhar contratos</small>';b.onclick=open;q.appendChild(b);return true
 }
-function isConsultor(){try{return !DATA||String(DATA.perfil||'consultor')==='consultor'}catch{return true}}
-function syncButton(){const b=$('cvContractsBtn');if(b)b.style.display=isConsultor()?'':'none'}
+function profile(){try{return String(DATA?.perfil||'consultor')}catch{return 'consultor'}}
+function isConsultor(){return profile()==='consultor'}
+function isTeamViewer(){return profile()==='acompanhante'}
+function syncButton(){const b=$('cvContractsBtn');if(b)b.style.display=(isConsultor()||isTeamViewer())?'':'none'}
 function status(t,ok=true){const e=$('ctCStatus');if(e){e.textContent=t;e.className='ctCStatus '+(ok?'ok':'bad')}}
 function showPanel(name){
  const map={create:'ctCPanelCreate',month:'ctCPanelMonth',docs:'ctCPanelDocs'};
@@ -95,7 +97,7 @@ async function removeContract(id){
 }
 async function loadDocs(){const box=$('ctCDocs');box.innerHTML='<div class="ctCEmpty">Carregando contratos vigentes...</div>';try{const j=await call({action:'consultor_documents'});state.documents=j.documents||[];renderDocs()}catch(e){box.innerHTML='<div class="ctCEmpty">'+E(e.message)+'</div>'}}
 function renderDocs(){const docs=state.documents||[];$('ctCDocs').innerHTML=docs.length?docs.map(d=>'<article class="ctCDoc">'+(d.tipo==='imagem'&&d.signed_url?'<img src="'+E(d.signed_url)+'" alt="">':'<div style="font-size:46px">📄</div>')+'<h4>'+E(d.titulo)+'</h4>'+(d.signed_url?'<a href="'+E(d.signed_url)+'" target="_blank" rel="noopener">'+(d.tipo==='pdf'?'ABRIR PDF':'ABRIR IMAGEM')+'</a>':'')+'</article>').join(''):'<div class="ctCEmpty">Nenhum contrato vigente foi publicado para sua rota.</div>'}
-async function open(){if(!isConsultor())return;css();build();$('ctCOverlay').classList.add('show');resetForm();$('ctCMonth').value=monthNow();showPanel('month');loadDocs()}
+async function open(){if(isTeamViewer()){return window.openTeamContracts?.()}if(!isConsultor())return;css();build();$('ctCOverlay').classList.add('show');resetForm();$('ctCMonth').value=monthNow();showPanel('month');loadDocs()}
 function boot(){css();build();ensureButton();syncButton();const mo=new MutationObserver(()=>{ensureButton();syncButton()});mo.observe(document.body,{childList:true,subtree:true});setInterval(()=>{ensureButton();syncButton()},1000)}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
 })();
