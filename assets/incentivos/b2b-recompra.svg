@@ -1,5 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 620">
-<rect width="700" height="620" rx="38" fill="#f8fbff"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-50 -40 800 700">
+<rect x="-50" y="-40" width="800" height="700" rx="46" fill="#f8fbff"/>
 <!-- left cart -->
 <g stroke="#667785" stroke-width="13" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path d="M45 210h55l45 190h190l40-145H122"/>
