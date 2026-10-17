@@ -71,6 +71,54 @@
 #ov .sheet{position:relative;z-index:10001!important;max-height:calc(100dvh - 16px)!important;overflow:auto!important}
 #ov .sheetBody{padding-bottom:140px!important}
 .rogerioResultFilter{margin:10px 0 12px;padding:12px;background:#fff;border:1px solid #dce3e8;border-radius:14px;display:grid;grid-template-columns:auto minmax(220px,360px);gap:12px;align-items:center}.rogerioResultFilter b{font-size:13px;color:#142236}.rogerioResultFilter small{display:block;font-size:10px;color:#6b7785;margin-top:2px}
+@media(min-width:901px){
+#dash.rogerioMode .topbar{
+ display:grid!important;
+ grid-template-columns:minmax(480px,1fr) minmax(110px,150px) minmax(260px,310px)!important;
+ grid-template-areas:"brand user view" "official official official"!important;
+ column-gap:14px!important;
+ row-gap:10px!important;
+ align-items:center!important;
+ max-width:1320px!important;
+ padding:12px 18px!important;
+}
+#dash.rogerioMode .topbar>.brand{grid-area:brand!important;min-width:0!important;margin:0!important;display:flex!important;align-items:center!important;gap:12px!important}
+#dash.rogerioMode .topbar>.brand>div:last-child{min-width:0!important}
+#dash.rogerioMode .topbar>.brand>div:last-child b{font-size:27px!important;line-height:1.05!important;white-space:nowrap!important}
+#dash.rogerioMode .topbar>.brand>div:last-child small{display:block!important;white-space:nowrap!important}
+#dash.rogerioMode .cvHeaderDate{flex:0 0 88px!important;min-width:88px!important}
+#dash.rogerioMode .cvHeaderOfficial{
+ grid-area:official!important;
+ width:100%!important;
+ display:flex!important;
+ justify-content:center!important;
+ gap:10px!important;
+ margin:0!important;
+ min-width:0!important;
+}
+#dash.rogerioMode .cvHeaderOfficial a{min-width:220px!important;height:42px!important;justify-content:flex-start!important}
+#dash.rogerioMode .user{
+ grid-area:user!important;
+ margin:0!important;
+ min-width:0!important;
+ align-self:center!important;
+ justify-self:end!important;
+ max-width:150px!important;
+}
+#dash.rogerioMode #name{font-size:17px!important;line-height:1.05!important;white-space:nowrap!important}
+#dash.rogerioMode #route{font-size:10px!important;line-height:1.15!important;white-space:normal!important;max-width:145px!important}
+#dash.rogerioMode .rogerioUiHead{
+ grid-area:view!important;
+ margin:0!important;
+ width:100%!important;
+ min-width:0!important;
+ max-width:310px!important;
+ justify-self:end!important;
+}
+#dash.rogerioMode .rogerioUiHead label{font-size:9px!important;margin-bottom:2px!important}
+#dash.rogerioMode .rogerioUiSelect{height:46px!important;font-size:14px!important}
+#dash.rogerioMode .logout{grid-area:view!important;justify-self:end!important;align-self:end!important;margin:0!important}
+}
 @media(max-width:900px){.rogerioUiHead{order:4;flex:1 1 100%;min-width:0}.rogerioUiBar{grid-template-columns:1fr;gap:6px}.rogerioResultFilter{grid-template-columns:1fr;gap:7px}}
 `;
     document.head.appendChild(s);
