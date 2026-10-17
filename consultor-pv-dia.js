@@ -450,5 +450,6 @@ window.addEventListener('iturama:routechange',()=>{clients=[];baseClients=[];las
 window.__openPvDayReport=()=>openReport();
 window.__renderPvHomePanel=renderHomePanel;
 window.__setPvHomeDay=setSelectedDay;
+window.__openPvHomePicker=()=>openClientPicker('home');
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',watch);else watch();
 })();
