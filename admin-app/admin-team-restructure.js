@@ -194,6 +194,19 @@ html,body{width:100%!important;max-width:100%!important;overflow-x:hidden!import
  #admConsultorView .acvCarouselNav{display:none!important}
 }
 
+
+.acvDetailOverlay{display:none;position:fixed;inset:0;z-index:31000;background:#0009;padding:12px}.acvDetailOverlay.show{display:flex;align-items:center;justify-content:center}
+.acvDetailSheet{width:min(1050px,100%);max-height:96dvh;overflow:auto;background:#f4f6f8;border-radius:20px}
+.acvDetailTop{position:sticky;top:0;z-index:4;background:linear-gradient(135deg,#090909,#9f0000);color:#fff;padding:15px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.acvDetailTop h2{margin:0;font-size:21px}.acvDetailTop small{display:block;margin-top:4px;color:#ffe4e7;font-size:11px}.acvDetailTop button{border:0;border-radius:10px;background:#fff;padding:10px 14px;font-weight:950}
+.acvDetailBody{padding:14px 14px 100px}.acvDetailFilters{display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:end;background:#fff;border:1px solid #dce4ea;border-radius:16px;padding:13px}
+.acvDetailFilters label{display:block;font-size:10px;font-weight:950;color:#607386;margin-bottom:5px}.acvDetailFilters select{width:100%;height:44px;border:1px solid #cbd6df;border-radius:10px;background:#fff;padding:0 10px;font-weight:900}
+.acvDetailGo{height:44px;border:0;border-radius:10px;background:#e30613;color:#fff;padding:0 18px;font-weight:950}.acvDetailSummary{margin-top:11px;background:#fff;border:1px solid #dce4ea;border-radius:14px;padding:11px;display:flex;gap:8px;flex-wrap:wrap}
+.acvDetailChip{background:#edf3f7;border-radius:999px;padding:6px 9px;font-size:11px;font-weight:900}.acvDetailTableWrap{margin-top:11px;overflow:auto;background:#fff;border:1px solid #dce4ea;border-radius:14px}
+.acvDetailTable{width:100%;min-width:760px;border-collapse:collapse}.acvDetailTable th{background:#d90000;color:#fff;padding:9px;text-align:left;font-size:11px}.acvDetailTable td{padding:9px;border-bottom:1px solid #dce4ea;font-size:11px}
+.acvDetailTable tbody tr:nth-child(odd){background:#edf5fb}.acvDetailTable tbody tr:nth-child(even){background:#fff}.acvDetailEmpty{text-align:center;padding:25px;color:#66798a;font-weight:800}
+@media(max-width:700px){.acvDetailOverlay{padding:0}.acvDetailSheet{width:100%;height:100dvh;max-height:100dvh;border-radius:0}.acvDetailFilters{grid-template-columns:1fr}.acvDetailGo{width:100%}}
+
 .acvOppSection{width:100%;max-width:100%;min-width:0}
 .acvOppBtn{width:100%;border:1px solid #d6e1ea;background:linear-gradient(135deg,#fff,#eef7ff);border-radius:18px;padding:14px;display:flex;align-items:center;gap:12px;text-align:left;color:#17344f;box-shadow:0 5px 15px #172b400d}
 .acvOppBtn .ico{width:46px;height:46px;border-radius:13px;background:#e30613;color:#fff;display:grid;place-items:center;font-size:24px;flex:0 0 auto}.acvOppBtn b{display:block;font-size:17px}.acvOppBtn small{display:block;color:#657687;margin-top:3px;font-size:11px}.acvOppBtn:after{content:'›';margin-left:auto;font-size:28px;color:#e30613;font-weight:950}
@@ -293,6 +306,73 @@ function ensureView(){
  return v;
 }
 
+
+const acvDetailCache=new Map(),acvDayCache=new Map();
+function ensureIncentiveDetail(){
+ let ov=d.getElementById('acvDetailOverlay');if(ov)return ov;
+ ov=d.createElement('div');ov.id='acvDetailOverlay';ov.className='acvDetailOverlay';
+ ov.innerHTML='<div class="acvDetailSheet"><div class="acvDetailTop"><div><h2 id="acvDetailTitle">Cobertura</h2><small>Veja os clientes que realizaram a cobertura.</small></div><button type="button" id="acvDetailClose">Fechar</button></div><div id="acvDetailBody" class="acvDetailBody"></div></div>';
+ d.body.appendChild(ov);d.getElementById('acvDetailClose').onclick=()=>ov.classList.remove('show');return ov
+}
+function detailRouteOptions(selected){
+ const opts='<option value="TEAM">👥 Toda a Equipe</option>'+getTeam().map(x=>'<option value="'+E(x.rota)+'">👤 '+E(x.rota)+' - '+E(x.nome||'Consultor')+'</option>').join('');
+ return opts
+}
+function detailDayOptions(){
+ return '<option value="ALL">Todos os dias</option><option value="SEG">Segunda-feira</option><option value="TER">Terça-feira</option><option value="QUA">Quarta-feira</option><option value="QUI">Quinta-feira</option><option value="SEX">Sexta-feira</option>'
+}
+async function getRouteDetail(route){
+ if(acvDetailCache.has(route))return acvDetailCache.get(route);
+ const p=w.post({action:'consultor_view',token:sessionStorage.getItem('admToken')||'',rota});
+ acvDetailCache.set(route,p);
+ try{return await p}catch(e){acvDetailCache.delete(route);throw e}
+}
+async function getDaySet(route,day){
+ if(day==='ALL')return null;
+ const key=route+'|'+day;if(acvDayCache.has(key))return acvDayCache.get(key);
+ const p=w.post({action:'day_clients',token:sessionStorage.getItem('admToken')||'',rota,day}).then(r=>new Set((r?.clients||[]).map(x=>String(x.pv||x.cliente||'').trim())));
+ acvDayCache.set(key,p);
+ try{return await p}catch(e){acvDayCache.delete(key);throw e}
+}
+function completedClients(row){
+ return (row?.clientes||[]).filter(x=>x?.completo!==false)
+}
+async function loadIncentiveDetail(){
+ const body=d.getElementById('acvDetailResult'),route=d.getElementById('acvDetailRoute')?.value||'TEAM',day=d.getElementById('acvDetailDay')?.value||'ALL',cat=d.getElementById('acvDetailCategory')?.value||'';
+ if(!body||!cat)return;
+ body.innerHTML='<div class="acvDetailEmpty">Carregando clientes...</div>';
+ try{
+   const routes=route==='TEAM'?getTeam().map(x=>String(x.rota)): [route];
+   const people=new Map(getTeam().map(x=>[String(x.rota),String(x.nome||'Consultor')]));
+   const rows=[];
+   for(const rt of routes){
+     const [detail,daySet]=await Promise.all([getRouteDetail(rt),getDaySet(rt,day)]);
+     const res=(detail?.resultados||[]).find(x=>String(x.nome)===cat);
+     for(const cl of completedClients(res)){
+       const pv=String(cl.cliente||cl.pv||'').trim();
+       if(daySet&&!daySet.has(pv))continue;
+       rows.push({rota:rt,consultor:people.get(rt)||detail?.consultor?.nome||'',pv,razao:String(cl.razao||''),subcanal:String(cl.subcanal||''),qtd:Number(cl.quantidade||0),compras:Number(cl.compras||0),vendidos:Number(cl.vendidos||0)})
+     }
+   }
+   rows.sort((a,b)=>a.rota.localeCompare(b.rota)||a.razao.localeCompare(b.razao,'pt-BR'));
+   const dayName={ALL:'Todos os dias',SEG:'Segunda-feira',TER:'Terça-feira',QUA:'Quarta-feira',QUI:'Quinta-feira',SEX:'Sexta-feira'}[day]||day;
+   const routeName=route==='TEAM'?'Toda a Equipe':route+' - '+(people.get(route)||'');
+   body.innerHTML='<div class="acvDetailSummary"><span class="acvDetailChip">'+E(cat)+'</span><span class="acvDetailChip">'+E(routeName)+'</span><span class="acvDetailChip">'+E(dayName)+'</span><span class="acvDetailChip">'+rows.length+' cliente(s)</span></div>'+
+   (rows.length?'<div class="acvDetailTableWrap"><table class="acvDetailTable"><thead><tr><th>Rota</th><th>Consultor</th><th>PV</th><th>Cliente</th><th>Subcanal</th></tr></thead><tbody>'+rows.map(x=>'<tr><td><b>'+E(x.rota)+'</b></td><td>'+E(x.consultor)+'</td><td><b>'+E(x.pv)+'</b></td><td>'+E(x.razao)+'</td><td>'+E(x.subcanal)+'</td></tr>').join('')+'</tbody></table></div>':'<div class="acvDetailEmpty">Nenhum cliente realizou esta cobertura neste filtro.</div>');
+ }catch(e){body.innerHTML='<div class="acvDetailEmpty">Não foi possível carregar os clientes: '+E(e?.message||'Erro')+'</div>'}
+}
+function openIncentiveDetail(cat){
+ const ov=ensureIncentiveDetail(),body=d.getElementById('acvDetailBody'),current=d.getElementById('acvRoute')?.value||'TEAM';
+ d.getElementById('acvDetailTitle').textContent=cat;
+ body.innerHTML='<div class="acvDetailFilters"><div><label>VISUALIZAR</label><select id="acvDetailRoute">'+detailRouteOptions(current)+'</select></div><div><label>DIA DA SEMANA</label><select id="acvDetailDay">'+detailDayOptions()+'</select></div><button type="button" id="acvDetailGo" class="acvDetailGo">Ver clientes</button></div><input type="hidden" id="acvDetailCategory" value="'+E(cat)+'"><div id="acvDetailResult"></div>';
+ const r=d.getElementById('acvDetailRoute');if(r&&[...r.options].some(o=>o.value===current))r.value=current;
+ d.getElementById('acvDetailDay').value='ALL';
+ d.getElementById('acvDetailGo').onclick=loadIncentiveDetail;
+ d.getElementById('acvDetailRoute').onchange=loadIncentiveDetail;
+ d.getElementById('acvDetailDay').onchange=loadIncentiveDetail;
+ ov.classList.add('show');loadIncentiveDetail();
+}
+
 let admOppVisits=[],admOppVisitsLoaded=false,admOppScanId=0;
 function admOppParse(text){const ls=text.trim().split(/\r?\n/);if(!ls.length)return[];const h=ls.shift().split(';');return ls.filter(Boolean).map(l=>{const a=l.split(';'),o={};h.forEach((k,i)=>o[k]=a[i]||'');return o})}
 async function admOppLoadVisits(){if(admOppVisitsLoaded)return;const ps=await Promise.all([0,1,2,3,4].map(i=>fetch('visitas_full_part'+i+'.csv?v=20261017-opp-adm-01',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('Não foi possível carregar a base de clientes.');return r.text()})));admOppVisits=ps.flatMap(admOppParse);admOppVisitsLoaded=true}
@@ -336,7 +416,7 @@ function renderView(cat){
  if(spEl){const f=v=>{const m=String(v||'').match(/^(\d{4})-(\d{2})-(\d{2})$/);return m?m[3]+'/'+m[2]+'/'+m[1]:String(v||'')};spEl.textContent=sp.inicio&&sp.fim?'Vendas atualizadas: '+f(sp.inicio)+' a '+f(sp.fim):'Vendas atualizadas: sem período'}
 
  $('#acvCats').innerHTML=rows.map(x=>{const p=x.meta?Math.min(100,Math.round(x.realizado/x.meta*100)):0,pm=productMeta(x);return '<button class="acvCat acvTheme-'+pm.theme+'"'+(pm.theme==='custom'?' style="--acv-custom:'+E(pm.color)+'"':'')+' type="button" data-cat="'+E(x.nome)+'"><span class="acvProd">'+(pm.img?'<img loading="eager" decoding="async" referrerpolicy="no-referrer" data-fit="'+(pm.fit||'logo')+'" src="'+pm.img+'" alt="">':'<span class="acvFallback">'+icon(x.nome)+'</span>')+'</span><b>'+E(x.nome)+'</b><small>'+x.realizado+' / '+x.meta+' realizados</small><span class="acvProgress"><i style="width:'+p+'%"></i></span><span class="acvArrow">›</span></button>'}).join('');
- $$('.acvCat',$('#acvCats')).forEach(b=>b.onclick=()=>renderResult(b.dataset.cat));
+ $('.acvCat',$('#acvCats')).forEach(b=>b.onclick=()=>openIncentiveDetail(b.dataset.cat));
  $('#acvResultTitle').textContent=route==='TEAM'?'Resultado da Equipe por incentivo':'Resultado de '+(person?.nome||route)+' por incentivo';
  $('#acvResultHint').textContent=route==='TEAM'?'Selecione um incentivo para visualizar os resultados de toda a equipe.':'Visualizando '+route+' - '+(person?.nome||'Consultor')+'.';
  renderResult(cat||'');
