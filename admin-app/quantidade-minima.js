@@ -85,8 +85,16 @@ function installCategory(){
         cor_card:typeof window.cmGetVisualColor==='function'?window.cmGetVisualColor(id):(q('cmColor')?.value||''),
         regras:rr.regras||[]
       });
+      let uploaded=false;
+      if(typeof window.cmHasSelectedCardImage==='function'&&window.cmHasSelectedCardImage()){
+        q('cmStatus').textContent='Regra salva. Preparando e enviando imagem...';
+        await window.cmUploadSelectedCardImage(id);
+        uploaded=true;
+      }
       q('cmStatus').className='ok';
-      q('cmStatus').textContent=useQty?`Categoria salva com quantidade mínima de ${min} caixa(s).`:`Categoria salva como Recompra: mínimo de ${repMin} compras em datas diferentes.`;
+      q('cmStatus').textContent=useQty
+        ?`Categoria salva com quantidade mínima de ${min} caixa(s)${uploaded?' + imagem':''}.`
+        :`Recompra salva na Tabela ${Number(q('cmPriority')?.value||2)}, com cor${uploaded?' e imagem':''} atualizadas.`;
       await carregarTudo();
       await window.cmEditCategory(id);
     }catch(e){q('cmStatus').className='bad';q('cmStatus').textContent=e.message}
