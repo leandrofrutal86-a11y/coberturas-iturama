@@ -2,7 +2,7 @@
   const FIXED=[
     {rota:'8A1',nome:'Lucas'},
     {rota:'8B1',nome:'Pedro Henrique'},
-    {rota:'8C1',nome:'Pedro Afonso'},
+    {rota:'8C1',nome:'Ricardo Miguel Franco'},
     {rota:'8D1',nome:'Poliana'},
     {rota:'8F1',nome:'Heitor'}
   ];
@@ -16,10 +16,16 @@
       return n==='rogerio';
     }catch{return false}
   }
+  function teamList(){
+    try{
+      const a=Array.isArray(window.__ituramaConsultores)&&window.__ituramaConsultores.length?window.__ituramaConsultores:(Array.isArray(DATA?.consultores)&&DATA.consultores.length?DATA.consultores:FIXED);
+      return a.map(x=>({rota:String(x.rota||'').trim(),nome:String(x.nome||x.consultor||'').trim()})).filter(x=>x.rota);
+    }catch{return FIXED}
+  }
   function getCtx(){
     try{
       const v=String(sessionStorage.getItem('iturama_context')||TEAM);
-      return v===TEAM||FIXED.some(x=>x.rota===v)?v:TEAM;
+      return v===TEAM||teamList().some(x=>x.rota===v)?v:TEAM;
     }catch{return TEAM}
   }
   function setCtx(v){
@@ -27,7 +33,7 @@
     window.__ituramaContext=v;
   }
   function options(){
-    return `<option value="TEAM">👥 ${TEAM_LABEL}</option>`+FIXED.map(x=>`<option value="${x.rota}">👤 ${x.rota} - ${x.nome}</option>`).join('');
+    return `<option value="TEAM">👥 ${TEAM_LABEL}</option>`+teamList().map(x=>`<option value="${x.rota}">👤 ${x.rota} - ${x.nome}</option>`).join('');
   }
   function fillSelect(s){
     if(!s)return;
@@ -52,7 +58,8 @@
 #ov.overlay,.cvOverlay,.contOverlay,.impOverlay,.cvContentOverlay{z-index:10000!important}
 #ov .sheet{position:relative;z-index:10001!important;max-height:calc(100dvh - 16px)!important;overflow:auto!important}
 #ov .sheetBody{padding-bottom:140px!important}
-@media(max-width:900px){.rogerioUiHead{order:4;flex:1 1 100%;min-width:0}.rogerioUiBar{grid-template-columns:1fr;gap:6px}}
+.rogerioResultFilter{margin:10px 0 12px;padding:12px;background:#fff;border:1px solid #dce3e8;border-radius:14px;display:grid;grid-template-columns:auto minmax(220px,360px);gap:12px;align-items:center}.rogerioResultFilter b{font-size:13px;color:#142236}.rogerioResultFilter small{display:block;font-size:10px;color:#6b7785;margin-top:2px}
+@media(max-width:900px){.rogerioUiHead{order:4;flex:1 1 100%;min-width:0}.rogerioUiBar{grid-template-columns:1fr;gap:6px}.rogerioResultFilter{grid-template-columns:1fr;gap:7px}}
 `;
     document.head.appendChild(s);
   }
@@ -78,7 +85,7 @@
   async function changeRoute(v){
     if(!isRogerio()||busy)return;
     v=String(v||TEAM);
-    if(v!==TEAM&&!FIXED.some(x=>x.rota===v))v=TEAM;
+    if(v!==TEAM&&!teamList().some(x=>x.rota===v))v=TEAM;
     busy=true;
     const selects=[...document.querySelectorAll('.rogerioUiSelect')];
     selects.forEach(s=>s.disabled=true);
@@ -87,7 +94,7 @@
       const fn=baseApi||api;
       const j=await fn('dashboard',{rota:v===TEAM?'TEAM':v});
       DATA=j;
-      window.__ituramaConsultores=Array.isArray(j?.consultores)?j.consultores:FIXED;
+      window.__ituramaConsultores=Array.isArray(j?.consultores)&&j.consultores.length?j.consultores:teamList();
       if(typeof TAB!=='undefined')TAB=(v===TEAM?'equipe':'meu');
       const nm=document.getElementById('name'),rt=document.getElementById('route');
       if(v===TEAM){
@@ -101,6 +108,8 @@
       if(typeof render==='function')render();
       if(typeof summary==='function')summary();
       applyTeamLabels(v);
+      addResultSelector();
+      patchChoose();
       sync();
       window.dispatchEvent(new CustomEvent('iturama:routechange',{detail:{rota:v,equipe:v===TEAM,keepOpen:true}}));
       setTimeout(addOverlaySelectors,60);
@@ -112,6 +121,38 @@
       busy=false;
       document.querySelectorAll('.rogerioUiSelect').forEach(s=>s.disabled=false);
     }
+  }
+
+  function patchChoose(){
+    if(typeof choose!=='function'||choose.__rogerioUi)return;
+    const old=choose;
+    const wrapped=function(cat){
+      if(!isRogerio())return old(cat);
+      const sel=document.getElementById('cat');
+      if(sel)sel.value=cat;
+      if(typeof TAB!=='undefined')TAB=getCtx()===TEAM?'equipe':'meu';
+      if(typeof render==='function')render();
+      applyTeamLabels(getCtx());
+      document.querySelector('.panel')?.scrollIntoView({behavior:'smooth',block:'start'});
+    };
+    wrapped.__rogerioUi=true;
+    try{choose=wrapped;window.choose=wrapped}catch{}
+  }
+
+  function addResultSelector(){
+    if(!isRogerio())return;
+    const tabs=document.querySelector('#dash .tabs');
+    if(!tabs)return;
+    let box=document.getElementById('rogerioResultFilter');
+    if(!box){
+      box=document.createElement('div');
+      box.id='rogerioResultFilter';
+      box.className='rogerioResultFilter';
+      box.innerHTML='<div><b>Visualizar resultado</b><small>Escolha toda a equipe ou um consultor individual.</small></div><select class="rogerioUiSelect" aria-label="Selecionar resultado da equipe ou consultor"></select>';
+      tabs.insertAdjacentElement('beforebegin',box);
+      box.querySelector('select').addEventListener('change',e=>changeRoute(e.target.value));
+    }
+    fillSelect(box.querySelector('select'));
   }
 
   function applyTeamLabels(v){
@@ -180,12 +221,15 @@
     window.getIturamaContext=()=>getCtx();
     window.__ituramaConsultores=Array.isArray(DATA?.consultores)&&DATA.consultores.length?DATA.consultores:FIXED;
     patchApiAfterLogin();
+    patchChoose();
     addHeader();
+    addResultSelector();
     if(typeof TAB!=='undefined')TAB='equipe';
     applyTeamLabels(TEAM);
     if(typeof render==='function')render();
     addOverlaySelectors();
-    document.addEventListener('click',()=>setTimeout(addOverlaySelectors,80),true);
+    addResultSelector();
+    document.addEventListener('click',()=>setTimeout(()=>{addOverlaySelectors();addResultSelector();patchChoose()},80),true);
     setTimeout(()=>changeRoute(TEAM),40);
     return true;
   }
@@ -197,5 +241,5 @@
   },250);
   if(document.readyState!=='loading')activateOnce();
   else document.addEventListener('DOMContentLoaded',activateOnce,{once:true});
-  setInterval(()=>{if(isRogerio())sync()},1200);
+  setInterval(()=>{if(isRogerio()){sync();addResultSelector();patchChoose()}},1200);
 })();
