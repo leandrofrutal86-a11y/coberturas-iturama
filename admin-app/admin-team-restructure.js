@@ -5,7 +5,7 @@ const $=(s,r=d)=>r.querySelector(s), $$=(s,r=d)=>[...r.querySelectorAll(s)];
 const E=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const norm=v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().toLowerCase();
 const n=v=>Number(v||0);
-const ALLOWED=new Set(['visao da equipe','atualizar vendas','acoes vigentes','contratos','relatorios']);
+const ALLOWED=new Set(['visao da equipe','atualizar vendas','acoes vigentes','contratos','relatorios','premiacoes de incentivos']);
 
 function getDash(){try{return w.eval('dash')}catch{try{return typeof dash!=='undefined'?dash:null}catch{return null}}}
 function getTeam(){const x=getDash();return Array.isArray(x?.individual)?x.individual:[]}
@@ -64,7 +64,7 @@ function css(){
 .acvArrow{position:absolute!important;right:9px!important;bottom:9px!important;width:34px!important;height:34px!important;border-radius:50%!important;background:#fff!important;color:#e30613!important;display:grid!important;place-items:center!important;font-size:25px!important;font-weight:900!important;box-shadow:0 4px 10px rgba(0,0,0,.18)!important}
 .acvCat.acvTheme-blue{background:linear-gradient(160deg,#2563eb,#1e3a8a)!important}.acvCat.acvTheme-pink{background:linear-gradient(160deg,#ff3b8d,#c9005f)!important}.acvCat.acvTheme-black{background:linear-gradient(160deg,#30343a,#050505)!important}.acvCat.acvTheme-gold{background:linear-gradient(160deg,#ffc928,#c77a00)!important}.acvCat.acvTheme-brown{background:linear-gradient(160deg,#8d572e,#3d1f0d)!important}.acvCat.acvTheme-green{background:linear-gradient(160deg,#22a850,#075b29)!important}.acvCat.acvTheme-cyan{background:linear-gradient(160deg,#16a6e6,#0755b7)!important}.acvCat.acvTheme-purple{background:linear-gradient(160deg,#8b43e6,#4d1498)!important}.acvCat.acvTheme-navy{background:linear-gradient(160deg,#1f4f8f,#071b38)!important}.acvCat.acvTheme-orange{background:linear-gradient(160deg,#ff9a25,#e3420c)!important}.acvCat.acvTheme-red{background:linear-gradient(160deg,#f52633,#9e0009)!important}
 .acvStats{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}.acvStat{background:#fff;border:1px solid #e1e7ed;border-radius:15px;padding:12px;box-shadow:0 4px 12px #172b4009}.acvStat span{font-size:9px;color:#607386;font-weight:950}.acvStat b{display:block;font-size:22px;margin-top:4px}
-.acvResults{background:#fff;border:1px solid #e0e7ed;border-radius:18px;padding:13px;box-shadow:0 5px 15px #172b400d}.acvResultFilter{margin:0 0 12px;padding:12px;background:#fff;border:1px solid #dce3e8;border-radius:14px;display:grid;grid-template-columns:auto minmax(220px,360px);gap:12px;align-items:center}.acvResultFilter b{font-size:13px;color:#142236}.acvResultFilter small{display:block;font-size:10px;color:#6b7785;margin-top:2px}.acvResultFilter .acvRoute{width:100%}@media(max-width:700px){.acvResultFilter{grid-template-columns:1fr;gap:7px}}.acvTableWrap{overflow:auto;border:1px solid #e2e8ed;border-radius:12px}.acvTable{width:100%;border-collapse:collapse;min-width:720px}.acvTable th,.acvTable td{padding:10px 8px;border-bottom:1px solid #edf0f2;text-align:center;font-size:12px}.acvTable th{background:#f5f7f9}.acvTable th:first-child,.acvTable td:first-child{text-align:left;font-weight:900}.good{color:#087249;font-weight:950}.bad{color:#b3141c;font-weight:950}
+.acvResults{background:#fff;border:1px solid #e0e7ed;border-radius:18px;padding:13px;box-shadow:0 5px 15px #172b400d}.acvResultFilter{margin:0 0 12px;padding:12px;background:#fff;border:1px solid #dce3e8;border-radius:14px;display:grid;grid-template-columns:auto minmax(220px,360px);gap:12px;align-items:center}.acvResultFilter b{font-size:13px;color:#142236}.acvResultFilter small{display:block;font-size:10px;color:#6b7785;margin-top:2px}.acvResultFilter .acvRoute{width:100%}@media(max-width:700px){.acvResultFilter{grid-template-columns:1fr;gap:7px}}.acvTableWrap{overflow:auto;border:1px solid #dbe2e8;border-radius:12px}.acvTable{width:100%;border-collapse:collapse;min-width:720px}.acvTable th,.acvTable td{padding:11px 9px;border-bottom:1px solid #d9e1e7;text-align:center;font-size:12px}.acvTable thead th{background:#d90000!important;color:#fff!important;font-weight:950}.acvTable thead th:first-child{text-align:left}.acvTable tbody tr:nth-child(odd){background:#eaf3fa}.acvTable tbody tr:nth-child(even){background:#fff}.acvTable tbody td:first-child{text-align:left;font-weight:950;color:#14283a}.acvTable tbody td:nth-child(2){color:#0d5f95;font-weight:950}.acvTable tbody td:nth-child(3),.acvTable tbody td:nth-child(4),.acvTable tbody td:nth-child(5){color:#c8151d;font-weight:950}.good{color:#087249!important;font-weight:950}.bad{color:#c8151d!important;font-weight:950}
 @media(max-width:900px){.acvActions{grid-template-columns:repeat(3,minmax(0,1fr))}.acvTopIn{flex-wrap:wrap}.acvBrand{flex-basis:calc(100% - 125px)}.acvSupervisor{order:3}.acvMainGrid{grid-template-columns:1fr}.acvHello{align-items:flex-start;flex-wrap:wrap}.acvRouteBox{width:100%;min-width:0}.acvStats{grid-template-columns:1fr 1fr}}
 @media(max-width:520px){.acvActions{grid-template-columns:1fr}.acvWrap{width:calc(100% - 14px);margin-top:8px}.acvTop{padding:10px}.acvBrand b{font-size:16px}.acvBrand small{font-size:9px}.acvBack{font-size:11px;padding:8px 10px}.acvSupervisor{font-size:10px;padding:6px 9px}.acvSearchRow{grid-template-columns:1fr}.acvSearchRow button{padding:11px}.acvCat{flex-basis:148px;height:220px}.acvProd{height:118px}.acvSecTitle h3{font-size:18px}}
 
@@ -209,7 +209,7 @@ function patchHome(){
    vendas.insertBefore(team,vendas.firstChild);
  }
  team.onclick=openView;
- const order=['visao da equipe','atualizar vendas','acoes vigentes','contratos','relatorios'];
+ const order=['visao da equipe','atualizar vendas','acoes vigentes','contratos','relatorios','premiacoes de incentivos'];
  const cards=$$('.menuCard',vendas),sorted=[...cards].sort((a,b)=>order.indexOf(getCardLabel(a))-order.indexOf(getCardLabel(b)));
  if(cards.some((x,i)=>x!==sorted[i]))sorted.forEach(x=>vendas.appendChild(x));
 }
@@ -322,14 +322,14 @@ function renderView(cat){
 function renderResult(cat){
  const route=$('#acvRoute')?.value||'TEAM',team=getTeam(),cats=getCats().filter(x=>!norm(x?.nome).includes('imperdo'));
  const body=$('#acvResultBody');if(!body)return;
+ let rows=[];
  if(route==='TEAM'){
-  const use=cat?cats.filter(x=>x.nome===cat):cats;
-  const heads=team.map(p=>'<th>'+E(p.rota)+'<br><small>'+E(String(p.nome||'').split(' ')[0])+'</small></th>').join('');
-  body.innerHTML='<div class="acvTableWrap"><table class="acvTable"><thead><tr><th>INCENTIVO</th>'+heads+'<th>TOTAL</th></tr></thead><tbody>'+use.map(c=>{const cells=team.map(p=>{const r=(p.resultados||[]).find(x=>x.nome===c.nome)||{};const ok=n(r.meta)>0&&n(r.realizado)>=n(r.meta);return '<td class="'+(ok?'good':'bad')+'">'+n(r.realizado)+'/'+n(r.meta)+'<br><small>'+n(r.percentual)+'%</small></td>'}).join('');return '<tr><td>'+E(c.nome)+'</td>'+cells+'<td><b>'+n(c.realizado)+'/'+n(c.meta)+'</b><br><small>'+n(c.percentual)+'%</small></td></tr>'}).join('')+'</tbody></table></div>';
+   rows=cats.filter(x=>!cat||x.nome===cat).map(x=>({nome:x.nome,meta:n(x.meta),realizado:n(x.realizado),falta:n(x.falta),percentual:n(x.percentual)}));
  }else{
-  const p=team.find(x=>String(x.rota)===route),rows=(p?.resultados||[]).filter(x=>!norm(x?.nome).includes('imperdo')).filter(x=>!cat||x.nome===cat);
-  body.innerHTML='<div class="acvTableWrap"><table class="acvTable"><thead><tr><th>INCENTIVO</th><th>META</th><th>REALIZADO</th><th>FALTA</th><th>%</th></tr></thead><tbody>'+rows.map(x=>'<tr><td>'+E(x.nome)+'</td><td>'+n(x.meta)+'</td><td class="'+(n(x.meta)>0&&n(x.realizado)>=n(x.meta)?'good':'bad')+'">'+n(x.realizado)+'</td><td>'+n(x.falta)+'</td><td>'+n(x.percentual)+'%</td></tr>').join('')+'</tbody></table></div>';
+   const p=team.find(x=>String(x.rota)===route);
+   rows=(p?.resultados||[]).filter(x=>!norm(x?.nome).includes('imperdo')).filter(x=>!cat||x.nome===cat).map(x=>({nome:x.nome,meta:n(x.meta),realizado:n(x.realizado),falta:n(x.falta),percentual:n(x.percentual)}));
  }
+ body.innerHTML='<div class="acvTableWrap"><table class="acvTable"><thead><tr><th>Incentivo</th><th>Meta</th><th>Realizado</th><th>Falta</th><th>%</th></tr></thead><tbody>'+rows.map(x=>'<tr><td>'+E(x.nome)+'</td><td>'+n(x.meta)+'</td><td>'+n(x.realizado)+'</td><td>'+n(x.falta)+'</td><td>'+n(x.percentual)+'%</td></tr>').join('')+'</tbody></table></div>';
 }
 function sweep(){
  css();d.getElementById('admQuickNav')?.remove();d.getElementById('admQuickOverlay')?.remove();patchHome();patchSidebar();
