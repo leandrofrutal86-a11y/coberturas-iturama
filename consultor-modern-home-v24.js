@@ -7,18 +7,18 @@ function D(){try{return typeof DATA!=='undefined'?DATA:null}catch{return null}}
 
 function productMeta(name){
  const s=String(name||'').toUpperCase();
- if(s.includes('PERFETTI'))return{img:'assets/incentivos/perfetti.svg?v=20261017-v24',theme:'blue',fit:'logo'};
- if(s.includes('FINI'))return{img:'assets/incentivos/fini.svg?v=20261017-v24',theme:'pink',fit:'logo'};
- if(s.includes('BLACK LABEL'))return{img:'assets/incentivos/black-label.webp?v=20261017-v24',theme:'black',fit:'logo'};
- if(s.includes('WHITE HORSE'))return{img:'assets/incentivos/white-horse.webp?v=20261017-v24',theme:'gold',fit:'logo'};
- if(s.includes('OLD PARR'))return{img:'assets/incentivos/old-parr.webp?v=20261017-v24',theme:'brown',fit:'logo'};
- if(s.includes('FRUT')||s.includes('DEL VALLE'))return{img:'assets/incentivos/del-valle-frut.svg?v=20261017-v24',theme:'green',fit:'logo'};
- if(s.includes('ESTRELLA'))return{img:'assets/incentivos/estrella.webp?v=20261017-v24',theme:'red',fit:'logo'};
- if(s.includes('PÃO DE QUEIJO')||s.includes('PAO DE QUEIJO'))return{img:'assets/incentivos/trio-pao-de-queijo.webp?v=20261017-v24',theme:'red',fit:'wide'};
- if(s.includes('TANQUERAY'))return{img:'assets/incentivos/tanqueray.webp?v=20261017-v24',theme:'green',fit:'logo'};
- if(s.includes('B2B'))return{img:'assets/incentivos/b2b.svg?v=20261017-v24',theme:s.includes('RECOMPRA')?'purple':'cyan',fit:'logo'};
- if(s.includes('CAMPARI'))return{img:'assets/incentivos/campari.svg?v=20261017-v24',theme:'navy',fit:'logo'};
- if(s.includes('APEROL'))return{img:'assets/incentivos/aperol.webp?v=20261017-v24',theme:'orange',fit:'logo'};
+ if(s.includes('PERFETTI'))return{img:'assets/incentivos/perfetti.svg?v=20261017-v26',theme:'blue',fit:'logo'};
+ if(s.includes('FINI'))return{img:'assets/incentivos/fini.svg?v=20261017-v26',theme:'pink',fit:'logo'};
+ if(s.includes('BLACK LABEL'))return{img:'assets/incentivos/black-label-logo-v23.svg?v=20261017-v26',theme:'black',fit:'logo'};
+ if(s.includes('WHITE HORSE'))return{img:'assets/incentivos/white-horse-logo-v23.svg?v=20261017-v26',theme:'gold',fit:'logo'};
+ if(s.includes('OLD PARR'))return{img:'assets/incentivos/old-parr.svg?v=20261017-v26',theme:'brown',fit:'logo'};
+ if(s.includes('FRUT')||s.includes('DEL VALLE'))return{img:'assets/incentivos/del-valle-frut.svg?v=20261017-v26',theme:'green',fit:'logo'};
+ if(s.includes('ESTRELLA'))return{img:'assets/incentivos/estrella-logo-v23.svg?v=20261017-v26',theme:'red',fit:'logo'};
+ if(s.includes('PÃO DE QUEIJO')||s.includes('PAO DE QUEIJO'))return{img:'assets/incentivos/trio-pao-de-queijo.svg?v=20261017-v26',theme:'red',fit:'wide'};
+ if(s.includes('TANQUERAY'))return{img:'assets/incentivos/tanqueray-logo-v23.svg?v=20261017-v26',theme:'green',fit:'logo'};
+ if(s.includes('B2B'))return{img:'assets/incentivos/b2b.svg?v=20261017-v26',theme:s.includes('RECOMPRA')?'purple':'cyan',fit:'logo'};
+ if(s.includes('CAMPARI'))return{img:'assets/incentivos/campari.svg?v=20261017-v26',theme:'navy',fit:'logo'};
+ if(s.includes('APEROL'))return{img:'assets/incentivos/aperol.svg?v=20261017-v26',theme:'orange',fit:'logo'};
  return{img:'',theme:'red',fit:'logo'};
 }
 
