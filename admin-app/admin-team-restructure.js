@@ -309,10 +309,6 @@ function ensureView(){
  };
  if(prev)prev.onclick=e=>{e.preventDefault();e.stopPropagation();moveCarousel(-1)};
  if(next)next.onclick=e=>{e.preventDefault();e.stopPropagation();moveCarousel(1)};
- let dragging=false,startX=0,startLeft=0;
- cv.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'){dragging=true;startX=e.clientX;startLeft=cv.scrollLeft;try{cv.setPointerCapture(e.pointerId)}catch{}}});
- cv.addEventListener('pointermove',e=>{if(!dragging)return;cv.scrollLeft=startLeft-(e.clientX-startX)});
- const stop=()=>{dragging=false};cv.addEventListener('pointerup',stop);cv.addEventListener('pointercancel',stop);cv.addEventListener('pointerleave',stop);
  $$('.acvAct',v).forEach(b=>b.onclick=()=>{const a=b.dataset.act;if(a==='contratos')window.openTeamContracts?.();if(a==='visitas')openAdminFeature('Visita de Clientes');if(a==='subcanais')openAdminFeature('Subcanais');if(a==='contatos')openAdminFeature('Contato dos Clientes')});
  return v;
 }
