@@ -1,1 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 620"><rect width="360" height="620" fill="#fff"/><rect x="132" y="20" width="96" height="100" rx="22" fill="#c8ae89"/><path d="M92 115h176l40 66v330q0 65-128 65T52 511V181z" fill="#5d291c" stroke="#3b140e" stroke-width="8"/><rect x="80" y="220" width="200" height="225" rx="70" fill="#efe4c8" stroke="#b59d79" stroke-width="6"/><text x="180" y="332" font-family="Georgia,serif" font-size="62" text-anchor="middle" fill="#c94731">Old Parr</text><text x="180" y="395" font-family="Georgia,serif" font-size="82" font-weight="700" text-anchor="middle" fill="#201a17">12</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 700">
+<rect width="1200" height="700" fill="#fff"/>
+<text x="600" y="430" text-anchor="middle" font-family="Georgia,Times New Roman,serif" font-size="300" font-weight="700">
+<tspan fill="#e11b22">O</tspan><tspan fill="#151515">ld</tspan><tspan fill="#e11b22">P</tspan><tspan fill="#151515">arr</tspan>
+</text>
+</svg>
