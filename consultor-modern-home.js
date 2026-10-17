@@ -17,8 +17,8 @@ html,body{max-width:100%!important;overflow-x:hidden!important}
 #dash{background:#f3f6f8!important;min-height:100vh;max-width:100vw!important;overflow-x:hidden!important}
 #dash .wrap{box-sizing:border-box!important;width:100%!important;max-width:100vw!important;margin:0 auto 92px!important;padding:12px 14px 0!important;overflow-x:hidden!important;overflow-y:visible!important}
 #dash .quick,#dash .summary,#dash .tools,#dash .mot{display:none!important}
-#dash .top{box-sizing:border-box!important;width:100%!important;max-width:100vw!important;background:linear-gradient(135deg,#ed0713,#c9000b 70%,#9d0007)!important;border:0!important;padding:11px 12px!important;box-shadow:none!important;overflow:hidden!important}
-#dash .topbar{width:100%!important;max-width:620px!important;margin:auto!important;min-height:64px!important;gap:8px!important}
+#dash .top{box-sizing:border-box!important;width:100%!important;max-width:100vw!important;background:radial-gradient(circle at 18% 28%,rgba(255,95,95,.34),transparent 30%),radial-gradient(circle at 72% 72%,rgba(255,0,0,.18),transparent 32%),linear-gradient(118deg,#ff1717 0%,#d0000b 34%,#5c0004 68%,#050505 100%)!important;border:0!important;padding:11px 12px!important;box-shadow:0 8px 24px rgba(80,0,0,.22)!important;overflow:hidden!important;position:relative!important}
+#dash .top:before{content:'';position:absolute;inset:0;background:linear-gradient(155deg,rgba(255,255,255,.10),transparent 28%),radial-gradient(circle at 15% 82%,rgba(255,255,255,.08),transparent 24%),linear-gradient(170deg,transparent 0 52%,rgba(255,0,0,.12) 60%,transparent 70%);pointer-events:none;z-index:0}#dash .topbar{width:100%!important;max-width:620px!important;margin:auto!important;min-height:64px!important;gap:8px!important}#dash .topbar{position:relative!important;z-index:1!important}
 #dash .top .brand{min-width:0!important;overflow:hidden!important}
 #dash .top .brand .logo,#dash .top .brand .vline{display:none!important}
 #dash .top .brand>div:last-child:before{content:'COBERTURAS • EQUIPE ITURAMA';display:block;color:#fff;font-size:17px;font-weight:950;line-height:1.1;white-space:normal}
