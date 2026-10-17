@@ -72,7 +72,16 @@ function install(){
   const oldEdit=window.cmEditCategory;
   window.cmEditCategory=async function(id){
     const c=catById(id);
-    if(isB2B(c)){showB2B(c);return}
+    if(isB2B(c)){
+      await oldEdit(id);
+      const refreshed=catById(id)||c;
+      if(q('cmPriority'))q('cmPriority').value=String(refreshed.prioridade_acomp||2);
+      if(q('cmColor'))q('cmColor').value=refreshed.cor_card||'#e30613';
+      if(q('cmCardImageUrl'))q('cmCardImageUrl').value=refreshed.imagem_card_url||'';
+      if(q('cmCardFile'))q('cmCardFile').value='';
+      showB2B(refreshed);
+      return;
+    }
     return oldEdit(id);
   };
 
@@ -88,18 +97,37 @@ function install(){
     const rep=norm(name)==='RECOMPRA B2B'||isRep(c);
     q('cmStatus').className='';q('cmStatus').textContent='Salvando parâmetros B2B...';
     try{
+      const priority=Number(q('cmPriority')?.value||c?.prioridade_acomp||2);
+      const color=typeof window.cmGetVisualColor==='function'
+        ? window.cmGetVisualColor(id)
+        : (q('cmColor')?.value||c?.cor_card||'');
       await cfg({
         action:'save_category_full',token,id,
         nome:rep?'RECOMPRA B2B':'COMPRA B2B',
         tipo_regra:rep?'recompra':'simples',
         quantidade_minima:1,
         compras_minimas:rep?2:1,
+        prioridade_acomp:priority,
+        cor_card:color,
         regras:[{grupo:1,campo:'origem',operador:'IN',valores:['B2B'],obrigatorio:true,excluir_subcanais:[]}]
       });
-      q('cmStatus').className='ok';
-      q('cmStatus').textContent=rep?'RECOMPRA B2B salva • Origem B2B • mínimo 2 compras em datas diferentes.':'COMPRA B2B salva • Origem B2B • mínimo 1 compra.';
+      let uploaded=false;
+      if(typeof window.cmHasSelectedCardImage==='function'&&window.cmHasSelectedCardImage()){
+        q('cmStatus').textContent='Parâmetros B2B salvos. Preparando e enviando imagem...';
+        await window.cmUploadSelectedCardImage(id);
+        uploaded=true;
+      }
       if(typeof carregarTudo==='function')await carregarTudo();
-      const refreshed=catById(id)||c;showB2B(refreshed);
+      const refreshed=catById(id)||c;
+      if(refreshed){
+        refreshed.prioridade_acomp=priority;
+        refreshed.cor_card=color||null;
+      }
+      if(q('cmPriority'))q('cmPriority').value=String(priority);
+      if(q('cmColor'))q('cmColor').value=color||'#e30613';
+      showB2B(refreshed);
+      q('cmStatus').className='ok';
+      q('cmStatus').textContent=(rep?'RECOMPRA B2B':'COMPRA B2B')+' salva na Tabela '+priority+', com cor'+(uploaded?' e imagem':'')+' atualizada'+(uploaded?'s':'')+'.';
     }catch(e){q('cmStatus').className='bad';q('cmStatus').textContent=e?.message||'Falha ao salvar B2B.'}
   };
   save.__b2bFixed=true;
