@@ -215,7 +215,7 @@ function render(){
  '<button class="cmAct" data-act="contratos"><span class="ic">📄</span>Contratos</button>'+
  '<button class="cmAct blue" data-act="visitas"><span class="ic">📅</span>Visita de Clientes</button>'+
  '<button class="cmAct green" data-act="subcanais"><span class="ic">🏪</span>Subcanais</button>'+
- '<button class="cmAct purple" data-act="materiais"><span class="ic">📚</span>Materiais de Apoio</button>'+
+ ''+
  '<button class="cmAct blue" data-act="contatos"><span class="ic">📞</span>Contato dos Clientes</button>'+
  '</div></div>'+
  '<div><div class="cmSectionTitle"><h3>Coberturas dos Incentivos</h3><small>↔ arraste para o lado</small></div><div class="cmCarouselViewport"><div class="cmCarousel">'+cards+'</div></div></div>';
@@ -225,7 +225,7 @@ function render(){
  const listBtn=document.getElementById('cmClientListBtn');if(listBtn)listBtn.onclick=()=>{try{window.__openPvHomePicker?.()}catch{}};
 
  QA('#consultorModernHome .cmCat').forEach(b=>b.onclick=()=>chooseWithGraph(b.dataset.cat));
- QA('#consultorModernHome .cmAct').forEach(b=>b.onclick=()=>{const a=b.dataset.act;if(a==='contratos')clickExisting('cvContractsBtn','Contratos');else if(a==='visitas')clickExisting('cvVisitBtn','Visita de Clientes');else if(a==='subcanais')clickExisting('cvSubBtn','Subcanais');else if(a==='materiais')clickExisting(null,'Materiais de Apoio');else if(a==='contatos')clickExisting('contClientesBtn','Contato dos Clientes')});
+ QA('#consultorModernHome .cmAct').forEach(b=>b.onclick=()=>{const a=b.dataset.act;if(a==='contratos')clickExisting('cvContractsBtn','Contratos');else if(a==='visitas')clickExisting('cvVisitBtn','Visita de Clientes');else if(a==='subcanais')clickExisting('cvSubBtn','Subcanais');else if(a==='contatos')clickExisting('contClientesBtn','Contato dos Clientes')});
  hideOldPriority();
  try{window.__renderPvHomePanel?.()}catch{}
 }
