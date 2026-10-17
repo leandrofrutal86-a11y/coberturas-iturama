@@ -7,18 +7,18 @@ function D(){try{return typeof DATA!=='undefined'?DATA:null}catch{return null}}
 
 function productMeta(name){
  const s=String(name||'').toUpperCase();
- if(s.includes('PERFETTI'))return{img:'assets/incentivos/perfetti.svg?v=20261017-hd2',theme:'blue',fit:'logo'};
- if(s.includes('FINI'))return{img:'assets/incentivos/fini.svg?v=20261017-hd2',theme:'pink',fit:'logo'};
- if(s.includes('BLACK LABEL'))return{img:'assets/incentivos/black-label.webp?v=20261017-logos-21',theme:'black',fit:'bottle'};
- if(s.includes('WHITE HORSE'))return{img:'https://down-br.img.susercontent.com/file/sg-11134201-7ren9-m2biiltoes0m12',theme:'gold',fit:'bottle'};
- if(s.includes('OLD PARR'))return{img:'https://i.pinimg.com/originals/ac/a6/d7/aca6d75a18b70632b33779e64e26a2f0.png',theme:'brown',fit:'bottle'};
- if(s.includes('FRUT')||s.includes('DEL VALLE'))return{img:'assets/incentivos/del-valle-frut.svg?v=20261017-hd2',theme:'green',fit:'logo'};
- if(s.includes('ESTRELLA'))return{img:'https://coopsp.vtexassets.com/arquivos/ids/248137/7898953990010_1_4_1200_72_SRGB.png?v=638888860004500000',theme:'red',fit:'bottle'};
- if(s.includes('PÃO DE QUEIJO')||s.includes('PAO DE QUEIJO'))return{img:'assets/incentivos/trio-pao-de-queijo.webp?v=20261017-logos-21',theme:'red',fit:'wide'};
- if(s.includes('TANQUERAY'))return{img:'assets/incentivos/tanqueray.webp?v=20261017-logos-21',theme:'green',fit:'bottle'};
- if(s.includes('B2B'))return{img:'assets/incentivos/b2b.svg?v=20261017-hd2',theme:s.includes('RECOMPRA')?'purple':'cyan',fit:'logo'};
- if(s.includes('CAMPARI'))return{img:'assets/incentivos/campari.svg?v=20261017-hd2',theme:'navy',fit:'logo'};
- if(s.includes('APEROL'))return{img:'assets/incentivos/aperol.webp?v=20261017-logos-21',theme:'orange',fit:'bottle'};
+ if(s.includes('PERFETTI'))return{img:'assets/incentivos/perfetti.svg?v=20261017-final22',theme:'blue',fit:'logo'};
+ if(s.includes('FINI'))return{img:'assets/incentivos/fini.svg?v=20261017-final22',theme:'pink',fit:'logo'};
+ if(s.includes('BLACK LABEL'))return{img:'assets/incentivos/black-label.svg?v=20261017-final22',theme:'black',fit:'logo'};
+ if(s.includes('WHITE HORSE'))return{img:'assets/incentivos/white-horse.svg?v=20261017-final22',theme:'gold',fit:'logo'};
+ if(s.includes('OLD PARR'))return{img:'assets/incentivos/old-parr.svg?v=20261017-final22',theme:'brown',fit:'logo'};
+ if(s.includes('FRUT')||s.includes('DEL VALLE'))return{img:'assets/incentivos/del-valle-frut.svg?v=20261017-final22',theme:'green',fit:'logo'};
+ if(s.includes('ESTRELLA'))return{img:'assets/incentivos/estrella.svg?v=20261017-final22',theme:'red',fit:'logo'};
+ if(s.includes('PÃO DE QUEIJO')||s.includes('PAO DE QUEIJO'))return{img:'assets/incentivos/trio-pao-de-queijo.webp?v=20261017-final22',theme:'red',fit:'wide'};
+ if(s.includes('TANQUERAY'))return{img:'assets/incentivos/tanqueray.svg?v=20261017-final22',theme:'green',fit:'logo'};
+ if(s.includes('B2B'))return{img:'assets/incentivos/b2b.svg?v=20261017-final22',theme:s.includes('RECOMPRA')?'purple':'cyan',fit:'logo'};
+ if(s.includes('CAMPARI'))return{img:'assets/incentivos/campari.svg?v=20261017-final22',theme:'navy',fit:'logo'};
+ if(s.includes('APEROL'))return{img:'assets/incentivos/aperol.svg?v=20261017-final22',theme:'orange',fit:'logo'};
  return{img:'',theme:'red',fit:'logo'};
 }
 
@@ -81,9 +81,9 @@ html,body{max-width:100%!important;overflow-x:hidden!important}
 .cmCat .cmProd{position:absolute!important;left:0!important;right:0!important;top:0!important;height:142px!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:8px!important;overflow:hidden!important;background:#fff!important}
 .cmCat .cmProd:before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.98),rgba(245,247,250,.96));z-index:0}
 .cmCat .cmProd img{display:block!important;position:relative!important;z-index:1!important;max-width:94%!important;max-height:132px!important;width:auto!important;height:auto!important;object-fit:contain!important;filter:none!important}
-.cmCat .cmProd img[data-fit="logo"]{max-width:90%!important;max-height:104px!important;object-fit:contain!important;filter:none!important}
+.cmCat .cmProd img[data-fit="logo"]{display:block!important;max-width:96%!important;max-height:116px!important;width:auto!important;height:auto!important;object-fit:contain!important;object-position:center!important;filter:none!important}
 .cmCat .cmProd img[data-fit="bottle"]{max-width:92%!important;max-height:134px!important;object-fit:contain!important;filter:drop-shadow(0 5px 6px rgba(0,0,0,.14))!important}
-.cmCat .cmProd img[data-fit="wide"]{width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;object-fit:contain!important;filter:none!important;background:#fff!important}
+.cmCat .cmProd img[data-fit="wide"]{display:block!important;width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;object-fit:contain!important;object-position:center!important;filter:none!important;background:#fff!important}
 .cmCat .cmFallback{font-size:42px;position:relative;z-index:1}
 .cmCat b{font-size:14px!important;line-height:1.05!important;display:block!important;text-transform:uppercase!important;margin-top:146px!important;min-height:31px!important;text-shadow:0 1px 2px rgba(0,0,0,.22)}
 .cmCat small{display:block!important;margin-top:6px!important;color:#fff!important;font-size:10.5px!important;line-height:1.15!important}
