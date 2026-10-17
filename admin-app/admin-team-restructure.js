@@ -225,7 +225,7 @@ function patchSidebar(){
 }
 function productMeta(item){
  const name=typeof item==='object'?(item?.nome||''):item;
- if(item&&typeof item==='object'&&item.imagem_card_url)return{img:String(item.imagem_card_url),theme:'custom',fit:'logo',color:String(item.cor_card||'#e30613')};
+ if(item&&typeof item==='object'&&(item.imagem_card_url||item.cor_card))return{img:String(item.imagem_card_url||''),theme:'custom',fit:'logo',color:String(item.cor_card||'#e30613')};
  const s=String(name||'').toUpperCase();
  if(s.includes('IMPERDO')&&(s.includes('SSRD')||s.includes('SSD')))return{img:'../assets/incentivos/imperdoaveis-ssrd.webp?v=20261017-imp-v34',theme:'red',fit:'logo'};
  if(s.includes('IMPERDO')&&(s.includes('STILL')||s.includes('ESTILO')))return{img:'../assets/incentivos/imperdoaveis-still.webp?v=20261017-imp-v35',theme:'blue',fit:'logo'};
