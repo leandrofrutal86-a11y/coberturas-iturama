@@ -9,16 +9,16 @@ function productMeta(name){
  const s=String(name||'').toUpperCase();
  if(s.includes('PERFETTI'))return{img:'assets/incentivos/perfetti.svg?v=20261017-hd2',theme:'blue',fit:'logo'};
  if(s.includes('FINI'))return{img:'assets/incentivos/fini.svg?v=20261017-hd2',theme:'pink',fit:'logo'};
- if(s.includes('BLACK LABEL'))return{img:'https://www.vhv.rs/dpng/d/461-4619820_johnnie-walker-black-png-transparent-png.png',theme:'black',fit:'bottle'};
+ if(s.includes('BLACK LABEL'))return{img:'assets/incentivos/black-label.webp?v=20261017-logos-21',theme:'black',fit:'bottle'};
  if(s.includes('WHITE HORSE'))return{img:'https://down-br.img.susercontent.com/file/sg-11134201-7ren9-m2biiltoes0m12',theme:'gold',fit:'bottle'};
  if(s.includes('OLD PARR'))return{img:'https://i.pinimg.com/originals/ac/a6/d7/aca6d75a18b70632b33779e64e26a2f0.png',theme:'brown',fit:'bottle'};
  if(s.includes('FRUT')||s.includes('DEL VALLE'))return{img:'assets/incentivos/del-valle-frut.svg?v=20261017-hd2',theme:'green',fit:'logo'};
  if(s.includes('ESTRELLA'))return{img:'https://coopsp.vtexassets.com/arquivos/ids/248137/7898953990010_1_4_1200_72_SRGB.png?v=638888860004500000',theme:'red',fit:'bottle'};
- if(s.includes('PÃO DE QUEIJO')||s.includes('PAO DE QUEIJO'))return{img:'https://www.agenciatocantins.com.br/envios/2025/06/09/bd6380b1ef0c0c0f22001908a2502b06.webp',theme:'red',fit:'wide'};
- if(s.includes('TANQUERAY'))return{img:'https://cdn.imgbin.com/19/3/23/imgbin-tanqueray-gin-and-tonic-distilled-beverage-whiskey-tanqueray-gin-ErtdjmUwVhuQiAs66sMW2Wie2.jpg',theme:'green',fit:'bottle'};
+ if(s.includes('PÃO DE QUEIJO')||s.includes('PAO DE QUEIJO'))return{img:'assets/incentivos/trio-pao-de-queijo.webp?v=20261017-logos-21',theme:'red',fit:'wide'};
+ if(s.includes('TANQUERAY'))return{img:'assets/incentivos/tanqueray.webp?v=20261017-logos-21',theme:'green',fit:'bottle'};
  if(s.includes('B2B'))return{img:'assets/incentivos/b2b.svg?v=20261017-hd2',theme:s.includes('RECOMPRA')?'purple':'cyan',fit:'logo'};
  if(s.includes('CAMPARI'))return{img:'assets/incentivos/campari.svg?v=20261017-hd2',theme:'navy',fit:'logo'};
- if(s.includes('APEROL'))return{img:'https://wineanthology.com/images/thumbs/0009170_aperol-aperitivo-liqueur-26340_600.gif',theme:'orange',fit:'bottle'};
+ if(s.includes('APEROL'))return{img:'assets/incentivos/aperol.webp?v=20261017-logos-21',theme:'orange',fit:'bottle'};
  return{img:'',theme:'red',fit:'logo'};
 }
 
