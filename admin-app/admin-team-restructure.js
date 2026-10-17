@@ -45,10 +45,24 @@ function css(){
 .acvActions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
 .acvAct{min-height:95px;border:1px solid #dfe6ec;border-radius:17px;background:#fff;padding:13px;text-align:left;font-weight:900;color:#152738;box-shadow:0 4px 12px #172b400b}
 .acvAct .ic{width:40px;height:40px;border-radius:12px;background:#fff0f1;display:grid;place-items:center;font-size:21px;margin-bottom:8px}.acvAct.blue .ic{background:#e9f3ff}.acvAct.green .ic{background:#e8f8ef}.acvAct.orange .ic{background:#fff0df}
-.acvCarouselShell{position:relative;min-width:0}.acvCarousel{display:flex;gap:10px;overflow-x:auto;padding:2px 1px 12px;scrollbar-width:none;scroll-snap-type:x proximity}.acvCarousel::-webkit-scrollbar{display:none}
-.acvCat{flex:0 0 165px;height:232px;border:0;border-radius:20px;padding:0 13px 14px;color:#fff;text-align:left;position:relative;scroll-snap-align:start;box-shadow:0 7px 16px #172b4020;background:linear-gradient(160deg,#f52633,#9e0009)}
-.acvCat:nth-child(6n+2){background:linear-gradient(160deg,#2563eb,#1e3a8a)}.acvCat:nth-child(6n+3){background:linear-gradient(160deg,#22a850,#075b29)}.acvCat:nth-child(6n+4){background:linear-gradient(160deg,#ff9a25,#e3420c)}.acvCat:nth-child(6n+5){background:linear-gradient(160deg,#8b43e6,#4d1498)}.acvCat:nth-child(6n){background:linear-gradient(160deg,#16a6e6,#0755b7)}
-.acvProd{height:125px;margin:0 -13px 10px;border-radius:20px 20px 14px 14px;background:linear-gradient(180deg,#fff,#f5f7fa);display:grid;place-items:center;font-size:43px}.acvCat b{font-size:14px;line-height:1.08;display:block;min-height:31px}.acvCat small{display:block;margin-top:6px;color:#fff;font-size:10.5px}.acvProgress{height:6px;border-radius:999px;background:#ffffff38;overflow:hidden;margin-top:8px;margin-right:34px}.acvProgress i{display:block;height:100%;background:#fff;border-radius:inherit}.acvArrow{position:absolute;right:9px;bottom:9px;width:32px;height:32px;border-radius:50%;background:#fff;color:#e30613;display:grid;place-items:center;font-size:23px;font-weight:950}
+.acvCarouselShell{position:relative!important;min-width:0!important;width:100%!important;max-width:100%!important}
+.acvCarouselViewport{box-sizing:border-box!important;width:100%!important;max-width:100%!important;min-width:0!important;overflow-x:auto!important;overflow-y:hidden!important;-webkit-overflow-scrolling:touch!important;touch-action:pan-x!important;overscroll-behavior-x:contain!important;scroll-behavior:smooth!important;scrollbar-width:none!important}
+.acvCarouselViewport::-webkit-scrollbar{display:none!important}
+.acvCarousel{box-sizing:border-box!important;display:flex!important;flex-flow:row nowrap!important;gap:9px!important;width:max-content!important;min-width:max-content!important;max-width:none!important;overflow:visible!important;padding:2px 24px 12px 1px!important;scroll-snap-type:x proximity!important}
+.acvCarouselNav{display:none}
+.acvCat{box-sizing:border-box!important;flex:0 0 148px!important;width:148px!important;min-width:148px!important;max-width:148px!important;height:252px!important;border:0!important;border-radius:20px!important;padding:0 10px 12px!important;color:#fff!important;text-align:left!important;scroll-snap-align:start!important;position:relative!important;box-shadow:0 12px 24px rgba(18,31,45,.20)!important;overflow:hidden!important;display:flex!important;flex-direction:column!important;justify-content:flex-end!important;background:linear-gradient(165deg,#d50a18,#7a0007)!important}
+.acvProd{position:absolute!important;left:0!important;right:0!important;top:0!important;height:142px!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:10px!important;overflow:hidden!important;background:#fff!important}
+.acvProd:before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.98),rgba(245,247,250,.96));z-index:0}
+.acvProd img{display:block!important;position:relative!important;z-index:1!important;width:auto!important;height:auto!important;max-width:100%!important;max-height:122px!important;object-fit:contain!important;object-position:center!important}
+.acvProd img[data-fit="logo"]{max-width:80%!important;max-height:96px!important;margin:auto!important}
+.acvProd img[data-fit="bottle"]{max-width:92%!important;max-height:134px!important;filter:drop-shadow(0 5px 6px rgba(0,0,0,.14))!important}
+.acvProd img[data-fit="wide"],.acvProd img[data-fit="photo"]{width:100%!important;height:100%!important;max-width:100%!important;max-height:122px!important;object-fit:contain!important}
+.acvFallback{font-size:42px;position:relative;z-index:1}
+.acvCat b{font-size:14px!important;line-height:1.05!important;display:block!important;text-transform:uppercase!important;margin-top:146px!important;min-height:31px!important;text-shadow:0 1px 2px rgba(0,0,0,.22)}
+.acvCat small{display:block!important;margin-top:6px!important;color:#fff!important;font-size:10.5px!important;line-height:1.15!important}
+.acvProgress{height:6px!important;border-radius:999px!important;background:rgba(255,255,255,.22)!important;overflow:hidden!important;margin-top:8px!important;margin-right:40px!important}.acvProgress i{display:block!important;height:100%!important;border-radius:inherit!important;background:rgba(255,255,255,.88)!important}
+.acvArrow{position:absolute!important;right:9px!important;bottom:9px!important;width:34px!important;height:34px!important;border-radius:50%!important;background:#fff!important;color:#e30613!important;display:grid!important;place-items:center!important;font-size:25px!important;font-weight:900!important;box-shadow:0 4px 10px rgba(0,0,0,.18)!important}
+.acvCat.acvTheme-blue{background:linear-gradient(160deg,#2563eb,#1e3a8a)!important}.acvCat.acvTheme-pink{background:linear-gradient(160deg,#ff3b8d,#c9005f)!important}.acvCat.acvTheme-black{background:linear-gradient(160deg,#30343a,#050505)!important}.acvCat.acvTheme-gold{background:linear-gradient(160deg,#ffc928,#c77a00)!important}.acvCat.acvTheme-brown{background:linear-gradient(160deg,#8d572e,#3d1f0d)!important}.acvCat.acvTheme-green{background:linear-gradient(160deg,#22a850,#075b29)!important}.acvCat.acvTheme-cyan{background:linear-gradient(160deg,#16a6e6,#0755b7)!important}.acvCat.acvTheme-purple{background:linear-gradient(160deg,#8b43e6,#4d1498)!important}.acvCat.acvTheme-navy{background:linear-gradient(160deg,#1f4f8f,#071b38)!important}.acvCat.acvTheme-orange{background:linear-gradient(160deg,#ff9a25,#e3420c)!important}.acvCat.acvTheme-red{background:linear-gradient(160deg,#f52633,#9e0009)!important}
 .acvStats{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}.acvStat{background:#fff;border:1px solid #e1e7ed;border-radius:15px;padding:12px;box-shadow:0 4px 12px #172b4009}.acvStat span{font-size:9px;color:#607386;font-weight:950}.acvStat b{display:block;font-size:22px;margin-top:4px}
 .acvResults{background:#fff;border:1px solid #e0e7ed;border-radius:18px;padding:13px;box-shadow:0 5px 15px #172b400d}.acvTableWrap{overflow:auto;border:1px solid #e2e8ed;border-radius:12px}.acvTable{width:100%;border-collapse:collapse;min-width:720px}.acvTable th,.acvTable td{padding:10px 8px;border-bottom:1px solid #edf0f2;text-align:center;font-size:12px}.acvTable th{background:#f5f7f9}.acvTable th:first-child,.acvTable td:first-child{text-align:left;font-weight:900}.good{color:#087249;font-weight:950}.bad{color:#b3141c;font-weight:950}
 @media(max-width:900px){.acvActions{grid-template-columns:repeat(3,minmax(0,1fr))}.acvTopIn{flex-wrap:wrap}.acvBrand{flex-basis:calc(100% - 125px)}.acvSupervisor{order:3}.acvMainGrid{grid-template-columns:1fr}.acvHello{align-items:flex-start;flex-wrap:wrap}.acvRouteBox{width:100%;min-width:0}.acvStats{grid-template-columns:1fr 1fr}}
@@ -79,8 +93,14 @@ function css(){
   .acvSearch{align-self:stretch}
   .acvQuickBox{align-self:stretch}
   .acvActions{grid-template-columns:repeat(3,minmax(0,1fr))}
-  .acvCat{flex:0 0 188px;height:270px}
-  .acvProd{height:150px}
+  .acvCarouselShell{padding:0 50px!important}
+  .acvCarousel{gap:14px!important;padding:4px 8px 14px!important}
+  .acvCat{flex:0 0 190px!important;width:190px!important;min-width:190px!important;max-width:190px!important;height:292px!important;padding:0 14px 15px!important;border-radius:22px!important}
+  .acvProd{height:160px!important;padding:14px!important}
+  .acvProd img{max-height:138px!important}.acvProd img[data-fit="logo"]{max-width:86%!important;max-height:118px!important}.acvProd img[data-fit="bottle"]{max-height:150px!important}.acvProd img[data-fit="wide"],.acvProd img[data-fit="photo"]{max-height:138px!important}
+  .acvCat b{font-size:16px!important;margin-top:166px!important;min-height:36px!important}.acvCat small{font-size:12px!important}
+  .acvCarouselNav{display:grid!important;place-items:center!important;position:absolute!important;top:50%!important;transform:translateY(-50%)!important;width:40px!important;height:58px!important;border:0!important;border-radius:14px!important;background:#fff!important;color:#d50712!important;font-size:32px!important;font-weight:900!important;box-shadow:0 7px 18px rgba(20,35,50,.18)!important;z-index:5!important;cursor:pointer!important}
+  .acvCarouselPrev{left:2px!important}.acvCarouselNext{right:2px!important}.acvCarouselNav:hover{background:#d50712!important;color:#fff!important}
 }
 @media(max-width:900px){
   .acvWrap{width:calc(100% - 16px);margin:10px auto 64px}
@@ -127,10 +147,11 @@ function css(){
   .acvAct .ic{width:36px;height:36px;font-size:19px;margin-bottom:6px}
   .acvSecTitle h3{font-size:18px}
   .acvSecTitle small{font-size:10px}
-  .acvCarouselShell{width:100%;max-width:100%;overflow:hidden}
-  .acvCarousel{width:100%;max-width:100%;padding:2px 18px 10px 0;gap:8px;overflow-x:auto}
-  .acvCat{flex:0 0 142px;width:142px;min-width:142px;max-width:142px;height:218px}
-  .acvProd{height:116px}
+  .acvCarouselShell{width:100%!important;max-width:100%!important;overflow:visible!important;padding:0!important}
+  .acvCarouselViewport{width:100%!important;max-width:100%!important;overflow-x:auto!important;overflow-y:hidden!important;touch-action:pan-x!important}
+  .acvCarousel{width:max-content!important;min-width:max-content!important;max-width:none!important;padding:2px 24px 12px 1px!important;gap:9px!important}
+  .acvCat{flex:0 0 148px!important;width:148px!important;min-width:148px!important;max-width:148px!important;height:252px!important}
+  .acvProd{height:142px!important}
   .acvCat b{font-size:13px}
   .acvStats{grid-template-columns:1fr 1fr;gap:7px}
   .acvStat{padding:10px}
@@ -162,6 +183,26 @@ function patchSidebar(){
  const nav=d.getElementById('admSideNav');if(!nav)return;
  $$('.admTopic',nav).forEach(g=>{const t=norm(g.querySelector('.admTopicHead')?.dataset.topic||g.querySelector('.admTopicHead')?.textContent);if(t.includes('incentivos'))g.remove()});
 }
+function productMeta(name){
+ const s=String(name||'').toUpperCase();
+ if(s.includes('IMPERDO')&&(s.includes('SSRD')||s.includes('SSD')))return{img:'../assets/incentivos/imperdoaveis-ssrd.webp?v=20261017-imp-v34',theme:'red',fit:'logo'};
+ if(s.includes('IMPERDO')&&(s.includes('STILL')||s.includes('ESTILO')))return{img:'../assets/incentivos/imperdoaveis-still.webp?v=20261017-imp-v35',theme:'blue',fit:'logo'};
+ if(s.includes('IMPERDO')&&s.includes('ARTD'))return{img:'../assets/incentivos/imperdoaveis-artd.webp?v=20261017-imp-v35',theme:'black',fit:'logo'};
+ if(s.includes('PERFETTI'))return{img:'../assets/incentivos/perfetti.svg?v=20261017-v28',theme:'blue',fit:'logo'};
+ if(s.includes('FINI'))return{img:'../assets/incentivos/fini.svg?v=20261017-v28',theme:'pink',fit:'logo'};
+ if(s.includes('BLACK LABEL'))return{img:'../assets/incentivos/v27/white-horse.webp?v=20261017-v28',theme:'black',fit:'logo'};
+ if(s.includes('WHITE HORSE'))return{img:'../assets/incentivos/v27/black-label.webp?v=20261017-v28',theme:'gold',fit:'logo'};
+ if(s.includes('OLD PARR'))return{img:'../assets/incentivos/v27/trio-pao-de-queijo.webp?v=20261017-v28',theme:'brown',fit:'logo'};
+ if(s.includes('FRUT')||s.includes('DEL VALLE'))return{img:'../assets/incentivos/del-valle-frut.svg?v=20261017-v28',theme:'green',fit:'logo'};
+ if(s.includes('ESTRELLA'))return{img:'../assets/incentivos/v27/estrella.webp?v=20261017-v28',theme:'red',fit:'photo'};
+ if(s.includes('PÃO DE QUEIJO')||s.includes('PAO DE QUEIJO'))return{img:'../assets/incentivos/v27/old-parr.webp?v=20261017-v28',theme:'red',fit:'photo'};
+ if(s.includes('TANQUERAY'))return{img:'../assets/incentivos/v27/aperol.webp?v=20261017-v28',theme:'green',fit:'logo'};
+ if(s.includes('RECOMPRA')&&s.includes('B2B'))return{img:'../assets/incentivos/b2b-recompra.svg?v=20261017-b2b-v33',theme:'purple',fit:'logo'};
+ if(s.includes('B2B'))return{img:'../assets/incentivos/b2b.svg?v=20261017-b2b-v31',theme:'cyan',fit:'logo'};
+ if(s.includes('CAMPARI'))return{img:'../assets/incentivos/campari.svg?v=20261017-v28',theme:'navy',fit:'logo'};
+ if(s.includes('APEROL'))return{img:'../assets/incentivos/aperol.svg?v=20261017-aperol-v30',theme:'orange',fit:'logo'};
+ return{img:'',theme:'red',fit:'logo'};
+}
 function icon(name){
  const s=String(name||'').toUpperCase();
  if(s.includes('FINI'))return '🍬';if(s.includes('PERFETTI'))return '🍭';if(s.includes('PÃO DE QUEIJO')||s.includes('PAO DE QUEIJO'))return '🧀';
@@ -179,7 +220,7 @@ function rowsFor(route){
 function ensureView(){
  let v=d.getElementById('admConsultorView');if(v)return v;
  css();v=d.createElement('section');v.id='admConsultorView';v.hidden=true;
- v.innerHTML='<header class="acvTop"><div class="acvTopIn"><div class="acvBrand"><b>COBERTURAS • EQUIPE ITURAMA</b><small>Painel do Supervisor • Visão da Equipe</small></div><span class="acvSupervisor">Leandro • Supervisor</span><button type="button" id="acvBack" class="acvBack">← Voltar ao DM</button></div></header><main class="acvWrap"><section class="acvHello"><div class="acvAvatar">👤</div><div class="acvHelloText"><strong>Olá, Leandro</strong><small>Bora conquistar mais hoje! 🚀</small></div><div class="acvRouteBox"><label>Visualizar</label><select id="acvRoute" class="acvRoute"></select></div></section><section class="acvMainGrid"><div class="acvSearch"><div class="acvSearchTitle"><div class="acvSearchIcon">🔎</div><div><b>Pesquisa de PV</b><small>Pesquise PV, cliente ou razão social</small></div></div><div class="acvSearchRow"><input id="acvPv" inputmode="numeric" placeholder="Digite o PV do cliente"><button type="button" id="acvSearchBtn">Pesquisar ›</button></div><div class="acvPvControls"><div class="acvPvLabel">📍 Escolha o dia da visita</div><div class="acvDays">'+['SEG','TER','QUA','QUI','SEX'].map(x=>'<button type="button" class="acvDay" data-day="'+x+'">'+x+'</button>').join('')+'</div><button type="button" id="acvListDay" class="acvList">Listar clientes do dia ▾</button></div></div><div class="acvQuickBox"><div class="acvSecTitle"><h3>Acesso rápido</h3><small>Ferramentas da equipe</small></div><div class="acvActions"><button type="button" class="acvAct blue" data-act="visitas"><span class="ic">📅</span>Visita de Clientes</button><button type="button" class="acvAct green" data-act="subcanais"><span class="ic">🏪</span>Subcanais</button><button type="button" class="acvAct orange" data-act="contatos"><span class="ic">📞</span>Contato dos Clientes</button></div></div></section><section><div class="acvSecTitle"><h3>Coberturas dos Incentivos</h3><small>↔ arraste para o lado</small></div><div class="acvCarouselShell"><div id="acvCats" class="acvCarousel"></div></div></section><section id="acvStats" class="acvStats"></section><section class="acvResults"><div class="acvSecTitle"><div><h3 id="acvResultTitle">Resultado da Equipe por incentivo</h3><small id="acvResultHint">Selecione um incentivo para visualizar os resultados.</small></div></div><div id="acvResultBody"></div></section></main>';
+ v.innerHTML='<header class="acvTop"><div class="acvTopIn"><div class="acvBrand"><b>COBERTURAS • EQUIPE ITURAMA</b><small>Painel do Supervisor • Visão da Equipe</small></div><span class="acvSupervisor">Leandro • Supervisor</span><button type="button" id="acvBack" class="acvBack">← Voltar ao DM</button></div></header><main class="acvWrap"><section class="acvHello"><div class="acvAvatar">👤</div><div class="acvHelloText"><strong>Olá, Leandro</strong><small>Bora conquistar mais hoje! 🚀</small></div><div class="acvRouteBox"><label>Visualizar</label><select id="acvRoute" class="acvRoute"></select></div></section><section class="acvMainGrid"><div class="acvSearch"><div class="acvSearchTitle"><div class="acvSearchIcon">🔎</div><div><b>Pesquisa de PV</b><small>Pesquise PV, cliente ou razão social</small></div></div><div class="acvSearchRow"><input id="acvPv" inputmode="numeric" placeholder="Digite o PV do cliente"><button type="button" id="acvSearchBtn">Pesquisar ›</button></div><div class="acvPvControls"><div class="acvPvLabel">📍 Escolha o dia da visita</div><div class="acvDays">'+['SEG','TER','QUA','QUI','SEX'].map(x=>'<button type="button" class="acvDay" data-day="'+x+'">'+x+'</button>').join('')+'</div><button type="button" id="acvListDay" class="acvList">Listar clientes do dia ▾</button></div></div><div class="acvQuickBox"><div class="acvSecTitle"><h3>Acesso rápido</h3><small>Ferramentas da equipe</small></div><div class="acvActions"><button type="button" class="acvAct blue" data-act="visitas"><span class="ic">📅</span>Visita de Clientes</button><button type="button" class="acvAct green" data-act="subcanais"><span class="ic">🏪</span>Subcanais</button><button type="button" class="acvAct orange" data-act="contatos"><span class="ic">📞</span>Contato dos Clientes</button></div></div></section><section><div class="acvSecTitle"><h3>Coberturas dos Incentivos</h3><small>↔ arraste para o lado</small></div><div class="acvCarouselShell"><button type="button" class="acvCarouselNav acvCarouselPrev" aria-label="Voltar incentivos">‹</button><div class="acvCarouselViewport"><div id="acvCats" class="acvCarousel"></div></div><button type="button" class="acvCarouselNav acvCarouselNext" aria-label="Avançar incentivos">›</button></div></section><section id="acvStats" class="acvStats"></section><section class="acvResults"><div class="acvSecTitle"><div><h3 id="acvResultTitle">Resultado da Equipe por incentivo</h3><small id="acvResultHint">Selecione um incentivo para visualizar os resultados.</small></div></div><div id="acvResultBody"></div></section></main>';
  d.body.appendChild(v);
  $('#acvBack').onclick=closeView;
  $('#acvRoute').onchange=()=>renderView();
@@ -187,6 +228,9 @@ function ensureView(){
  $('#acvPv').onkeydown=e=>{if(e.key==='Enter')searchPv()};
  $$('.acvDay',v).forEach(b=>b.onclick=()=>{$$('.acvDay',v).forEach(x=>x.classList.remove('on'));b.classList.add('on');try{sessionStorage.setItem('pv_dia_visita',b.dataset.day)}catch{}});
  $('#acvListDay').onclick=()=>openAdminFeature('Visita de Clientes');
+ const cv=$('.acvCarouselViewport',v),prev=$('.acvCarouselPrev',v),next=$('.acvCarouselNext',v);
+ const moveCarousel=dir=>{if(!cv)return;const amount=Math.max(420,Math.floor(cv.clientWidth*.72));cv.scrollBy({left:dir*amount,behavior:'smooth'})};
+ if(prev)prev.onclick=()=>moveCarousel(-1);if(next)next.onclick=()=>moveCarousel(1);
  $$('.acvAct',v).forEach(b=>b.onclick=()=>{const a=b.dataset.act;if(a==='visitas')openAdminFeature('Visita de Clientes');if(a==='subcanais')openAdminFeature('Subcanais');if(a==='contatos')openAdminFeature('Contato dos Clientes')});
  return v;
 }
@@ -219,7 +263,7 @@ function renderView(cat){
  $('#acvStats').innerHTML=[
   ['REALIZADO',real],['META',totalMeta],['ATINGIMENTO',pct+'%'],[route==='TEAM'?'CONSULTORES':'FALTA',route==='TEAM'?team.length:falta]
  ].map(x=>'<div class="acvStat"><span>'+x[0]+'</span><b>'+x[1]+'</b></div>').join('');
- $('#acvCats').innerHTML=rows.map(x=>{const p=x.meta?Math.min(100,Math.round(x.realizado/x.meta*100)):0;return '<button class="acvCat" type="button" data-cat="'+E(x.nome)+'"><span class="acvProd">'+icon(x.nome)+'</span><b>'+E(x.nome)+'</b><small>'+x.realizado+' / '+x.meta+' realizados</small><span class="acvProgress"><i style="width:'+p+'%"></i></span><span class="acvArrow">›</span></button>'}).join('');
+ $('#acvCats').innerHTML=rows.map(x=>{const p=x.meta?Math.min(100,Math.round(x.realizado/x.meta*100)):0,pm=productMeta(x.nome);return '<button class="acvCat acvTheme-'+pm.theme+'" type="button" data-cat="'+E(x.nome)+'"><span class="acvProd">'+(pm.img?'<img loading="eager" decoding="async" referrerpolicy="no-referrer" data-fit="'+(pm.fit||'logo')+'" src="'+pm.img+'" alt="">':'<span class="acvFallback">'+icon(x.nome)+'</span>')+'</span><b>'+E(x.nome)+'</b><small>'+x.realizado+' / '+x.meta+' realizados</small><span class="acvProgress"><i style="width:'+p+'%"></i></span><span class="acvArrow">›</span></button>'}).join('');
  $$('.acvCat',$('#acvCats')).forEach(b=>b.onclick=()=>renderResult(b.dataset.cat));
  $('#acvResultTitle').textContent=route==='TEAM'?'Resultado da Equipe por incentivo':'Resultado de '+(person?.nome||route)+' por incentivo';
  $('#acvResultHint').textContent=route==='TEAM'?'Selecione um incentivo para visualizar os resultados de toda a equipe.':'Visualizando '+route+' - '+(person?.nome||'Consultor')+'.';
