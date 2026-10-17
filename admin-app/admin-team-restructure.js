@@ -334,14 +334,14 @@ function detailDayOptions(){
 }
 async function getRouteDetail(route){
  if(acvDetailCache.has(route))return acvDetailCache.get(route);
- const p=w.post({action:'consultor_view',token:sessionStorage.getItem('admToken')||'',rota});
+ const p=w.post({action:'consultor_view',token:sessionStorage.getItem('admToken')||'',rota:route});
  acvDetailCache.set(route,p);
  try{return await p}catch(e){acvDetailCache.delete(route);throw e}
 }
 async function getDaySet(route,day){
  if(day==='ALL')return null;
  const key=route+'|'+day;if(acvDayCache.has(key))return acvDayCache.get(key);
- const p=w.post({action:'day_clients',token:sessionStorage.getItem('admToken')||'',rota,day}).then(r=>new Set((r?.clients||[]).map(x=>String(x.pv||x.cliente||'').trim())));
+ const p=w.post({action:'day_clients',token:sessionStorage.getItem('admToken')||'',rota:route,day}).then(r=>new Set((r?.clients||[]).map(x=>String(x.pv||x.cliente||'').trim())));
  acvDayCache.set(key,p);
  try{return await p}catch(e){acvDayCache.delete(key);throw e}
 }
