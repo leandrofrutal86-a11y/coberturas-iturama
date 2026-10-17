@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 700">
+<rect width="900" height="700" fill="#ffd936"/>
+<g fill="#fff" transform="translate(95 70) scale(.95)">
+<path d="M80 205c35-112 142-177 270-141 83 24 143 86 177 174 62 2 125 21 188 55-55 16-95 47-119 92-54-40-113-62-177-65-36 109-126 180-247 199 40-43 62-91 67-144-82-18-137-74-159-170z"/>
+<path d="M544 221c53-55 108-80 165-75-37 35-61 72-75 112z"/>
+</g>
+<text x="450" y="405" text-anchor="middle" font-family="Georgia,Times New Roman,serif" font-size="120" font-weight="700" font-style="italic" fill="#d7192d">WHITE HORSE</text>
+</svg>
