@@ -449,5 +449,6 @@ function watch(){
 window.addEventListener('iturama:routechange',()=>{clients=[];baseClients=[];lastKey='';baseKey='';inject(true).catch(()=>{})});
 window.__openPvDayReport=()=>openReport();
 window.__renderPvHomePanel=renderHomePanel;
+window.__setPvHomeDay=setSelectedDay;
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',watch);else watch();
 })();
