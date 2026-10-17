@@ -45,10 +45,10 @@ function css(){
 .acvActions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
 .acvAct{min-height:95px;border:1px solid #dfe6ec;border-radius:17px;background:#fff;padding:13px;text-align:left;font-weight:900;color:#152738;box-shadow:0 4px 12px #172b400b}
 .acvAct .ic{width:40px;height:40px;border-radius:12px;background:#fff0f1;display:grid;place-items:center;font-size:21px;margin-bottom:8px}.acvAct.blue .ic{background:#e9f3ff}.acvAct.green .ic{background:#e8f8ef}.acvAct.orange .ic{background:#fff0df}
-.acvCarouselShell{position:relative!important;min-width:0!important;width:100%!important;max-width:100%!important}
-.acvCarouselViewport{box-sizing:border-box!important;width:100%!important;max-width:100%!important;min-width:0!important;overflow-x:auto!important;overflow-y:hidden!important;-webkit-overflow-scrolling:touch!important;touch-action:pan-x!important;overscroll-behavior-x:contain!important;scroll-behavior:smooth!important;scrollbar-width:none!important}
-.acvCarouselViewport::-webkit-scrollbar{display:none!important}
-.acvCarousel{box-sizing:border-box!important;display:flex!important;flex-flow:row nowrap!important;gap:9px!important;width:max-content!important;min-width:max-content!important;max-width:none!important;overflow:visible!important;padding:2px 24px 12px 1px!important;scroll-snap-type:x proximity!important}
+.acvCarouselShell{position:relative!important;min-width:0!important;width:100%!important;max-width:100%!important;overflow:hidden!important}
+.acvCarouselViewport{box-sizing:border-box!important;width:100%!important;max-width:100%!important;min-width:0!important;overflow-x:scroll!important;overflow-y:hidden!important;-webkit-overflow-scrolling:touch!important;touch-action:pan-x!important;overscroll-behavior-x:contain!important;scroll-behavior:smooth!important;scrollbar-width:none!important}
+.acvCarouselViewport::-webkit-scrollbar{display:none!important}.acvCarousel:after{content:"";flex:0 0 28px;height:1px}
+.acvCarousel{box-sizing:border-box!important;display:flex!important;flex-flow:row nowrap!important;gap:9px!important;width:100%!important;min-width:100%!important;max-width:100%!important;overflow:visible!important;padding:2px 24px 12px 1px!important;scroll-snap-type:x proximity!important}
 .acvCarouselNav{display:none}
 .acvCat{box-sizing:border-box!important;flex:0 0 148px!important;width:148px!important;min-width:148px!important;max-width:148px!important;height:252px!important;border:0!important;border-radius:20px!important;padding:0 10px 12px!important;color:#fff!important;text-align:left!important;scroll-snap-align:start!important;position:relative!important;box-shadow:0 12px 24px rgba(18,31,45,.20)!important;overflow:hidden!important;display:flex!important;flex-direction:column!important;justify-content:flex-end!important;background:linear-gradient(165deg,#d50a18,#7a0007)!important}
 .acvProd{position:absolute!important;left:0!important;right:0!important;top:0!important;height:142px!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:10px!important;overflow:hidden!important;background:#fff!important}
@@ -100,7 +100,7 @@ function css(){
   .acvProd img{max-height:138px!important}.acvProd img[data-fit="logo"]{max-width:86%!important;max-height:118px!important}.acvProd img[data-fit="bottle"]{max-height:150px!important}.acvProd img[data-fit="wide"],.acvProd img[data-fit="photo"]{max-height:138px!important}
   .acvCat b{font-size:16px!important;margin-top:166px!important;min-height:36px!important}.acvCat small{font-size:12px!important}
   .acvCarouselNav{display:grid!important;place-items:center!important;position:absolute!important;top:50%!important;transform:translateY(-50%)!important;width:40px!important;height:58px!important;border:0!important;border-radius:14px!important;background:#fff!important;color:#d50712!important;font-size:32px!important;font-weight:900!important;box-shadow:0 7px 18px rgba(20,35,50,.18)!important;z-index:5!important;cursor:pointer!important}
-  .acvCarouselPrev{left:2px!important}.acvCarouselNext{right:2px!important}.acvCarouselNav:hover{background:#d50712!important;color:#fff!important}
+  .acvCarouselPrev{left:6px!important}.acvCarouselNext{right:6px!important}.acvCarouselNav:hover{background:#d50712!important;color:#fff!important}
 }
 @media(max-width:900px){
   .acvWrap{width:calc(100% - 16px);margin:10px auto 64px}
@@ -148,8 +148,8 @@ function css(){
   .acvSecTitle h3{font-size:18px}
   .acvSecTitle small{font-size:10px}
   .acvCarouselShell{width:100%!important;max-width:100%!important;overflow:visible!important;padding:0!important}
-  .acvCarouselViewport{width:100%!important;max-width:100%!important;overflow-x:auto!important;overflow-y:hidden!important;touch-action:pan-x!important}
-  .acvCarousel{width:max-content!important;min-width:max-content!important;max-width:none!important;padding:2px 24px 12px 1px!important;gap:9px!important}
+  .acvCarouselViewport{width:100%!important;max-width:100%!important;overflow-x:scroll!important;overflow-y:hidden!important;touch-action:pan-x!important}
+  .acvCarousel{width:100%!important;min-width:100%!important;max-width:100%!important;padding:2px 24px 12px 1px!important;gap:9px!important}
   .acvCat{flex:0 0 148px!important;width:148px!important;min-width:148px!important;max-width:148px!important;height:252px!important}
   .acvProd{height:142px!important}
   .acvCat b{font-size:13px}
@@ -161,6 +161,9 @@ function css(){
 }
 
 /* HARD RESET DE VIEWPORT - impede qualquer estouro horizontal */
+#admConsultorView .acvWrap>*{min-width:0!important;max-width:100%!important;width:100%!important}
+#admConsultorView .acvIncentivesSection{min-width:0!important;max-width:100%!important;width:100%!important;overflow:hidden!important}
+
 html,body{width:100%!important;max-width:100%!important;overflow-x:hidden!important}
 #admConsultorView{inset:0!important;width:100vw!important;max-width:100vw!important;min-width:0!important;overflow-x:hidden!important}
 #admConsultorView .acvTop{width:100%!important;max-width:100vw!important}
@@ -175,8 +178,8 @@ html,body{width:100%!important;max-width:100%!important;overflow-x:hidden!import
 #admConsultorView .acvDay{width:100%!important;min-width:0!important;max-width:100%!important}
 #admConsultorView .acvList{width:100%!important;max-width:100%!important}
 #admConsultorView .acvCarouselShell{width:100%!important;max-width:100%!important;min-width:0!important}
-#admConsultorView .acvCarouselViewport{display:block!important;width:100%!important;max-width:100%!important;min-width:0!important;overflow-x:auto!important;overflow-y:hidden!important;-webkit-overflow-scrolling:touch!important;scroll-behavior:smooth!important;touch-action:pan-x!important;overscroll-behavior-x:contain!important}
-#admConsultorView .acvCarousel{display:flex!important;flex-flow:row nowrap!important;width:max-content!important;min-width:max-content!important;max-width:none!important;overflow:visible!important}
+#admConsultorView .acvCarouselViewport{display:block!important;width:100%!important;max-width:100%!important;min-width:0!important;overflow-x:scroll!important;overflow-y:hidden!important;-webkit-overflow-scrolling:touch!important;scroll-behavior:smooth!important;touch-action:pan-x!important;overscroll-behavior-x:contain!important}
+#admConsultorView .acvCarousel{display:flex!important;flex-flow:row nowrap!important;width:100%!important;min-width:100%!important;max-width:100%!important;overflow:visible!important}
 @media(max-width:900px){
  #admConsultorView .acvWrap{width:calc(100vw - 12px)!important;max-width:calc(100vw - 12px)!important}
  #admConsultorView .acvTopIn{width:calc(100vw - 16px)!important;max-width:calc(100vw - 16px)!important}
@@ -187,7 +190,7 @@ html,body{width:100%!important;max-width:100%!important;overflow-x:hidden!import
  #admConsultorView .acvSearchRow button{display:block!important;width:100%!important;margin-top:7px!important;padding:11px!important}
  #admConsultorView .acvDays{grid-template-columns:repeat(5,minmax(0,1fr))!important}
  #admConsultorView .acvCarouselShell{padding:0!important;overflow:visible!important}
- #admConsultorView .acvCarouselViewport{width:100%!important;max-width:100%!important;overflow-x:auto!important;touch-action:pan-x!important}
+ #admConsultorView .acvCarouselViewport{width:100%!important;max-width:100%!important;min-width:0!important;overflow-x:scroll!important;overflow-y:hidden!important;touch-action:pan-x!important;-webkit-overflow-scrolling:touch!important}
  #admConsultorView .acvCarouselNav{display:none!important}
 }
 `;d.head.appendChild(s);
@@ -252,7 +255,7 @@ function rowsFor(route){
 function ensureView(){
  let v=d.getElementById('admConsultorView');if(v)return v;
  css();v=d.createElement('section');v.id='admConsultorView';v.hidden=true;
- v.innerHTML='<header class="acvTop"><div class="acvTopIn"><div class="acvBrand"><b>COBERTURAS • EQUIPE ITURAMA</b><small>Painel do Supervisor • Visão da Equipe</small></div><span class="acvSupervisor">Leandro • Supervisor</span><button type="button" id="acvBack" class="acvBack">← Voltar ao DM</button></div></header><main class="acvWrap"><section class="acvHello"><div class="acvAvatar">👤</div><div class="acvHelloText"><strong>Olá, Leandro</strong><small>Bora conquistar mais hoje! 🚀</small></div><div class="acvRouteBox"><label>Visualizar</label><select id="acvRoute" class="acvRoute"></select></div></section><section class="acvMainGrid"><div class="acvSearch"><div class="acvSearchTitle"><div class="acvSearchIcon">🔎</div><div><b>Pesquisa de PV</b><small>Pesquise PV, cliente ou razão social</small></div></div><div class="acvSearchRow"><input id="acvPv" inputmode="numeric" placeholder="Digite o PV do cliente"><button type="button" id="acvSearchBtn">Pesquisar ›</button></div><div class="acvPvControls"><div class="acvPvLabel">📍 Escolha o dia da visita</div><div class="acvDays">'+['SEG','TER','QUA','QUI','SEX'].map(x=>'<button type="button" class="acvDay" data-day="'+x+'">'+x+'</button>').join('')+'</div><button type="button" id="acvListDay" class="acvList">Listar clientes do dia ▾</button></div></div><div class="acvQuickBox"><div class="acvSecTitle"><h3>Acesso rápido</h3><small>Ferramentas da equipe</small></div><div class="acvActions"><button type="button" class="acvAct blue" data-act="visitas"><span class="ic">📅</span>Visita de Clientes</button><button type="button" class="acvAct green" data-act="subcanais"><span class="ic">🏪</span>Subcanais</button><button type="button" class="acvAct orange" data-act="contatos"><span class="ic">📞</span>Contato dos Clientes</button></div></div></section><section><div class="acvSecTitle"><h3>Coberturas dos Incentivos</h3><small>↔ arraste para o lado</small></div><div class="acvCarouselShell"><button type="button" class="acvCarouselNav acvCarouselPrev" aria-label="Voltar incentivos">‹</button><div class="acvCarouselViewport"><div id="acvCats" class="acvCarousel"></div></div><button type="button" class="acvCarouselNav acvCarouselNext" aria-label="Avançar incentivos">›</button></div></section><section id="acvStats" class="acvStats"></section><section class="acvResults"><div class="acvSecTitle"><div><h3 id="acvResultTitle">Resultado da Equipe por incentivo</h3><small id="acvResultHint">Selecione um incentivo para visualizar os resultados.</small></div></div><div id="acvResultBody"></div></section></main>';
+ v.innerHTML='<header class="acvTop"><div class="acvTopIn"><div class="acvBrand"><b>COBERTURAS • EQUIPE ITURAMA</b><small>Painel do Supervisor • Visão da Equipe</small></div><span class="acvSupervisor">Leandro • Supervisor</span><button type="button" id="acvBack" class="acvBack">← Voltar ao DM</button></div></header><main class="acvWrap"><section class="acvHello"><div class="acvAvatar">👤</div><div class="acvHelloText"><strong>Olá, Leandro</strong><small>Bora conquistar mais hoje! 🚀</small></div><div class="acvRouteBox"><label>Visualizar</label><select id="acvRoute" class="acvRoute"></select></div></section><section class="acvMainGrid"><div class="acvSearch"><div class="acvSearchTitle"><div class="acvSearchIcon">🔎</div><div><b>Pesquisa de PV</b><small>Pesquise PV, cliente ou razão social</small></div></div><div class="acvSearchRow"><input id="acvPv" inputmode="numeric" placeholder="Digite o PV do cliente"><button type="button" id="acvSearchBtn">Pesquisar ›</button></div><div class="acvPvControls"><div class="acvPvLabel">📍 Escolha o dia da visita</div><div class="acvDays">'+['SEG','TER','QUA','QUI','SEX'].map(x=>'<button type="button" class="acvDay" data-day="'+x+'">'+x+'</button>').join('')+'</div><button type="button" id="acvListDay" class="acvList">Listar clientes do dia ▾</button></div></div><div class="acvQuickBox"><div class="acvSecTitle"><h3>Acesso rápido</h3><small>Ferramentas da equipe</small></div><div class="acvActions"><button type="button" class="acvAct blue" data-act="visitas"><span class="ic">📅</span>Visita de Clientes</button><button type="button" class="acvAct green" data-act="subcanais"><span class="ic">🏪</span>Subcanais</button><button type="button" class="acvAct orange" data-act="contatos"><span class="ic">📞</span>Contato dos Clientes</button></div></div></section><section class="acvIncentivesSection"><div class="acvSecTitle"><h3>Coberturas dos Incentivos</h3><small>↔ arraste para o lado</small></div><div class="acvCarouselShell"><button type="button" class="acvCarouselNav acvCarouselPrev" aria-label="Voltar incentivos">‹</button><div class="acvCarouselViewport"><div id="acvCats" class="acvCarousel"></div></div><button type="button" class="acvCarouselNav acvCarouselNext" aria-label="Avançar incentivos">›</button></div></section><section id="acvStats" class="acvStats"></section><section class="acvResults"><div class="acvSecTitle"><div><h3 id="acvResultTitle">Resultado da Equipe por incentivo</h3><small id="acvResultHint">Selecione um incentivo para visualizar os resultados.</small></div></div><div id="acvResultBody"></div></section></main>';
  d.body.appendChild(v);
  $('#acvBack').onclick=closeView;
  $('#acvRoute').onchange=()=>renderView();
@@ -264,9 +267,11 @@ function ensureView(){
  const moveCarousel=dir=>{
    if(!cv)return;
    const max=Math.max(0,cv.scrollWidth-cv.clientWidth);
-   const amount=Math.max(320,Math.floor(cv.clientWidth*.72));
-   const target=Math.max(0,Math.min(max,cv.scrollLeft+(dir*amount)));
-   if(typeof cv.scrollTo==='function')cv.scrollTo({left:target,behavior:'smooth'});else cv.scrollLeft=target;
+   const card=cv.querySelector('.acvCat');
+   const step=card?Math.max(170,card.getBoundingClientRect().width+14):Math.max(260,Math.floor(cv.clientWidth*.7));
+   const target=Math.max(0,Math.min(max,cv.scrollLeft+(dir*step*2)));
+   try{cv.scrollTo({left:target,behavior:'smooth'})}catch{cv.scrollLeft=target}
+   requestAnimationFrame(()=>{if(Math.abs(cv.scrollLeft-target)>4)cv.scrollLeft=target});
  };
  if(prev)prev.onclick=e=>{e.preventDefault();e.stopPropagation();moveCarousel(-1)};
  if(next)next.onclick=e=>{e.preventDefault();e.stopPropagation();moveCarousel(1)};
