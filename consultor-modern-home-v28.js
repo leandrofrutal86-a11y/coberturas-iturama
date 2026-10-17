@@ -17,7 +17,7 @@ function productMeta(name){
  if(s.includes('ESTRELLA'))return{img:'assets/incentivos/v27/estrella.webp?v=20261017-v28',theme:'red',fit:'photo'};
  if(s.includes('PÃO DE QUEIJO')||s.includes('PAO DE QUEIJO'))return{img:'assets/incentivos/v27/old-parr.webp?v=20261017-v28',theme:'red',fit:'photo'};
  if(s.includes('TANQUERAY'))return{img:'assets/incentivos/v27/aperol.webp?v=20261017-v28',theme:'green',fit:'logo'};
- if(s.includes('RECOMPRA')&&s.includes('B2B'))return{img:'assets/incentivos/recompra-b2b.webp?v=20261017-recompra-v31',theme:'purple',fit:'logo'};
+ if(s.includes('RECOMPRA')&&s.includes('B2B'))return{img:'assets/incentivos/b2b-recompra-card.webp?v=20261017-b2b-v32',theme:'purple',fit:'logo'};
  if(s.includes('RECOMPRA')&&s.includes('B2B'))return{img:'assets/incentivos/b2b-recompra.svg?v=20261017-b2b-v31',theme:'purple',fit:'logo'};
  if(s.includes('B2B'))return{img:'assets/incentivos/b2b.svg?v=20261017-b2b-v31',theme:'cyan',fit:'logo'};
  if(s.includes('CAMPARI'))return{img:'assets/incentivos/campari.svg?v=20261017-v28',theme:'navy',fit:'logo'};
@@ -84,7 +84,7 @@ html,body{max-width:100%!important;overflow-x:hidden!important}
 .cmCat .cmProd{position:absolute!important;left:0!important;right:0!important;top:0!important;height:142px!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:10px!important;overflow:hidden!important;background:#fff!important}
 .cmCat .cmProd:before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.98),rgba(245,247,250,.96));z-index:0}
 .cmCat .cmProd img{display:block!important;position:relative!important;z-index:1!important;width:auto!important;height:auto!important;max-width:100%!important;max-height:122px!important;object-fit:contain!important;object-position:center!important;filter:none!important;image-rendering:auto!important}
-.cmCat .cmProd img[data-fit="logo"]{display:block!important;max-width:96%!important;max-height:124px!important;width:auto!important;height:auto!important;object-fit:contain!important;object-position:center!important;filter:none!important;background:#fff!important}
+.cmCat .cmProd img[data-fit="logo"]{display:block!important;max-width:88%!important;max-height:108px!important;width:auto!important;height:auto!important;object-fit:contain!important;object-position:center!important;filter:none!important;background:#fff!important;margin:auto!important}
 .cmCat .cmProd img[data-fit="bottle"]{max-width:92%!important;max-height:134px!important;object-fit:contain!important;filter:drop-shadow(0 5px 6px rgba(0,0,0,.14))!important}
 .cmCat .cmProd img[data-fit="wide"]{width:100%!important;height:100%!important;max-width:100%!important;max-height:122px!important;object-fit:contain!important;object-position:center!important;filter:none!important;background:transparent!important}
 .cmCat .cmProd img[data-fit="photo"]{width:100%!important;height:100%!important;max-width:100%!important;max-height:122px!important;object-fit:contain!important;object-position:center!important;filter:none!important;background:transparent!important}
