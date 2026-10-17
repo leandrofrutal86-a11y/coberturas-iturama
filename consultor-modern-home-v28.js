@@ -113,6 +113,59 @@ html,body{max-width:100%!important;overflow-x:hidden!important}
 
 #dash .tabs{margin-top:13px!important}.cmGraph{background:#fff;border:1px solid #e0e7ed;border-radius:17px;padding:13px;margin:0 0 12px;box-shadow:0 5px 15px #172b400d}.cmGraphTop{display:flex;align-items:center;gap:12px}.cmDonut{--p:0;width:88px;height:88px;border-radius:50%;background:conic-gradient(#0b9b57 calc(var(--p)*1%),#edf1f4 0);display:grid;place-items:center;flex:0 0 auto}.cmDonut:after{content:attr(data-p);width:65px;height:65px;border-radius:50%;background:#fff;display:grid;place-items:center;font-size:18px;font-weight:950;color:#163046}.cmGraphText{min-width:0}.cmGraphText h3{font-size:16px;margin:0 0 7px;color:#172736;line-height:1.15}.cmGraphStats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:11px}.cmGraphStat{background:#f5f8fa;border-radius:10px;padding:8px;text-align:center}.cmGraphStat small{display:block;font-size:9px;color:#687987;font-weight:800}.cmGraphStat b{display:block;font-size:16px;margin-top:2px}
 .cvPrioritySection,.cvPriorityWrap,.cvHomePriorities,#cvPriorityBlock{display:none!important}
+@media(max-width:900px){
+  #dash .top{padding-bottom:8px!important}
+  #dash .cmSalesPeriod{
+    position:relative!important;
+    right:auto!important;
+    bottom:auto!important;
+    display:block!important;
+    width:max-content!important;
+    max-width:calc(100% - 8px)!important;
+    margin:6px 4px 0 auto!important;
+    padding:3px 7px!important;
+    font-size:9px!important;
+    line-height:1.1!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+  }
+}
+@media(max-width:520px){
+  #dash .top{padding:8px 8px 7px!important}
+  #dash .topbar{gap:5px!important}
+  #dash .top .brand>div:last-child:before{
+    font-size:15px!important;
+    line-height:1.05!important;
+  }
+  #dash .top .brand>div:last-child b{
+    font-size:9px!important;
+    line-height:1.05!important;
+  }
+  #dash .logout{
+    padding:8px 10px!important;
+    font-size:11px!important;
+    border-radius:10px!important;
+  }
+  #dash .cvHeaderOfficial{gap:5px!important}
+  #dash .cvHeaderOfficial a{
+    height:34px!important;
+    padding:0 6px!important;
+    gap:4px!important;
+    font-size:9px!important;
+    border-radius:10px!important;
+  }
+  #dash .cvHeaderOfficial a span{width:21px!important;height:21px!important;font-size:11px!important}
+  #dash .cvHeaderDate{min-width:58px!important}
+  #dash .cvDateMain{font-size:8.5px!important}
+  #dash .cvDateWeek{font-size:7.5px!important}
+  #dash .cmSalesPeriod{
+    margin-top:5px!important;
+    font-size:8.5px!important;
+    padding:3px 6px!important;
+  }
+}
+
 @media(max-width:380px){#dash .wrap{padding-left:7px!important;padding-right:7px!important}.cmSearchRow{grid-template-columns:1fr!important}.cmSearchRow button{width:100%!important;font-size:11px!important}.cmCat{flex-basis:120px!important;width:120px!important;min-width:120px!important;max-width:120px!important}.cmAct{font-size:12px}}
 
 /* FINAL PORTRAIT FIX */
