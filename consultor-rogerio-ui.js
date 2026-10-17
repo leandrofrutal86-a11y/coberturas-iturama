@@ -37,7 +37,8 @@
   }
   function fillSelect(s){
     if(!s)return;
-    if(s.dataset.rogerioUi!=='1'){s.innerHTML=options();s.dataset.rogerioUi='1'}
+    const sig=teamList().map(x=>x.rota+':'+x.nome).join('|');
+    if(s.dataset.rogerioSig!==sig){s.innerHTML=options();s.dataset.rogerioSig=sig}
     s.value=getCtx();
   }
   function sync(){document.querySelectorAll('.rogerioUiSelect').forEach(fillSelect);try{applyTeamLabels(getCtx())}catch{}}
@@ -50,6 +51,8 @@
 #dash.rogerioMode .user{display:flex!important;flex-direction:column!important;margin-left:auto!important}
 #dash.rogerioMode #name{font-weight:900!important}
 #dash.rogerioMode #route{font-size:11px!important;opacity:.85!important}
+#dash.rogerioMode .tabs{display:none!important}
+#dash.rogerioMode .summary .sum:first-child{display:none!important}
 .rogerioUiHead{margin-left:auto;min-width:245px;display:flex;flex-direction:column;gap:3px;color:#fff}
 .rogerioUiHead label{font-size:9px;font-weight:900;text-transform:uppercase;opacity:.82}
 .rogerioUiSelect{width:100%;height:42px;border-radius:11px;border:1px solid #d5dde4;background:#fff;color:#142236;padding:0 34px 0 11px;font-weight:900;cursor:pointer}
@@ -130,7 +133,8 @@
       if(!isRogerio())return old(cat);
       const sel=document.getElementById('cat');
       if(sel)sel.value=cat;
-      if(typeof TAB!=='undefined')TAB=getCtx()===TEAM?'equipe':'meu';
+      const ctx=getCtx();
+      if(typeof TAB!=='undefined')TAB=ctx===TEAM?'equipe':'meu';
       if(typeof render==='function')render();
       applyTeamLabels(getCtx());
       document.querySelector('.panel')?.scrollIntoView({behavior:'smooth',block:'start'});
@@ -141,44 +145,47 @@
 
   function addResultSelector(){
     if(!isRogerio())return;
-    const tabs=document.querySelector('#dash .tabs');
-    if(!tabs)return;
+    const panel=document.querySelector('#dash .panel');
+    if(!panel)return;
     let box=document.getElementById('rogerioResultFilter');
     if(!box){
       box=document.createElement('div');
       box.id='rogerioResultFilter';
       box.className='rogerioResultFilter';
-      box.innerHTML='<div><b>Visualizar resultado</b><small>Escolha toda a equipe ou um consultor individual.</small></div><select class="rogerioUiSelect" aria-label="Selecionar resultado da equipe ou consultor"></select>';
-      tabs.insertAdjacentElement('beforebegin',box);
+      box.innerHTML='<div><b>Visualizar resultado</b><small>Escolha Toda a Equipe ou um consultor individual.</small></div><select class="rogerioUiSelect" aria-label="Selecionar resultado da equipe ou consultor"></select>';
+      panel.insertAdjacentElement('beforebegin',box);
       box.querySelector('select').addEventListener('change',e=>changeRoute(e.target.value));
+    }else if(box.nextElementSibling!==panel){
+      panel.insertAdjacentElement('beforebegin',box);
     }
     fillSelect(box.querySelector('select'));
   }
 
   function applyTeamLabels(v){
     const team=v===TEAM;
-    const tabs=[...document.querySelectorAll('.tabs .tab')];
-    const myTab=tabs.find(x=>x.dataset.t==='meu')||tabs[0];
-    const teamTab=tabs.find(x=>x.dataset.t==='equipe')||tabs[1];
-    if(team){
-      if(typeof TAB!=='undefined')TAB='equipe';
-      if(myTab){myTab.style.display='none';myTab.classList.remove('active')}
-      if(teamTab){teamTab.style.display='';teamTab.textContent='Resultado da Equipe';teamTab.classList.add('active')}
-    }else{
-      if(myTab){myTab.style.display='';myTab.textContent='Meu Resultado';myTab.classList.toggle('active',typeof TAB!=='undefined'&&TAB==='meu')}
-      if(teamTab){teamTab.style.display='';teamTab.textContent='Resultado da Equipe';teamTab.classList.toggle('active',typeof TAB!=='undefined'&&TAB==='equipe')}
-    }
+    if(typeof TAB!=='undefined')TAB=team?'equipe':'meu';
+    const tabs=document.querySelector('#dash .tabs');
+    if(tabs)tabs.style.setProperty('display','none','important');
+
     const sums=[...document.querySelectorAll('.summary .sum')];
-    if(sums[0])sums[0].style.display=team?'none':'';
-    if(sums[1])sums[1].style.display='';
+    if(sums[0])sums[0].style.setProperty('display','none','important');
+    if(sums[1]){
+      sums[1].style.display='';
+      const b=sums[1].querySelector('b');
+      if(b)b.textContent=team?'👥 RESULTADO DA EQUIPE':'👤 RESULTADO DO CONSULTOR';
+    }
+
     const title=document.getElementById('title'),hint=document.getElementById('hint');
     if(team){
       if(title)title.textContent='Resultado da Equipe por incentivo';
       if(hint)hint.textContent='Selecione um incentivo para visualizar os resultados de toda a equipe.';
     }else{
-      if(title)title.textContent='Meu resultado por incentivo';
-      if(hint)hint.textContent='Selecione um incentivo para ver os clientes cobertos.';
+      const item=teamList().find(x=>x.rota===v);
+      const nome=String(DATA?.consultor?.nome||item?.nome||v);
+      if(title)title.textContent='Resultado de '+nome+' por incentivo';
+      if(hint)hint.textContent='Visualizando individualmente '+v+' - '+nome+'. Selecione um incentivo para ver os clientes cobertos.';
     }
+    addResultSelector();
   }
 
   function addHeader(){
@@ -241,5 +248,5 @@
   },250);
   if(document.readyState!=='loading')activateOnce();
   else document.addEventListener('DOMContentLoaded',activateOnce,{once:true});
-  setInterval(()=>{if(isRogerio()){sync();addResultSelector();patchChoose()}},1200);
+  setInterval(()=>{if(isRogerio()){document.getElementById('dash')?.classList.add('rogerioMode');sync();addResultSelector();patchChoose()}},700);
 })();
