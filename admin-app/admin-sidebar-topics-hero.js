@@ -59,6 +59,24 @@ function build(){
 }
 build();
 let tries=0;const timer=setInterval(()=>{if(d.getElementById('cokeHome')?.querySelector('.menuTopic')){build();clearInterval(timer)}else if(++tries>35)clearInterval(timer)},250);
+
+/* Mantém o menu lateral sempre igual à tela principal atual do ADM.
+   Se cards ou tópicos forem removidos/adicionados por outros módulos,
+   o painel administrativo é reconstruído automaticamente. */
+let rebuildTimer=0,observedHome=null;
+function watchHome(){
+ const home=d.getElementById('cokeHome');
+ if(!home||home===observedHome)return;
+ observedHome=home;
+ const mo=new MutationObserver(()=>{
+   clearTimeout(rebuildTimer);
+   rebuildTimer=setTimeout(()=>build(),80);
+ });
+ mo.observe(home,{childList:true,subtree:true,characterData:true});
+ setTimeout(build,120);
+}
+watchHome();
+const homeWatcher=setInterval(()=>{watchHome();if(++tries>80)clearInterval(homeWatcher)},250);
 })();
 
 /* Atalhos inferiores: consulta no ADM sem alterar telas de cadastro. */
