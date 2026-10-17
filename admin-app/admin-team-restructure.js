@@ -281,6 +281,17 @@ function ensureView(){
  $('#acvBack').onclick=closeView;
  $('#acvRoute').onchange=()=>{const r=d.getElementById('acvResultRoute');if(r)r.value=$('#acvRoute').value;renderView()};
  $('#acvResultRoute').onchange=()=>{const top=d.getElementById('acvRoute');if(top)top.value=$('#acvResultRoute').value;renderView()};
+ const catsHost=d.getElementById('acvCats');
+ if(catsHost&&!catsHost.dataset.detailClick){
+   catsHost.dataset.detailClick='1';
+   catsHost.addEventListener('click',e=>{
+     const card=e.target.closest('.acvCat');
+     if(!card||!catsHost.contains(card))return;
+     e.preventDefault();
+     e.stopPropagation();
+     openIncentiveDetail(card.dataset.cat||'');
+   });
+ }
  $('#acvSearchBtn').onclick=searchPv;
  $('#acvPv').onkeydown=e=>{if(e.key==='Enter')searchPv()};
  $$('.acvDay',v).forEach(b=>b.onclick=()=>{$$('.acvDay',v).forEach(x=>x.classList.remove('on'));b.classList.add('on');try{sessionStorage.setItem('pv_dia_visita',b.dataset.day)}catch{}});
@@ -426,7 +437,6 @@ function renderView(cat){
  if(spEl){const f=v=>{const m=String(v||'').match(/^(\d{4})-(\d{2})-(\d{2})$/);return m?m[3]+'/'+m[2]+'/'+m[1]:String(v||'')};spEl.textContent=sp.inicio&&sp.fim?'Vendas atualizadas: '+f(sp.inicio)+' a '+f(sp.fim):'Vendas atualizadas: sem período'}
 
  $('#acvCats').innerHTML=rows.map(x=>{const p=x.meta?Math.min(100,Math.round(x.realizado/x.meta*100)):0,pm=productMeta(x);return '<button class="acvCat acvTheme-'+pm.theme+'"'+(pm.theme==='custom'?' style="--acv-custom:'+E(pm.color)+'"':'')+' type="button" data-cat="'+E(x.nome)+'"><span class="acvProd">'+(pm.img?'<img loading="eager" decoding="async" referrerpolicy="no-referrer" data-fit="'+(pm.fit||'logo')+'" src="'+pm.img+'" alt="">':'<span class="acvFallback">'+icon(x.nome)+'</span>')+'</span><b>'+E(x.nome)+'</b><small>'+x.realizado+' / '+x.meta+' realizados</small><span class="acvProgress"><i style="width:'+p+'%"></i></span><span class="acvArrow">›</span></button>'}).join('');
- $('.acvCat',$('#acvCats')).forEach(b=>b.onclick=()=>openIncentiveDetail(b.dataset.cat));
  $('#acvResultTitle').textContent=route==='TEAM'?'Resultado da Equipe por incentivo':'Resultado de '+(person?.nome||route)+' por incentivo';
  $('#acvResultHint').textContent=route==='TEAM'?'Selecione um incentivo para visualizar os resultados de toda a equipe.':'Visualizando '+route+' - '+(person?.nome||'Consultor')+'.';
  renderResult(cat||'');
