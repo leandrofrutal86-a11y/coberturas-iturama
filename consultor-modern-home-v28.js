@@ -19,7 +19,7 @@ function productMeta(name){
  if(s.includes('TANQUERAY'))return{img:'assets/incentivos/v27/aperol.webp?v=20261017-v28',theme:'green',fit:'logo'};
  if(s.includes('B2B'))return{img:'assets/incentivos/b2b.svg?v=20261017-v28',theme:s.includes('RECOMPRA')?'purple':'cyan',fit:'logo'};
  if(s.includes('CAMPARI'))return{img:'assets/incentivos/campari.svg?v=20261017-v28',theme:'navy',fit:'logo'};
- if(s.includes('APEROL'))return{img:'assets/incentivos/aperol-oficial.webp?v=20261017-aperol-v29',theme:'orange',fit:'logo'};
+ if(s.includes('APEROL'))return{img:'assets/incentivos/aperol.svg?v=20261017-aperol-v30',theme:'orange',fit:'logo'};
  return{img:'',theme:'red',fit:'logo'};
 }
 
@@ -82,7 +82,7 @@ html,body{max-width:100%!important;overflow-x:hidden!important}
 .cmCat .cmProd{position:absolute!important;left:0!important;right:0!important;top:0!important;height:142px!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:10px!important;overflow:hidden!important;background:#fff!important}
 .cmCat .cmProd:before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.98),rgba(245,247,250,.96));z-index:0}
 .cmCat .cmProd img{display:block!important;position:relative!important;z-index:1!important;width:auto!important;height:auto!important;max-width:100%!important;max-height:122px!important;object-fit:contain!important;object-position:center!important;filter:none!important;image-rendering:auto!important}
-.cmCat .cmProd img[data-fit="logo"]{display:block!important;max-width:94%!important;max-height:122px!important;width:auto!important;height:auto!important;object-fit:contain!important;object-position:center!important;filter:none!important;background:#fff!important}
+.cmCat .cmProd img[data-fit="logo"]{display:block!important;max-width:96%!important;max-height:124px!important;width:auto!important;height:auto!important;object-fit:contain!important;object-position:center!important;filter:none!important;background:#fff!important}
 .cmCat .cmProd img[data-fit="bottle"]{max-width:92%!important;max-height:134px!important;object-fit:contain!important;filter:drop-shadow(0 5px 6px rgba(0,0,0,.14))!important}
 .cmCat .cmProd img[data-fit="wide"]{width:100%!important;height:100%!important;max-width:100%!important;max-height:122px!important;object-fit:contain!important;object-position:center!important;filter:none!important;background:transparent!important}
 .cmCat .cmProd img[data-fit="photo"]{width:100%!important;height:100%!important;max-width:100%!important;max-height:122px!important;object-fit:contain!important;object-position:center!important;filter:none!important;background:transparent!important}
