@@ -7,6 +7,9 @@ function D(){try{return typeof DATA!=='undefined'?DATA:null}catch{return null}}
 
 function productMeta(name){
  const s=String(name||'').toUpperCase();
+ if(s.includes('IMPERDO')&&(s.includes('SSRD')||s.includes('SSD')))return{img:'assets/incentivos/imperdoaveis-ssrd.webp?v=20261017-imp-v34',theme:'red',fit:'logo'};
+ if(s.includes('IMPERDO')&&(s.includes('STILL')||s.includes('ESTILO')))return{img:'assets/incentivos/imperdoaveis-still.webp?v=20261017-imp-v34',theme:'red',fit:'logo'};
+ if(s.includes('IMPERDO')&&s.includes('ARTD'))return{img:'assets/incentivos/imperdoaveis-artd.webp?v=20261017-imp-v34',theme:'red',fit:'logo'};
  if(s.includes('PERFETTI'))return{img:'assets/incentivos/perfetti.svg?v=20261017-v28',theme:'blue',fit:'logo'};
  if(s.includes('FINI'))return{img:'assets/incentivos/fini.svg?v=20261017-v28',theme:'pink',fit:'logo'};
  /* Os arquivos v27 foram gravados com alguns nomes cruzados. Aqui o mapeamento aponta para a imagem visual correta. */
