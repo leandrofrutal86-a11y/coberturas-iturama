@@ -255,6 +255,53 @@ html,body{max-width:100%!important;overflow-x:hidden!important}
   }
 }
 
+
+.cmCarouselShell{position:relative!important;min-width:0!important}
+.cmCarouselNav{display:none}
+@media(min-width:901px){
+  html,body{overflow-x:hidden!important}
+  #dash .top{padding:16px 22px!important}
+  #dash .topbar{max-width:1180px!important;min-height:78px!important;gap:14px!important;align-items:center!important}
+  #dash .top .brand{flex:1 1 auto!important;min-width:420px!important;overflow:visible!important}
+  #dash .top .brand>div:last-child:before{font-size:23px!important;line-height:1.08!important;white-space:nowrap!important}
+  #dash .top .brand>div:last-child b{font-size:13px!important}
+  #dash .wrap{max-width:1240px!important;padding:18px 28px 0!important;margin:0 auto 96px!important}
+  .cmHome{max-width:1180px!important;margin:0 auto!important;grid-template-columns:minmax(0,1.22fr) minmax(340px,.78fr)!important;gap:18px!important}
+  .cmHello{grid-column:1 / -1!important;padding:16px 20px!important}
+  .cmAvatar{width:58px!important;height:58px!important;font-size:29px!important}
+  .cmHello strong{font-size:25px!important}.cmHello small{font-size:14px!important}
+  .cmSearchHero{grid-column:1!important;padding:20px!important;border-radius:24px!important}
+  .cmSearchTitle b{font-size:30px!important}.cmSearchTitle small{font-size:13px!important}
+  .cmSearchIcon{width:58px!important;height:58px!important;font-size:31px!important}
+  .cmSearchRow input{padding:15px 16px!important;font-size:17px!important}
+  .cmPvControls{padding:14px!important;margin-top:12px!important}
+  .cmPvLabel{font-size:15px!important;margin-bottom:10px!important}
+  .cmWeekDays{grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:8px!important}
+  .cmWeekDay{height:44px!important;font-size:13px!important}
+  .cmClientListBtn{padding:13px 14px!important;font-size:14px!important;margin-top:10px!important}
+  .cmHome>div:nth-of-type(3){grid-column:2!important;align-self:stretch!important}
+  .cmHome>div:nth-of-type(3) .cmActions{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:12px!important}
+  .cmAct{min-height:118px!important;padding:16px!important;font-size:16px!important;border-radius:19px!important}
+  .cmAct .ic{width:46px!important;height:46px!important;font-size:23px!important}
+  .cmHome>div:nth-of-type(4){grid-column:1 / -1!important;min-width:0!important}
+  .cmSectionTitle{margin:3px 4px 10px!important}
+  .cmSectionTitle h3{font-size:24px!important}.cmSectionTitle small{font-size:12px!important}
+  .cmCarouselShell{padding:0 50px!important}
+  .cmCarouselViewport{overflow-x:auto!important;overflow-y:hidden!important;touch-action:auto!important;scroll-behavior:smooth!important;overscroll-behavior-x:contain!important}
+  .cmCarousel{gap:14px!important;padding:4px 8px 14px!important;touch-action:auto!important}
+  .cmCat{flex:0 0 190px!important;width:190px!important;min-width:190px!important;max-width:190px!important;height:292px!important;padding:0 14px 15px!important;border-radius:22px!important}
+  .cmCat .cmProd{height:160px!important;padding:14px!important}
+  .cmCat .cmProd img{max-height:138px!important}
+  .cmCat .cmProd img[data-fit="logo"]{max-width:86%!important;max-height:118px!important}
+  .cmCat .cmProd img[data-fit="bottle"]{max-height:150px!important}
+  .cmCat .cmProd img[data-fit="wide"],.cmCat .cmProd img[data-fit="photo"]{max-height:138px!important}
+  .cmCat b{font-size:16px!important;margin-top:166px!important;min-height:36px!important}
+  .cmCat small{font-size:12px!important}
+  .cmCarouselNav{display:grid!important;place-items:center!important;position:absolute!important;top:50%!important;transform:translateY(-50%)!important;width:40px!important;height:58px!important;border:0!important;border-radius:14px!important;background:#fff!important;color:#d50712!important;font-size:32px!important;font-weight:900!important;box-shadow:0 7px 18px rgba(20,35,50,.18)!important;z-index:5!important;cursor:pointer!important}
+  .cmCarouselPrev{left:2px!important}.cmCarouselNext{right:2px!important}
+  .cmCarouselNav:hover{background:#d50712!important;color:#fff!important}
+}
+
 `;document.head.appendChild(s);
 }
 function clickExisting(id,text){const el=id?document.getElementById(id):null;if(el){el.click();return}const x=QA('#dash button,#dash .tile,#dash a').find(v=>String(v.textContent||'').toLowerCase().includes(String(text||'').toLowerCase()));if(x)x.click()}
@@ -283,11 +330,15 @@ function render(){
  ''+
  '<button class="cmAct blue" data-act="contatos"><span class="ic">📞</span>Contato dos Clientes</button>'+
  '</div></div>'+
- '<div><div class="cmSectionTitle"><h3>Coberturas dos Incentivos</h3><small>↔ arraste para o lado</small></div><div class="cmCarouselViewport"><div class="cmCarousel">'+cards+'</div></div></div>';
+ '<div><div class="cmSectionTitle"><h3>Coberturas dos Incentivos</h3><small>↔ arraste para o lado</small></div><div class="cmCarouselShell"><button type="button" class="cmCarouselNav cmCarouselPrev" aria-label="Voltar incentivos">‹</button><div class="cmCarouselViewport"><div class="cmCarousel">'+cards+'</div></div><button type="button" class="cmCarouselNav cmCarouselNext" aria-label="Avançar incentivos">›</button></div></div>';
  document.getElementById('cmPvInput').onkeydown=e=>{if(e.key==='Enter')searchPvHome()};
  const savedDay=(sessionStorage.getItem('pv_dia_visita')||'SEG').toUpperCase();
  QA('#consultorModernHome .cmWeekDay').forEach(b=>{b.classList.toggle('active',b.dataset.day===savedDay);const pick=async()=>{QA('#consultorModernHome .cmWeekDay').forEach(x=>x.classList.remove('active'));b.classList.add('active');sessionStorage.setItem('pv_dia_visita',b.dataset.day);try{await window.__setPvHomeDay?.(b.dataset.day)}catch{}};b.onclick=pick;b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();pick()}}});
  const listBtn=document.getElementById('cmClientListBtn');if(listBtn)listBtn.onclick=()=>{try{window.__openPvHomePicker?.()}catch{}};
+ const cv=Q('#consultorModernHome .cmCarouselViewport'),prev=Q('#consultorModernHome .cmCarouselPrev'),next=Q('#consultorModernHome .cmCarouselNext');
+ const moveCarousel=dir=>{if(!cv)return;const amount=Math.max(420,Math.floor(cv.clientWidth*.72));cv.scrollBy({left:dir*amount,behavior:'smooth'})};
+ if(prev)prev.onclick=()=>moveCarousel(-1);
+ if(next)next.onclick=()=>moveCarousel(1);
 
  QA('#consultorModernHome .cmCat').forEach(b=>b.onclick=()=>chooseWithGraph(b.dataset.cat));
  QA('#consultorModernHome .cmAct').forEach(b=>b.onclick=()=>{const a=b.dataset.act;if(a==='contratos')clickExisting('cvContractsBtn','Contratos');else if(a==='visitas')clickExisting('cvVisitBtn','Visita de Clientes');else if(a==='subcanais')clickExisting('cvSubBtn','Subcanais');else if(a==='contatos')clickExisting('contClientesBtn','Contato dos Clientes')});
