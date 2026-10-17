@@ -21,7 +21,7 @@ function ensureCss(){
 #dash .top .brand>div:last-child b:before{content:'Painel do Consultor • '}
 #dash .top .user{background:#ffffff18;border:1px solid #ffffff33;border-radius:14px;padding:8px 11px}
 #dash .top .user b,#dash .top .user small{color:#fff!important}.logout{background:#1d1d1d!important;border:0!important;border-radius:13px!important}
-#dash .wrap{width:min(1180px,calc(100% - 18px))!important;margin:14px auto 90px!important}
+#dash .wrap{width:min(720px,calc(100% - 16px))!important;margin:12px auto 92px!important;overflow:visible!important}
 #dash .quick,#dash .summary,#dash .tools,#dash .mot{display:none!important}
 .cmHome{display:grid;gap:14px;margin-bottom:18px}
 .cmHello{background:#fff;border:1px solid #e4e9ee;border-radius:22px;padding:16px 18px;box-shadow:0 8px 22px #172b4010;display:flex;align-items:center;justify-content:space-between;gap:12px}
@@ -35,9 +35,9 @@ function ensureCss(){
 .cmSectionTitle{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:2px 3px 7px}.cmSectionTitle h3{margin:0;font-size:20px;color:#152536}.cmSectionTitle small{color:#7a8795;font-weight:700}
 .cmActions{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
 .cmAct{background:#fff;border:1px solid #e0e7ed;border-radius:18px;min-height:105px;padding:13px;text-align:left;box-shadow:0 5px 14px #172b400d;position:relative;font-weight:900;color:#14263a}.cmAct .ic{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-size:22px;background:#fff0f1;margin-bottom:8px}.cmAct:after{content:'›';position:absolute;right:12px;bottom:8px;font-size:25px;color:#d70b15}.cmAct.blue .ic{background:#eaf3ff}.cmAct.green .ic{background:#e9f8ef}.cmAct.orange .ic{background:#fff1df}.cmAct.purple .ic{background:#f2eafe}
-.cmCarousel{display:flex;gap:10px;overflow-x:auto;padding:2px 2px 9px;scroll-snap-type:x mandatory;scrollbar-width:none}.cmCarousel::-webkit-scrollbar{display:none}
-.cmCat{flex:0 0 142px;min-height:145px;border:0;border-radius:18px;padding:13px;color:white;text-align:left;scroll-snap-align:start;position:relative;box-shadow:0 7px 16px #172b4020;overflow:hidden}.cmCat:after{content:'›';position:absolute;right:10px;bottom:9px;width:28px;height:28px;border-radius:50%;background:#fff;color:#d20a14;display:grid;place-items:center;font-size:23px}.cmCat .emoji{font-size:29px;display:block;margin-bottom:14px}.cmCat b{font-size:14px;line-height:1.1;display:block}.cmCat small{display:block;margin-top:6px;color:#fffde0;font-size:10px}.cmCat:nth-child(6n+1){background:linear-gradient(145deg,#ee2a61,#cf0050)}.cmCat:nth-child(6n+2){background:linear-gradient(145deg,#ff8b00,#e65c00)}.cmCat:nth-child(6n+3){background:linear-gradient(145deg,#0f7c3e,#075f2d)}.cmCat:nth-child(6n+4){background:linear-gradient(145deg,#1559c8,#0b3c9e)}.cmCat:nth-child(6n+5){background:linear-gradient(145deg,#d70b15,#a40008)}.cmCat:nth-child(6n+6){background:linear-gradient(145deg,#7f2cc7,#562091)}
-#dash .tabs{margin-top:16px!important}
+.cmCarousel{display:flex!important;flex-wrap:nowrap!important;gap:10px!important;width:100%!important;max-width:100%!important;overflow-x:auto!important;overflow-y:hidden!important;padding:2px 2px 12px!important;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch!important;touch-action:pan-x!important;overscroll-behavior-x:contain;scrollbar-width:none}.cmCarousel::-webkit-scrollbar{display:none}
+.cmCat{flex:0 0 142px!important;min-width:142px!important;max-width:142px!important;min-height:145px;border:0;border-radius:18px;padding:13px;color:white;text-align:left;scroll-snap-align:start;position:relative;box-shadow:0 7px 16px #172b4020;overflow:hidden}.cmCat:after{content:'›';position:absolute;right:10px;bottom:9px;width:28px;height:28px;border-radius:50%;background:#fff;color:#d20a14;display:grid;place-items:center;font-size:23px}.cmCat .emoji{font-size:29px;display:block;margin-bottom:14px}.cmCat b{font-size:14px;line-height:1.1;display:block}.cmCat small{display:block;margin-top:6px;color:#fffde0;font-size:10px}.cmCat:nth-child(6n+1){background:linear-gradient(145deg,#ee2a61,#cf0050)}.cmCat:nth-child(6n+2){background:linear-gradient(145deg,#ff8b00,#e65c00)}.cmCat:nth-child(6n+3){background:linear-gradient(145deg,#0f7c3e,#075f2d)}.cmCat:nth-child(6n+4){background:linear-gradient(145deg,#1559c8,#0b3c9e)}.cmCat:nth-child(6n+5){background:linear-gradient(145deg,#d70b15,#a40008)}.cmCat:nth-child(6n+6){background:linear-gradient(145deg,#7f2cc7,#562091)}
+#dash .tabs{margin-top:14px!important}.cmPvHomeSlot{display:block}.cvPrioritySection,.cvPriorityWrap,.cvHomePriorities,#cvPriorityBlock{display:none!important}
 @media(max-width:760px){
  #dash .top{padding:13px 12px!important}.topbar{gap:8px!important}.top .brand{min-width:0}.top .user{display:none!important}
  #dash .top .brand>div:last-child:before{font-size:18px!important}.top .brand>div:last-child b{font-size:11px!important}
@@ -64,6 +64,13 @@ function build(){
  if(!home){home=document.createElement('section');home.id='consultorModernHome';home.className='cmHome';const tabs=Q('#dash .tabs');wrap.insertBefore(home,tabs||wrap.firstChild)}
  return true
 }
+function hideLegacyHomeBlocks(){
+ QA('#dash .wrap > section,#dash .wrap > div').forEach(el=>{
+  if(el.id==='consultorModernHome'||el.classList.contains('tabs')||el.classList.contains('panel')||el.classList.contains('footer'))return;
+  const t=String(el.textContent||'').trim().toUpperCase();
+  if(t==='INCENTIVOS PRIORITÁRIOS'||(t.includes('INCENTIVOS PRIORITÁRIOS')&&t.length<120))el.style.display='none';
+ });
+}
 function render(){
  if(!build())return;const d=data();if(!d?.own)return;
  const own=d.own||[],meta=own.reduce((s,x)=>s+n(x.meta),0),real=own.reduce((s,x)=>s+n(x.realizado),0),pct=meta?Math.round(real/meta*100):0;
@@ -74,14 +81,15 @@ function render(){
  const cards=own.map(x=>'<button class="cmCat" data-cat="'+E(x.nome)+'"><span class="emoji">'+icon(x.nome)+'</span><b>'+E(x.nome)+'</b><small>'+n(x.realizado)+' / '+n(x.meta)+' realizados</small></button>').join('');
  const home=document.getElementById('consultorModernHome');
  home.innerHTML='<div class="cmHello"><div class="cmHelloMain"><div class="cmAvatar">👤</div><div><strong>Olá, '+E(name.split(' ')[0])+'</strong><small>Bora conquistar mais hoje! 🚀</small></div></div><div class="cmDate">📅 '+E(date)+'</div></div>'+
- '<div class="cmKpis"><div class="cmKpi"><span>COBERTURAS</span><b>'+real+'</b><small>de '+meta+' meta</small><div class="cmBar"><i style="width:'+Math.min(100,pct)+'%"></i></div></div><div class="cmKpi"><span>INCENTIVOS</span><b>'+own.length+'</b><small>categorias acompanhadas</small><div class="cmBar"><i style="width:'+Math.min(100,own.length*5)+'%;background:#0a9a52"></i></div></div><div class="cmKpi"><span>B2B</span><b>'+n(b2b.realizado)+'</b><small>compras realizadas</small><div class="cmBar"><i style="width:'+Math.min(100,n(b2b.percentual))+'%;background:#1765d8"></i></div></div><div class="cmKpi"><span>IMPERDOÁVEIS</span><b>'+impOpen+'</b><small>itens em aberto</small><div class="cmBar"><i style="width:'+Math.min(100,impOpen)+'%;background:#f17622"></i></div></div></div>'+
  '<div class="cmSearchHero"><div class="cmSearchTitle"><div class="cmSearchIcon">🔎</div><div><b>Pesquisa de PV</b><small>Pesquise PV, cliente ou razão social</small></div></div><div class="cmSearchRow"><input id="cmPvInput" inputmode="numeric" placeholder="Digite o PV do cliente"><button id="cmPvBtn">Pesquisar ›</button></div></div>'+
+ '<div id="cmPvHomeSlot" class="cmPvHomeSlot"></div>'+
  '<div><div class="cmSectionTitle"><h3>Acesso rápido</h3><small>Ferramentas do dia</small></div><div class="cmActions">'+
  '<button class="cmAct" data-act="meu"><span class="ic">📊</span>Meu Resultado</button><button class="cmAct" data-act="equipe"><span class="ic">👥</span>Resultado da Equipe</button><button class="cmAct orange" data-act="prior"><span class="ic">🏆</span>Incentivos Prioritários</button><button class="cmAct blue" data-act="b2b"><span class="ic">🛒</span>B2B Oportunidades</button>'+
  '<button class="cmAct orange" data-act="imp"><span class="ic">⚠️</span>Imperdoáveis</button><button class="cmAct" data-act="contratos"><span class="ic">📄</span>Contratos</button><button class="cmAct purple" data-act="materiais"><span class="ic">📚</span>Materiais de Apoio</button><button class="cmAct green" data-act="telefones"><span class="ic">☎️</span>Telefones Úteis</button></div></div>'+
  '<div><div class="cmSectionTitle"><h3>Incentivos e categorias</h3><small>↔ deslize para ver todos</small></div><div class="cmCarousel">'+cards+'</div></div>';
  document.getElementById('cmPvBtn').onclick=search;document.getElementById('cmPvInput').onkeydown=e=>{if(e.key==='Enter')search()};
  QA('.cmCat').forEach(b=>b.onclick=()=>{try{choose(b.dataset.cat)}catch{}});
+ hideLegacyHomeBlocks();
  QA('.cmAct').forEach(b=>b.onclick=()=>{const a=b.dataset.act;if(a==='meu')setTab('meu');else if(a==='equipe')setTab('equipe');else if(a==='prior')Q('.cmCarousel')?.scrollIntoView({behavior:'smooth'});else if(a==='b2b')clickExisting('cvB2BOpen','B2B');else if(a==='imp')clickExisting('impInternalBtn','Imperdoáveis');else if(a==='contratos')clickExisting('cvContractsBtn','Contratos');else if(a==='materiais')clickExisting(null,'Materiais de Apoio');else if(a==='telefones')clickExisting(null,'Telefones Úteis')})
 }
 let sig='';
