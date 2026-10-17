@@ -21,8 +21,6 @@ header>b,header b{font-size:18px}
 .topicVendas .topicIcon{background:#075fc8}
 .topicMetas .topicHead{background:linear-gradient(110deg,#22bd68,#0ea553 68%,#078740)}
 .topicMetas .topicIcon{background:#078d47}
-.topicIncentivos .topicHead{background:linear-gradient(110deg,#f3b400,#db9600 68%,#bd7900)}
-.topicIncentivos .topicIcon{background:#a66b00}
 .topicConsultores .topicHead{background:linear-gradient(110deg,#13b8c8,#079baa 68%,#087987)}
 .topicConsultores .topicIcon{background:#087c89}
 .topicInfo .topicHead{background:linear-gradient(110deg,#73879a,#596c7e 68%,#465766)}
@@ -69,7 +67,7 @@ function nav(label){
  const aliases={'Visão Consultor':'Visão do Consultor'};
  const wanted=aliases[String(label)]||String(label);
  const tryNav=()=>{const b=[...document.querySelectorAll('.tabs button')].find(x=>x.textContent.includes(wanted));if(b){b.click();setTimeout(addBack,0);return true}return false};if(!tryNav())setTimeout(tryNav,250)
-}function addBack(){if($('cokeHome')&&!$('cokeHome').classList.contains('hide'))return;const wrap=document.querySelector('.wrap');if(!wrap||$('backHome'))return;const b=document.createElement('button');b.id='backHome';b.className='backHome';b.innerHTML='← Voltar ao menu administrativo';b.onclick=show;wrap.insertBefore(b,wrap.firstChild)}function removeBack(){$('backHome')?.remove()}function show(){['visao','equipe','acomp','pesquisa','metas','consultores','telefones','materiais','vendas','historico','visitasSubcanais','subcanaisPainel','contatosClientes','trioPaoQueijo','imperdoaveisAdmin','adminConteudos'].forEach(id=>{const e=$(id);if(e)e.classList.add('hide')});$('cokeHome')?.classList.remove('hide');removeBack();try{sessionStorage.removeItem('adm_force_home')}catch{}}function build(){if($('cokeHome'))return;const tabs=document.querySelector('.tabs');if(!tabs)return;const wrap=document.querySelector('.wrap');const sec=document.createElement('section');sec.id='cokeHome';sec.innerHTML=`<div class="homeHero"><div class="homeHeroTop"><div class="homeHello"><div class="homeAvatar" role="img" aria-label="Foto de Leandro"></div><div><h1>Bem-vindo, Leandro</h1><p>Supervisor • Equipe Iturama</p></div></div><span class="adminBadge">Administrador</span></div></div>
+}function addBack(){if($('cokeHome')&&!$('cokeHome').classList.contains('hide'))return;const wrap=document.querySelector('.wrap');if(!wrap||$('backHome'))return;const b=document.createElement('button');b.id='backHome';b.className='backHome';b.innerHTML='← Voltar ao menu administrativo';b.onclick=show;wrap.insertBefore(b,wrap.firstChild)}function removeBack(){$('backHome')?.remove()}function show(){['visao','equipe','acomp','pesquisa','metas','consultores','telefones','materiais','vendas','historico','visitasSubcanais','subcanaisPainel','contatosClientes','trioPaoQueijo','adminConteudos'].forEach(id=>{const e=$(id);if(e)e.classList.add('hide')});$('cokeHome')?.classList.remove('hide');removeBack();try{sessionStorage.removeItem('adm_force_home')}catch{}}function build(){if($('cokeHome'))return;const tabs=document.querySelector('.tabs');if(!tabs)return;const wrap=document.querySelector('.wrap');const sec=document.createElement('section');sec.id='cokeHome';sec.innerHTML=`<div class="homeHero"><div class="homeHeroTop"><div class="homeHello"><div class="homeAvatar" role="img" aria-label="Foto de Leandro"></div><div><h1>Bem-vindo, Leandro</h1><p>Supervisor • Equipe Iturama</p></div></div><span class="adminBadge">Administrador</span></div></div>
 
 <div class="menuTopic topicVendas">
  <div class="topicHead"><span class="topicIcon">🛒</span><div><h2>Vendas</h2><small>Consulta, clientes e ações comerciais</small></div></div>
@@ -89,15 +87,6 @@ function nav(label){
   <button class="menuCard" onclick="window.cokeNav('Atualizar Metas')"><span class="mi" style="background:#16a35b">🎯</span><span><b>Atualizar Metas</b><small>Alterar meta por consultor e categoria</small></span></button>
   <button class="menuCard" onclick="window.cokeNav('Acompanhamento')"><span class="mi" style="background:#ff8a00">📈</span><span><b>Acompanhamento</b><small>Matriz de metas e realizados</small></span></button>
   <button class="menuCard" onclick="window.cokeNav('Metas e Categorias')"><span class="mi" style="background:#1687d9">🏷️</span><span><b>Metas e Categorias</b><small>Configurar categorias, marcas, códigos e regras</small></span></button>
- </div>
-</div>
-
-<div class="menuTopic topicIncentivos">
- <div class="topicHead"><span class="topicIcon">🏆</span><div><h2>Incentivos</h2><small>Acompanhamento e premiações</small></div></div>
- <div class="menuGrid">
-  <button class="menuCard" onclick="window.cokeNav('Trio Pão de Queijo')"><span class="mi" style="background:#d97706">🥖</span><span><b>Trio Pão de Queijo</b><small>Vendidos e oportunidades por rota e dia</small></span></button>
-  <button id="impAdminCard" class="menuCard"><span class="mi" style="background:#c90b13">🎯</span><span><b>Imperdoáveis</b><small>Visão geral, clientes e parâmetros</small></span></button>
-  <button class="menuCard" data-cmgr="premios" onclick="window.cokeNav('Premiações de Incentivos')"><span class="mi" style="background:#c99700">🏆</span><span><b>Premiações de Incentivos</b><small>Cadastrar textos, imagens e premiações</small></span></button>
  </div>
 </div>
 
