@@ -330,11 +330,13 @@ function render(){
  ''+
  '<button class="cmAct blue" data-act="contatos"><span class="ic">📞</span>Contato dos Clientes</button>'+
  '</div></div>'+
- '<div><div class="cmSectionTitle"><h3>Coberturas dos Incentivos</h3><small>↔ arraste para o lado</small></div><div class="cmCarouselShell"><button type="button" class="cmCarouselNav cmCarouselPrev" aria-label="Voltar incentivos">‹</button><div class="cmCarouselViewport"><div class="cmCarousel">'+cards+'</div></div><button type="button" class="cmCarouselNav cmCarouselNext" aria-label="Avançar incentivos">›</button></div></div>';
+ '<div><div class="cmSectionTitle"><h3>Coberturas dos Incentivos</h3><small>↔ arraste para o lado</small></div><div class="cmCarouselShell"><button type="button" class="cmCarouselNav cmCarouselPrev" aria-label="Voltar incentivos">‹</button><div class="cmCarouselViewport"><div class="cmCarousel">'+cards+'</div></div><button type="button" class="cmCarouselNav cmCarouselNext" aria-label="Avançar incentivos">›</button></div></div>'+
+ '<div class="cmOppSection"><button type="button" id="cmOppHomeBtn" class="cmOppBtn"><span class="ico">💡</span><span><b>Oportunidades</b><small>Clientes do dia ou toda a carteira que ainda faltam por categoria</small></span></button></div>';
  document.getElementById('cmPvInput').onkeydown=e=>{if(e.key==='Enter')searchPvHome()};
  const savedDay=(sessionStorage.getItem('pv_dia_visita')||'SEG').toUpperCase();
  QA('#consultorModernHome .cmWeekDay').forEach(b=>{b.classList.toggle('active',b.dataset.day===savedDay);const pick=async()=>{QA('#consultorModernHome .cmWeekDay').forEach(x=>x.classList.remove('active'));b.classList.add('active');sessionStorage.setItem('pv_dia_visita',b.dataset.day);try{await window.__setPvHomeDay?.(b.dataset.day)}catch{}};b.onclick=pick;b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();pick()}}});
  const listBtn=document.getElementById('cmClientListBtn');if(listBtn)listBtn.onclick=()=>{try{window.__openPvHomePicker?.()}catch{}};
+ const oppBtn=document.getElementById('cmOppHomeBtn');if(oppBtn)oppBtn.onclick=()=>window.openIturamaOpportunities?.();
  const cv=Q('#consultorModernHome .cmCarouselViewport'),prev=Q('#consultorModernHome .cmCarouselPrev'),next=Q('#consultorModernHome .cmCarouselNext');
  const moveCarousel=dir=>{if(!cv)return;const amount=Math.max(420,Math.floor(cv.clientWidth*.72));cv.scrollBy({left:dir*amount,behavior:'smooth'})};
  if(prev)prev.onclick=()=>moveCarousel(-1);
