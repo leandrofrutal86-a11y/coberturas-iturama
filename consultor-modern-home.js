@@ -7,18 +7,18 @@ function D(){try{return typeof DATA!=='undefined'?DATA:null}catch{return null}}
 
 function productMeta(name){
  const s=String(name||'').toUpperCase();
- if(s.includes('PERFETTI'))return{img:'https://www.kindpng.com/picc/m/704-7042720_perfetti-van-melle-logo-hd-png-download.png',theme:'blue',fit:'logo'};
- if(s.includes('FINI'))return{img:'https://finistore.es/cdn/shop/files/Logo_Fini_Golosinas_SEO.jpg?crop=center&height=1200&v=1763988559&width=1200',theme:'pink',fit:'logo'};
- if(s.includes('BLACK LABEL'))return{img:'https://www.vhv.rs/dpng/d/461-4619820_johnnie-walker-black-png-transparent-png.png',theme:'black',fit:'bottle'};
- if(s.includes('WHITE HORSE'))return{img:'https://www.kindpng.com/picc/m/189-1891460_white-horse-whisky-png-transparent-png.png',theme:'gold',fit:'bottle'};
- if(s.includes('OLD PARR'))return{img:'https://kihyatr7690.cdn-nhncommerce.com/data/goods/24/02/09/1000002786/pm-Old-Parr-12-Year.png',theme:'brown',fit:'bottle'};
- if(s.includes('FRUT')||s.includes('DEL VALLE'))return{img:'https://www.coca-cola.com/content/dam/onexp/br/pt/brands/del-valle/del-valle-frut/brazil_del_valle_1_desktop_1440x810%202.jpg',theme:'green',fit:'cover'};
- if(s.includes('ESTRELLA'))return{img:'https://mambodelivery.vtexassets.com/arquivos/ids/161715/cerveja-espanhola-estrella-galicia-garrafa-600ml.jpg?v=637883160241300000',theme:'red',fit:'bottle'};
- if(s.includes('PÃO DE QUEIJO'))return{img:'https://phygital-files.mercafacil.com/ferbella/uploads/produto/garrafa_coca_cola_fanta_retornavel_2000ml_c6ea4b8e-5f72-4a2f-b85d-96bf13a39ac0.jpg',theme:'red',fit:'cover'};
- if(s.includes('TANQUERAY'))return{img:'https://www.pikpng.com/pngl/m/420-4200282_tanqueray-bottle-gin-tanqueray-bottle-png-clipart.png',theme:'green',fit:'bottle'};
- if(s.includes('B2B'))return{img:'https://oridhean.com/tienda.png',theme:s.includes('RECOMPRA')?'purple':'cyan',fit:'cover'};
- if(s.includes('CAMPARI'))return{img:'https://images.squarespace-cdn.com/content/v1/67d72b0ada31a509717deaa3/86e1ec2d-4c9c-4fd7-ba88-aed34f4b4422/Campari%402x.png',theme:'navy',fit:'logo'};
- if(s.includes('APEROL'))return{img:'https://wineanthology.com/images/thumbs/0009170_aperol-aperitivo-liqueur-26340_600.gif',theme:'orange',fit:'bottle'};
+ if(s.includes('PERFETTI'))return{img:'assets/incentivos/perfetti.svg',theme:'blue',fit:'logo'};
+ if(s.includes('FINI'))return{img:'assets/incentivos/fini.svg',theme:'pink',fit:'logo'};
+ if(s.includes('BLACK LABEL'))return{img:'assets/incentivos/black-label.svg',theme:'black',fit:'bottle'};
+ if(s.includes('WHITE HORSE'))return{img:'assets/incentivos/white-horse.svg',theme:'gold',fit:'bottle'};
+ if(s.includes('OLD PARR'))return{img:'assets/incentivos/old-parr.svg',theme:'brown',fit:'bottle'};
+ if(s.includes('FRUT')||s.includes('DEL VALLE'))return{img:'assets/incentivos/del-valle-frut.svg',theme:'green',fit:'logo'};
+ if(s.includes('ESTRELLA'))return{img:'assets/incentivos/estrella.svg',theme:'red',fit:'bottle'};
+ if(s.includes('PÃO DE QUEIJO')||s.includes('PAO DE QUEIJO'))return{img:'assets/incentivos/trio-pao-de-queijo.svg',theme:'red',fit:'wide'};
+ if(s.includes('TANQUERAY'))return{img:'assets/incentivos/tanqueray.svg',theme:'green',fit:'bottle'};
+ if(s.includes('B2B'))return{img:'assets/incentivos/b2b.svg',theme:s.includes('RECOMPRA')?'purple':'cyan',fit:'logo'};
+ if(s.includes('CAMPARI'))return{img:'assets/incentivos/campari.svg',theme:'navy',fit:'logo'};
+ if(s.includes('APEROL'))return{img:'assets/incentivos/aperol.svg',theme:'orange',fit:'bottle'};
  return{img:'',theme:'red',fit:'logo'};
 }
 
@@ -78,26 +78,27 @@ html,body{max-width:100%!important;overflow-x:hidden!important}
 .cmCarousel{box-sizing:border-box!important;display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;gap:9px!important;width:max-content!important;min-width:max-content!important;max-width:none!important;overflow:visible!important;padding:2px 24px 10px 1px!important;touch-action:none!important;cursor:grab}
 .cmCarouselViewport::-webkit-scrollbar{display:none!important}.cmCarousel:active{cursor:grabbing}
 .cmCat{box-sizing:border-box!important;flex:0 0 148px!important;width:148px!important;min-width:148px!important;max-width:148px!important;height:252px!important;border:0!important;border-radius:20px!important;padding:0 10px 12px!important;color:#fff!important;text-align:left!important;scroll-snap-align:start!important;position:relative!important;box-shadow:0 12px 24px rgba(18,31,45,.20)!important;overflow:hidden!important;touch-action:pan-x!important;display:flex!important;flex-direction:column!important;justify-content:flex-end!important;background:linear-gradient(165deg,#d50a18,#7a0007)!important}
-.cmCat .cmProd{position:absolute!important;left:0!important;right:0!important;top:0!important;height:142px!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:8px!important;overflow:hidden!important;background:linear-gradient(160deg,rgba(255,255,255,.12),rgba(255,255,255,.02))!important}
-.cmCat .cmProd:before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 35%,rgba(255,255,255,.22),transparent 52%),linear-gradient(180deg,rgba(255,255,255,.05),rgba(0,0,0,.12));z-index:0}
-.cmCat .cmProd img{display:block!important;position:relative!important;z-index:1!important;max-width:94%!important;max-height:132px!important;width:auto!important;height:auto!important;object-fit:contain!important;filter:drop-shadow(0 8px 9px rgba(0,0,0,.22)) saturate(1.08) contrast(1.03)!important}
-.cmCat .cmProd img[data-fit="cover"]{width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;object-fit:cover!important;mix-blend-mode:multiply!important;filter:saturate(1.12) contrast(1.05)!important}
-.cmCat .cmProd img[data-fit="logo"]{max-width:90%!important;max-height:94px!important;mix-blend-mode:multiply!important;filter:saturate(1.08) contrast(1.08) drop-shadow(0 5px 7px rgba(0,0,0,.12))!important}
+.cmCat .cmProd{position:absolute!important;left:0!important;right:0!important;top:0!important;height:142px!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:8px!important;overflow:hidden!important;background:#fff!important}
+.cmCat .cmProd:before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.98),rgba(245,247,250,.96));z-index:0}
+.cmCat .cmProd img{display:block!important;position:relative!important;z-index:1!important;max-width:94%!important;max-height:126px!important;width:auto!important;height:auto!important;object-fit:contain!important;filter:drop-shadow(0 5px 7px rgba(0,0,0,.10))!important}
+.cmCat .cmProd img[data-fit="logo"]{max-width:90%!important;max-height:104px!important;object-fit:contain!important;filter:none!important}
+.cmCat .cmProd img[data-fit="bottle"]{max-width:88%!important;max-height:132px!important;object-fit:contain!important;filter:drop-shadow(0 7px 8px rgba(0,0,0,.16))!important}
+.cmCat .cmProd img[data-fit="wide"]{width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;object-fit:contain!important;filter:none!important;background:#c9000b!important}
 .cmCat .cmFallback{font-size:42px;position:relative;z-index:1}
 .cmCat b{font-size:14px!important;line-height:1.05!important;display:block!important;text-transform:uppercase!important;margin-top:146px!important;min-height:31px!important;text-shadow:0 1px 2px rgba(0,0,0,.22)}
 .cmCat small{display:block!important;margin-top:6px!important;color:#fff!important;font-size:10.5px!important;line-height:1.15!important}
 .cmCat .cmProgress{height:6px!important;border-radius:999px!important;background:rgba(255,255,255,.22)!important;overflow:hidden!important;margin-top:8px!important;margin-right:40px!important}
 .cmCat .cmProgress i{display:block!important;height:100%!important;border-radius:inherit!important;background:rgba(255,255,255,.88)!important}
 .cmCat .cmArrow{position:absolute!important;right:9px!important;bottom:9px!important;width:34px!important;height:34px!important;border-radius:50%!important;background:#fff!important;color:#e30613!important;display:grid!important;place-items:center!important;font-size:25px!important;font-weight:900!important;box-shadow:0 4px 10px rgba(0,0,0,.18)!important}
-.cmCat.cmTheme-blue{background:linear-gradient(160deg,#1f78ff,#142fbb)!important}
-.cmCat.cmTheme-pink{background:linear-gradient(160deg,#ff2f91,#b90065)!important}
+.cmCat.cmTheme-blue{background:linear-gradient(160deg,#2563eb,#1e3a8a)!important}
+.cmCat.cmTheme-pink{background:linear-gradient(160deg,#ff3b8d,#c9005f)!important}
 .cmCat.cmTheme-black{background:linear-gradient(160deg,#30343a,#050505)!important}
 .cmCat.cmTheme-gold{background:linear-gradient(160deg,#ffc928,#c77a00)!important}
 .cmCat.cmTheme-brown{background:linear-gradient(160deg,#8d572e,#3d1f0d)!important}
-.cmCat.cmTheme-green{background:linear-gradient(160deg,#24ae57,#075d29)!important}
-.cmCat.cmTheme-cyan{background:linear-gradient(160deg,#18b6f4,#0754b3)!important}
-.cmCat.cmTheme-purple{background:linear-gradient(160deg,#9c45ef,#5513a1)!important}
-.cmCat.cmTheme-navy{background:linear-gradient(160deg,#234b84,#071c3c)!important}
+.cmCat.cmTheme-green{background:linear-gradient(160deg,#22a850,#075b29)!important}
+.cmCat.cmTheme-cyan{background:linear-gradient(160deg,#16a6e6,#0755b7)!important}
+.cmCat.cmTheme-purple{background:linear-gradient(160deg,#8b43e6,#4d1498)!important}
+.cmCat.cmTheme-navy{background:linear-gradient(160deg,#1f4f8f,#071b38)!important}
 .cmCat.cmTheme-orange{background:linear-gradient(160deg,#ff9a25,#e3420c)!important}
 .cmCat.cmTheme-red{background:linear-gradient(160deg,#f52633,#9e0009)!important}
 
