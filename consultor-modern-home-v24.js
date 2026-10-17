@@ -18,7 +18,7 @@ function productMeta(name){
  if(s.includes('TANQUERAY'))return{img:'assets/incentivos/tanqueray-logo-v23.svg?v=20261017-v26',theme:'green',fit:'logo'};
  if(s.includes('B2B'))return{img:'assets/incentivos/b2b.svg?v=20261017-v26',theme:s.includes('RECOMPRA')?'purple':'cyan',fit:'logo'};
  if(s.includes('CAMPARI'))return{img:'assets/incentivos/campari.svg?v=20261017-v26',theme:'navy',fit:'logo'};
- if(s.includes('APEROL'))return{img:'assets/incentivos/aperol.svg?v=20261017-v26',theme:'orange',fit:'logo'};
+ if(s.includes('APEROL'))return{img:'assets/incentivos/aperol-oficial.webp?v=20261017-aperol27',theme:'orange',fit:'logo'};
  return{img:'',theme:'red',fit:'logo'};
 }
 
