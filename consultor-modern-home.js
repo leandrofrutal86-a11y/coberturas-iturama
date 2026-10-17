@@ -22,6 +22,22 @@ function productMeta(name){
  return{img:'',theme:'red'};
 }
 
+function incentiveClass(name){
+ const s=String(name||'').toUpperCase();
+ if(s.includes('PERFETTI'))return 'prod-perfetti';
+ if(s.includes('FINI'))return 'prod-fini';
+ if(s.includes('BLACK LABEL'))return 'prod-black';
+ if(s.includes('WHITE HORSE'))return 'prod-whitehorse';
+ if(s.includes('OLD PARR'))return 'prod-oldparr';
+ if(s.includes('FRUT')||s.includes('DEL VALLE'))return 'prod-frut';
+ if(s.includes('ESTRELLA'))return 'prod-estrella';
+ if(s.includes('PÃO DE QUEIJO'))return 'prod-trio';
+ if(s.includes('TANQUERAY'))return 'prod-tanqueray';
+ if(s.includes('B2B'))return s.includes('RECOMPRA')?'prod-recompra':'prod-compra';
+ if(s.includes('CAMPARI'))return 'prod-campari';
+ if(s.includes('APEROL'))return 'prod-aperol';
+ return 'prod-default';
+}
 function icon(name){
  const s=String(name||'').toUpperCase();
  if(s.includes('FINI'))return '🍬'; if(s.includes('PERFETTI'))return '🍭'; if(s.includes('PÃO DE QUEIJO'))return '🧀';
