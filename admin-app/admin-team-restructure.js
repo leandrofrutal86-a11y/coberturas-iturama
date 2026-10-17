@@ -205,7 +205,43 @@ html,body{width:100%!important;max-width:100%!important;overflow-x:hidden!import
 .acvDetailChip{background:#edf3f7;border-radius:999px;padding:6px 9px;font-size:11px;font-weight:900}.acvDetailTableWrap{margin-top:11px;overflow:auto;background:#fff;border:1px solid #dce4ea;border-radius:14px}
 .acvDetailTable{width:100%;min-width:760px;border-collapse:collapse}.acvDetailTable th{background:#d90000;color:#fff;padding:9px;text-align:left;font-size:11px}.acvDetailTable td{padding:9px;border-bottom:1px solid #dce4ea;font-size:11px}
 .acvDetailTable tbody tr:nth-child(odd){background:#edf5fb}.acvDetailTable tbody tr:nth-child(even){background:#fff}.acvDetailEmpty{text-align:center;padding:25px;color:#66798a;font-weight:800}
-@media(max-width:700px){.acvDetailFilters{grid-template-columns:1fr}.acvDetailGo{width:100%}.acvDetailBody{width:calc(100% - 12px);margin-top:8px}.acvDetailStats{grid-template-columns:1fr 1fr}.acvDetailDonut{width:92px;height:92px}.acvDetailDonut:after{width:66px;height:66px;font-size:17px}.acvDetailGraph h3{font-size:18px}}
+@media(orientation:portrait) and (max-width:700px){
+  .acvDetailOverlay,.acvDetailOverlay *{box-sizing:border-box}
+  .acvDetailOverlay{width:100vw!important;max-width:100vw!important;overflow-x:hidden!important}
+  .acvDetailSheet{width:100%!important;max-width:100%!important;overflow-x:hidden!important}
+  .acvDetailTop{width:100%!important;padding:9px 10px!important}
+  .acvDetailTop>div{min-width:0!important;overflow:hidden!important}
+  .acvDetailTop h2{font-size:16px!important;line-height:1.05!important;white-space:normal!important;overflow-wrap:anywhere!important}
+  .acvDetailTop small{font-size:9px!important;line-height:1.15!important;white-space:normal!important}
+  .acvDetailTop button{padding:8px 10px!important;font-size:11px!important;border-radius:10px!important;white-space:nowrap!important}
+  .acvDetailBody{width:calc(100vw - 12px)!important;max-width:calc(100vw - 12px)!important;margin:7px auto 50px!important;padding:0!important}
+  .acvDetailGraph{width:100%!important;max-width:100%!important;padding:10px!important;margin-bottom:8px!important;border-radius:15px!important;overflow:hidden!important}
+  .acvDetailGraphTop{display:grid!important;grid-template-columns:78px minmax(0,1fr)!important;align-items:center!important;gap:9px!important;min-width:0!important}
+  .acvDetailGraphTop>div:last-child{min-width:0!important}
+  .acvDetailDonut{width:78px!important;height:78px!important;flex:0 0 78px!important}
+  .acvDetailDonut:after{width:56px!important;height:56px!important;font-size:15px!important}
+  .acvDetailGraph h3{font-size:16px!important;line-height:1.05!important;overflow-wrap:anywhere!important}
+  .acvDetailGraph small{font-size:9.5px!important;line-height:1.15!important}
+  .acvDetailStats{grid-template-columns:1fr 1fr!important;gap:7px!important;margin-top:9px!important}
+  .acvDetailStat{padding:8px 6px!important;border-radius:10px!important}
+  .acvDetailStat small{font-size:7.5px!important}
+  .acvDetailStat b{font-size:16px!important;margin-top:2px!important}
+  .acvDetailFilters{grid-template-columns:1fr!important;gap:7px!important;padding:9px!important;border-radius:14px!important}
+  .acvDetailFilters label{font-size:8.5px!important;margin-bottom:4px!important}
+  .acvDetailFilters select{height:40px!important;font-size:11px!important;padding:0 8px!important}
+  .acvDetailGo{width:100%!important;height:40px!important;font-size:11px!important;padding:0 10px!important}
+  .acvDetailSummary{margin-top:8px!important;padding:8px!important;gap:5px!important;border-radius:12px!important}
+  .acvDetailChip{font-size:8.5px!important;padding:4px 6px!important}
+  .acvDetailTableWrap{width:100%!important;max-width:100%!important;margin-top:8px!important;overflow-x:hidden!important;border-radius:10px!important}
+  .acvDetailTable{width:100%!important;min-width:0!important;max-width:100%!important;table-layout:fixed!important}
+  .acvDetailTable th,.acvDetailTable td{padding:6px 3px!important;font-size:8px!important;line-height:1.15!important;white-space:normal!important;word-break:break-word!important;overflow-wrap:anywhere!important;vertical-align:top!important}
+  .acvDetailTable th:nth-child(1),.acvDetailTable td:nth-child(1){width:12%!important}
+  .acvDetailTable th:nth-child(2),.acvDetailTable td:nth-child(2){width:18%!important}
+  .acvDetailTable th:nth-child(3),.acvDetailTable td:nth-child(3){width:14%!important}
+  .acvDetailTable th:nth-child(4),.acvDetailTable td:nth-child(4){width:36%!important}
+  .acvDetailTable th:nth-child(5),.acvDetailTable td:nth-child(5){width:20%!important}
+  .acvDetailEmpty{font-size:11px!important;padding:18px 8px!important}
+}
 
 .acvOppSection{width:100%;max-width:100%;min-width:0}
 .acvOppBtn{width:100%;border:1px solid #d6e1ea;background:linear-gradient(135deg,#fff,#eef7ff);border-radius:18px;padding:14px;display:flex;align-items:center;gap:12px;text-align:left;color:#17344f;box-shadow:0 5px 15px #172b400d}

@@ -372,7 +372,37 @@ html,body{max-width:100%!important;overflow-x:hidden!important}
 .cmCoverageStats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:13px}.cmCoverageStat{background:#f4f7f9;border-radius:12px;padding:10px;text-align:center}.cmCoverageStat small{display:block;font-size:9px;color:#687987;font-weight:900}.cmCoverageStat b{display:block;font-size:19px;margin-top:3px}
 .cmCoverageResults{background:#fff;border:1px solid #e0e7ed;border-radius:18px;padding:13px;box-shadow:0 5px 15px #172b400d}.cmCoverageResults h3{margin:0 0 10px;font-size:18px}
 .cmCoverageTableWrap{overflow:auto;border:1px solid #dbe2e8;border-radius:12px}.cmCoverageTable{width:100%;min-width:620px;border-collapse:collapse}.cmCoverageTable th{background:#d90000;color:#fff;text-align:left;padding:9px;font-size:11px}.cmCoverageTable td{padding:9px;border-bottom:1px solid #dde5eb;font-size:11px}.cmCoverageTable tbody tr:nth-child(odd){background:#eef5fa}.cmCoverageEmpty{text-align:center;padding:25px;color:#677987;font-weight:800}
-@media(max-width:600px){.cmCoverageTop{padding:10px}.cmCoverageTopText b{font-size:17px}.cmCoverageBody{width:calc(100% - 12px);margin-top:8px}.cmCoverageGraphTop{align-items:flex-start}.cmCoverageDonut{width:92px;height:92px}.cmCoverageDonut:after{width:66px;height:66px;font-size:17px}.cmCoverageStats{grid-template-columns:1fr 1fr}.cmCoverageGraph h2{font-size:18px}}
+@media(orientation:portrait) and (max-width:700px){
+  #cmCoveragePage,#cmCoveragePage *{box-sizing:border-box}
+  #cmCoveragePage{width:100vw!important;max-width:100vw!important;overflow-x:hidden!important}
+  .cmCoverageTop{width:100%!important;padding:9px 10px!important}
+  .cmCoverageTopIn{width:100%!important;max-width:100%!important;gap:8px!important}
+  .cmCoverageTopText{min-width:0!important;overflow:hidden!important}
+  .cmCoverageTopText b{font-size:16px!important;line-height:1.05!important;white-space:normal!important;overflow-wrap:anywhere!important}
+  .cmCoverageTopText small{font-size:9px!important;line-height:1.15!important;white-space:normal!important}
+  .cmCoverageBack{padding:8px 10px!important;font-size:11px!important;border-radius:10px!important}
+  .cmCoverageBody{width:calc(100vw - 12px)!important;max-width:calc(100vw - 12px)!important;margin:7px auto 50px!important;gap:8px!important}
+  .cmCoverageGraph{width:100%!important;max-width:100%!important;padding:10px!important;border-radius:15px!important;overflow:hidden!important}
+  .cmCoverageGraphTop{display:grid!important;grid-template-columns:78px minmax(0,1fr)!important;align-items:center!important;gap:9px!important;min-width:0!important}
+  .cmCoverageGraphTop>div:last-child{min-width:0!important}
+  .cmCoverageDonut{width:78px!important;height:78px!important;flex:0 0 78px!important}
+  .cmCoverageDonut:after{width:56px!important;height:56px!important;font-size:15px!important}
+  .cmCoverageGraph h2{font-size:16px!important;line-height:1.05!important;overflow-wrap:anywhere!important}
+  .cmCoverageGraph p{font-size:9.5px!important;line-height:1.15!important;white-space:normal!important}
+  .cmCoverageStats{grid-template-columns:1fr 1fr!important;gap:7px!important;margin-top:9px!important}
+  .cmCoverageStat{padding:8px 6px!important;border-radius:10px!important}
+  .cmCoverageStat small{font-size:7.5px!important}
+  .cmCoverageStat b{font-size:16px!important;margin-top:2px!important}
+  .cmCoverageResults{width:100%!important;max-width:100%!important;padding:9px!important;border-radius:15px!important;overflow:hidden!important}
+  .cmCoverageResults h3{font-size:15px!important;line-height:1.1!important;margin:0 0 8px!important}
+  .cmCoverageTableWrap{width:100%!important;max-width:100%!important;overflow-x:hidden!important;border-radius:10px!important}
+  .cmCoverageTable{width:100%!important;min-width:0!important;max-width:100%!important;table-layout:fixed!important}
+  .cmCoverageTable th,.cmCoverageTable td{padding:6px 4px!important;font-size:8.5px!important;line-height:1.15!important;white-space:normal!important;word-break:break-word!important;overflow-wrap:anywhere!important;vertical-align:top!important}
+  .cmCoverageTable th:nth-child(1),.cmCoverageTable td:nth-child(1){width:15%!important}
+  .cmCoverageTable th:nth-child(2),.cmCoverageTable td:nth-child(2){width:43%!important}
+  .cmCoverageTable th:nth-child(3),.cmCoverageTable td:nth-child(3){width:24%!important}
+  .cmCoverageTable th:nth-child(4),.cmCoverageTable td:nth-child(4){width:18%!important}
+}
 
 `;document.head.appendChild(s);
 }
