@@ -3,47 +3,4 @@
 
 
 <script src="shortcut-install.js?v=20260909-login-01"></script>
-<script src="trio-ui-fix.js?v=20260911-04"></script><script src="consultor-contracts.js?v=20260923-contratos-excluir-02"></script><script src="consultor-b2b-status.js?v=20260928-03"></script><script src="consultor-b2b-oportunidades.js?v=20260928-celular-01"></script><script src="consultor-recursos.js?v=20260910-01"></script><script src="consultor-login-mobile-fix.js?v=20260928-login-hide-01"></script><script src="consultor-incentivos-prioridade.js?v=20261015-prioridades-02"></script><script src="b2b-ui.js?v=20260910-01"></script><script src="consultor-modern-home.js?v=20261016-layout-11"></script><style id="consultor-inline-final-20261016-2343">
-@media (orientation:portrait){
-  html,body,#dash{width:100%!important;max-width:100%!important;overflow-x:hidden!important}
-  #dash .wrap{box-sizing:border-box!important;width:100%!important;max-width:100%!important;margin:0!important;padding:10px 12px 96px!important;overflow-x:hidden!important}
-  #consultorModernHome,.cmHome{box-sizing:border-box!important;width:100%!important;max-width:100%!important;min-width:0!important;margin:0!important;padding:0!important}
-  .cmHello,.cmSearchHero,.cmPvHomeSlot,.pvHomeBox{box-sizing:border-box!important;width:100%!important;max-width:100%!important;min-width:0!important;margin-left:0!important;margin-right:0!important}
-  .cmSearchHero{padding:12px!important;border-radius:18px!important}
-  .cmSearchTitle b{font-size:21px!important}.cmSearchTitle small{font-size:10px!important}
-  .cmSearchRow{display:block!important;width:100%!important;max-width:100%!important}
-  .cmSearchRow input{box-sizing:border-box!important;width:100%!important;max-width:100%!important;min-width:0!important;padding:11px 12px!important}
-  .pvHomeBox{padding:9px!important;overflow:hidden!important}
-  .pvHomeHead{display:block!important;margin-bottom:7px!important}.pvHomeHead .pvHomeCount{display:none!important}
-  .pvHomeDays{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:4px!important;width:100%!important;max-width:100%!important;overflow:hidden!important}
-  .pvHomeDay{box-sizing:border-box!important;display:flex!important;align-items:center!important;justify-content:center!important;width:100%!important;min-width:0!important;height:34px!important;padding:0!important;margin:0!important;font-size:10px!important;border:1px solid #ffffff70!important;border-radius:8px!important;background:#ffffff16!important;color:#fff!important}
-  .pvHomeDay.active{background:#fff!important;color:#c9000b!important;border-color:#fff!important}
-  .pvHomeClient{box-sizing:border-box!important;width:100%!important;max-width:100%!important;min-width:0!important;padding:10px 11px!important;font-size:11px!important}
-  .cmActions{grid-template-columns:repeat(2,minmax(0,1fr))!important}
-  .cmCarouselViewport{box-sizing:border-box!important;width:100%!important;max-width:100%!important;overflow-x:scroll!important;overflow-y:hidden!important;-webkit-overflow-scrolling:touch!important;touch-action:pan-x!important;scrollbar-width:none!important}
-  .cmCarouselViewport::-webkit-scrollbar{display:none!important}
-  .cmCarousel{display:flex!important;flex-flow:row nowrap!important;gap:9px!important;width:max-content!important;min-width:max-content!important;max-width:none!important;overflow:visible!important;padding:2px 26px 10px 1px!important;touch-action:auto!important}
-  .cmCat{flex:0 0 126px!important;width:126px!important;min-width:126px!important;max-width:126px!important;touch-action:auto!important}
-}
-</style>
-<script>
-(()=>{const FLAG='consultor-inline-final-20261016-2343';
-function fixDays(){
- const host=document.getElementById('cmPvHomeSlot');if(!host)return;
- const days=host.querySelector('.pvHomeDays');if(!days)return;
- const wanted=['SEG','TER','QUA','QUI','SEX'];
- const current=(days.querySelector('.active')?.textContent||sessionStorage.getItem('pv_dia_visita')||'SEG').trim().toUpperCase();
- if(days.children.length!==5||[...days.children].some((x,i)=>x.textContent.trim()!==wanted[i])){
-   days.innerHTML=wanted.map(d=>'<span role="button" tabindex="0" class="pvHomeDay '+(d===current?'active':'')+'" data-home-day="'+d+'">'+d+'</span>').join('');
-   days.querySelectorAll('[data-home-day]').forEach(el=>el.addEventListener('click',()=>{sessionStorage.setItem('pv_dia_visita',el.dataset.homeDay); if(typeof window.__setPvHomeDay==='function')window.__setPvHomeDay(el.dataset.homeDay); else {host.querySelectorAll('.pvHomeDay').forEach(x=>x.classList.toggle('active',x===el));}}));
- }
-}
-function fixCarousel(){
- const vp=document.querySelector('.cmCarouselViewport');if(!vp)return;
- vp.style.overflowX='scroll';vp.style.touchAction='pan-x';
- const row=vp.querySelector('.cmCarousel');if(row){row.style.width='max-content';row.style.maxWidth='none';row.style.display='flex';row.style.flexWrap='nowrap';}
-}
-let n=0;const t=setInterval(()=>{fixDays();fixCarousel();if(++n>240)clearInterval(t)},250);
-document.addEventListener('DOMContentLoaded',()=>{fixDays();fixCarousel()});
-})();
-</script><script src="consultor-visitas.js?v=20260914-acomp-05"></script><script src="consultor-contatos.js?v=20260914-acomp-05"></script><script src="consultor-layout-clean.js?v=20260909-01"></script><script src="consultor-header-actions.js?v=20260914-rogerio-03"></script><script src="consultor-bottom-menu.js?v=20260910-bottom-02"></script><script src="b2b-dashboard-fix.js?v=20260914-b2b-live-01"></script><script src="consultor-results-style.js?v=20260911-results-02"></script><script src="consultor-pv-dia.js?v=20260915-pv-dia-01"></script><script src="consultor-oportunidades-dia.js?v=20260915-op-dia-02"></script><script src="consultor-imperdoaveis.js?v=20260914-acomp-05"></script><script src="consultor-imperdoaveis-ajuste.js?v=20260914-acomp-05"></script><script src="consultor-mobile-fit.js?v=20260914-mobile-10"></script><script src="consultor-trio-labels.js?v=20260911-trio-01"></script><script src="footer-credit.js?v=20260911-credit-01"></script><script src="consultor-rogerio-ui.js?v=20260914-rogerio-stable-02"></script><script src="consultor-overlay-layer-fix.js?v=20260916-overlay-02"></script><script src="login-remember.js?v=20260916-remember-01"></script><script src="consultor-materiais-v2.js?v=20260916-materiais-v2-01"></script></body></html>
+<script src="trio-ui-fix.js?v=20260911-04"></script><script src="consultor-contracts.js?v=20260923-contratos-excluir-02"></script><script src="consultor-b2b-status.js?v=20260928-03"></script><script src="consultor-b2b-oportunidades.js?v=20260928-celular-01"></script><script src="consultor-recursos.js?v=20260910-01"></script><script src="consultor-login-mobile-fix.js?v=20260928-login-hide-01"></script><script src="consultor-incentivos-prioridade.js?v=20261015-prioridades-02"></script><script src="b2b-ui.js?v=20260910-01"></script><script src="consultor-modern-home.js?v=20261016-layout-12"></script><script src="consultor-visitas.js?v=20260914-acomp-05"></script><script src="consultor-contatos.js?v=20260914-acomp-05"></script><script src="consultor-layout-clean.js?v=20260909-01"></script><script src="consultor-header-actions.js?v=20260914-rogerio-03"></script><script src="consultor-bottom-menu.js?v=20260910-bottom-02"></script><script src="b2b-dashboard-fix.js?v=20260914-b2b-live-01"></script><script src="consultor-results-style.js?v=20260911-results-02"></script><script src="consultor-pv-dia.js?v=20261016-home-pv-09"></script><script src="consultor-oportunidades-dia.js?v=20260915-op-dia-02"></script><script src="consultor-imperdoaveis.js?v=20260914-acomp-05"></script><script src="consultor-imperdoaveis-ajuste.js?v=20260914-acomp-05"></script><script src="consultor-mobile-fit.js?v=20260914-mobile-10"></script><script src="consultor-trio-labels.js?v=20260911-trio-01"></script><script src="footer-credit.js?v=20260911-credit-01"></script><script src="consultor-rogerio-ui.js?v=20260914-rogerio-stable-02"></script><script src="consultor-overlay-layer-fix.js?v=20260916-overlay-02"></script><script src="login-remember.js?v=20260916-remember-01"></script><script src="consultor-materiais-v2.js?v=20260916-materiais-v2-01"></script></body></html>
