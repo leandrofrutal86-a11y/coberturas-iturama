@@ -66,7 +66,7 @@ html,body{max-width:100%!important;overflow-x:hidden!important}
 #dash .top .brand>div:last-child:before{content:'COBERTURAS • EQUIPE ITURAMA';display:block;color:#fff;font-size:17px;font-weight:950;line-height:1.1;white-space:normal}
 #dash .top .brand>div:last-child b{font-size:10px!important;color:#ffe5e8!important;font-weight:650!important}
 #dash .top .brand>div:last-child b:before{content:'Painel do Consultor • '}
-#dash .top .user{display:none!important}.logout{background:#202020!important;border:0!important;border-radius:12px!important;padding:9px 12px!important;font-size:12px!important;flex:0 0 auto}
+#dash .top .user{display:none!important}.cmSalesPeriod{position:absolute!important;right:12px!important;bottom:4px!important;z-index:3!important;color:#fff!important;font-size:10px!important;font-weight:800!important;line-height:1.15!important;background:#00000038!important;border:1px solid #ffffff30!important;border-radius:999px!important;padding:4px 8px!important;white-space:nowrap!important}.logout{background:#202020!important;border:0!important;border-radius:12px!important;padding:9px 12px!important;font-size:12px!important;flex:0 0 auto}
 .cmHome{box-sizing:border-box!important;display:grid!important;gap:11px!important;width:auto!important;max-width:100%!important;min-width:0!important;margin:0!important;padding:0!important}
 .cmHello{box-sizing:border-box;width:100%;background:#fff;border:1px solid #e2e8ed;border-radius:18px;padding:12px 14px;box-shadow:0 5px 16px #172b400e;display:flex;align-items:center;gap:11px}
 .cmAvatar{width:46px;height:46px;border-radius:50%;background:#e30613;display:grid;place-items:center;color:#fff;font-size:23px;flex:0 0 auto}.cmHello strong{font-size:19px;color:#172736}.cmHello small{display:block;margin-top:3px;color:#6d7985;font-weight:700;font-size:12px}
@@ -307,6 +307,12 @@ html,body{max-width:100%!important;overflow-x:hidden!important}
 `;document.head.appendChild(s);
 }
 function clickExisting(id,text){const el=id?document.getElementById(id):null;if(el){el.click();return}const x=QA('#dash button,#dash .tile,#dash a').find(v=>String(v.textContent||'').toLowerCase().includes(String(text||'').toLowerCase()));if(x)x.click()}
+function fmtSalesDate(v){const s=String(v||'');const m=s.match(/^(\d{4})-(\d{2})-(\d{2})$/);return m?m[3]+'/'+m[2]+'/'+m[1]:s}
+function renderSalesPeriodHeader(d){
+ const top=Q('#dash .top');if(!top)return;
+ let el=document.getElementById('cmSalesPeriod');if(!el){el=document.createElement('div');el.id='cmSalesPeriod';el.className='cmSalesPeriod';top.appendChild(el)}
+ const p=d?.sales_period||{};el.textContent=p.inicio&&p.fim?'Vendas atualizadas: '+fmtSalesDate(p.inicio)+' a '+fmtSalesDate(p.fim):'Vendas atualizadas: sem período';
+}
 function searchPvHome(){const input=document.getElementById('cmPvInput');if(!input)return;const v=input.value.trim();try{openPv()}catch{}setTimeout(()=>{const p=document.getElementById('pv');if(p){p.value=v;if(v)try{searchPv()}catch{}}},80)}
 function renderGraph(cat){
  const panel=Q('#dash .panel');if(!panel||!cat||cat==='ALL')return;
@@ -347,8 +353,9 @@ function render(){
  QA('#consultorModernHome .cmCat').forEach(b=>b.onclick=()=>chooseWithGraph(b.dataset.cat));
  QA('#consultorModernHome .cmAct').forEach(b=>b.onclick=()=>{const a=b.dataset.act;if(a==='contratos')clickExisting('cvContractsBtn','Contratos');else if(a==='visitas')clickExisting('cvVisitBtn','Visita de Clientes');else if(a==='subcanais')clickExisting('cvSubBtn','Subcanais');else if(a==='contatos')clickExisting('contClientesBtn','Contato dos Clientes')});
  hideOldPriority();
+ renderSalesPeriodHeader(d);
  try{window.__renderPvHomePanel?.()}catch{}
 }
-let sig='';setInterval(()=>{const d=D();const s=d?JSON.stringify([(d.own||[]).map(x=>[x.nome,x.realizado,x.meta,x.imagem_card_url,x.cor_card]),d.consultor?.nome]):'';if(s&&s!==sig){sig=s;render()}},700);
+let sig='';setInterval(()=>{const d=D();const s=d?JSON.stringify([(d.own||[]).map(x=>[x.nome,x.realizado,x.meta,x.imagem_card_url,x.cor_card]),d.consultor?.nome,d.sales_period]):'';if(s&&s!==sig){sig=s;render()}},700);
 window.addEventListener('pageshow',()=>setTimeout(render,350));
 })();

@@ -1,7 +1,7 @@
 (()=>{const $=id=>document.getElementById(id);function css(){const s=document.createElement('style');s.textContent=`
 body{background:#eef2f5!important}
 header{background:linear-gradient(135deg,#060606 0%,#171717 48%,#b40000 100%)!important;padding:20px 4%!important;border-bottom:4px solid #e30613}
-header>b,header b{font-size:18px}
+header>b,header b{font-size:18px}header{position:relative!important;padding-bottom:34px!important}.dmSalesPeriod{position:absolute;right:4%;bottom:6px;color:#fff;font-size:10px;font-weight:800;background:#00000038;border:1px solid #ffffff30;border-radius:999px;padding:4px 8px;white-space:nowrap}
 .cokeBrand{font-family:Georgia,serif;font-style:italic;font-weight:900;color:#e30613;font-size:30px;letter-spacing:-2px}
 .tabs{display:none!important}.cokeHome{display:block}
 .homeHero{background:linear-gradient(135deg,#090909,#191919 58%,#7b0000);border-radius:26px;padding:24px;color:#fff;box-shadow:0 14px 36px #0003;margin-bottom:26px}
@@ -67,7 +67,14 @@ function nav(label){
  const aliases={'Visão Consultor':'Visão do Consultor'};
  const wanted=aliases[String(label)]||String(label);
  const tryNav=()=>{const b=[...document.querySelectorAll('.tabs button')].find(x=>x.textContent.includes(wanted));if(b){b.click();setTimeout(addBack,0);return true}return false};if(!tryNav())setTimeout(tryNav,250)
-}function addBack(){if($('cokeHome')&&!$('cokeHome').classList.contains('hide'))return;const wrap=document.querySelector('.wrap');if(!wrap||$('backHome'))return;const b=document.createElement('button');b.id='backHome';b.className='backHome';b.innerHTML='← Voltar ao menu administrativo';b.onclick=show;wrap.insertBefore(b,wrap.firstChild)}function removeBack(){$('backHome')?.remove()}function show(){['visao','equipe','acomp','pesquisa','metas','consultores','telefones','materiais','vendas','historico','visitasSubcanais','subcanaisPainel','contatosClientes','trioPaoQueijo','adminConteudos'].forEach(id=>{const e=$(id);if(e)e.classList.add('hide')});$('cokeHome')?.classList.remove('hide');removeBack();try{sessionStorage.removeItem('adm_force_home')}catch{}}function build(){if($('cokeHome'))return;const tabs=document.querySelector('.tabs');if(!tabs)return;const wrap=document.querySelector('.wrap');const sec=document.createElement('section');sec.id='cokeHome';sec.innerHTML=`<div class="homeHero"><div class="homeHeroTop"><div class="homeHello"><div class="homeAvatar" role="img" aria-label="Foto de Leandro"></div><div><h1>Bem-vindo, Leandro</h1><p>Supervisor • Equipe Iturama</p></div></div><span class="adminBadge">Administrador</span></div></div>
+}function addBack(){if($('cokeHome')&&!$('cokeHome').classList.contains('hide'))return;const wrap=document.querySelector('.wrap');if(!wrap||$('backHome'))return;const b=document.createElement('button');b.id='backHome';b.className='backHome';b.innerHTML='← Voltar ao menu administrativo';b.onclick=show;wrap.insertBefore(b,wrap.firstChild)}function removeBack(){$('backHome')?.remove()}function show(){['visao','equipe','acomp','pesquisa','metas','consultores','telefones','materiais','vendas','historico','visitasSubcanais','subcanaisPainel','contatosClientes','trioPaoQueijo','adminConteudos'].forEach(id=>{const e=$(id);if(e)e.classList.add('hide')});$('cokeHome')?.classList.remove('hide');removeBack();try{sessionStorage.removeItem('adm_force_home')}catch{}}function fmtSalesDate(v){const m=String(v||'').match(/^(\d{4})-(\d{2})-(\d{2})$/);return m?m[3]+'/'+m[2]+'/'+m[1]:String(v||'')}
+function syncSalesPeriod(){
+ const h=document.querySelector('header');if(!h)return;
+ let el=$('dmSalesPeriod');if(!el){el=document.createElement('div');el.id='dmSalesPeriod';el.className='dmSalesPeriod';h.appendChild(el)}
+ let p={};try{if(typeof dash!=='undefined'&&dash)p=dash.sales_period||{}}catch{}
+ el.textContent=p.inicio&&p.fim?'Vendas atualizadas: '+fmtSalesDate(p.inicio)+' a '+fmtSalesDate(p.fim):'Vendas atualizadas: sem período';
+}
+function build(){if($('cokeHome')){syncSalesPeriod();return;}const tabs=document.querySelector('.tabs');if(!tabs)return;const wrap=document.querySelector('.wrap');const sec=document.createElement('section');sec.id='cokeHome';sec.innerHTML=`<div class="homeHero"><div class="homeHeroTop"><div class="homeHello"><div class="homeAvatar" role="img" aria-label="Foto de Leandro"></div><div><h1>Bem-vindo, Leandro</h1><p>Supervisor • Equipe Iturama</p></div></div><span class="adminBadge">Administrador</span></div></div>
 
 <div class="menuTopic topicVendas">
  <div class="topicHead"><span class="topicIcon">🛒</span><div><h2>Vendas</h2><small>Consulta, clientes e ações comerciais</small></div></div>
