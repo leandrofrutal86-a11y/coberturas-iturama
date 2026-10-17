@@ -81,6 +81,8 @@ function installCategory(){
         tipo_regra:useQty?'quantidade':'recompra',
         quantidade_minima:min,
         compras_minimas:repMin,
+        prioridade_acomp:Number(q('cmPriority')?.value||2),
+        cor_card:typeof window.cmGetVisualColor==='function'?window.cmGetVisualColor(id):(q('cmColor')?.value||''),
         regras:rr.regras||[]
       });
       q('cmStatus').className='ok';
