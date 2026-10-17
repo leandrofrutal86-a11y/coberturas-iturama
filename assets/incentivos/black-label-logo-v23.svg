@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 700">
+<rect width="1100" height="700" fill="#fff"/>
+<g transform="translate(90 170) rotate(-10 460 180)">
+<rect x="0" y="0" width="920" height="360" rx="24" fill="#050505"/>
+<rect x="24" y="24" width="872" height="312" rx="15" fill="none" stroke="#d3c29b" stroke-width="8"/>
+<text x="460" y="142" text-anchor="middle" font-family="Georgia,Times New Roman,serif" font-size="58" fill="#fff">Johnnie Walker</text>
+<text x="460" y="250" text-anchor="middle" font-family="Georgia,Times New Roman,serif" font-size="112" font-weight="700" fill="#fff">BLACK LABEL</text>
+</g>
+</svg>
