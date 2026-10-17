@@ -18,7 +18,8 @@ function productMeta(name){
  if(s.includes('PÃO DE QUEIJO')||s.includes('PAO DE QUEIJO'))return{img:'assets/incentivos/v27/old-parr.webp?v=20261017-v28',theme:'red',fit:'photo'};
  if(s.includes('TANQUERAY'))return{img:'assets/incentivos/v27/aperol.webp?v=20261017-v28',theme:'green',fit:'logo'};
  if(s.includes('RECOMPRA')&&s.includes('B2B'))return{img:'assets/incentivos/recompra-b2b.webp?v=20261017-recompra-v31',theme:'purple',fit:'logo'};
- if(s.includes('B2B'))return{img:'assets/incentivos/b2b.svg?v=20261017-v28',theme:'cyan',fit:'logo'};
+ if(s.includes('RECOMPRA')&&s.includes('B2B'))return{img:'assets/incentivos/b2b-recompra.svg?v=20261017-b2b-v31',theme:'purple',fit:'logo'};
+ if(s.includes('B2B'))return{img:'assets/incentivos/b2b.svg?v=20261017-b2b-v31',theme:'cyan',fit:'logo'};
  if(s.includes('CAMPARI'))return{img:'assets/incentivos/campari.svg?v=20261017-v28',theme:'navy',fit:'logo'};
  if(s.includes('APEROL'))return{img:'assets/incentivos/aperol.svg?v=20261017-aperol-v30',theme:'orange',fit:'logo'};
  return{img:'',theme:'red',fit:'logo'};
