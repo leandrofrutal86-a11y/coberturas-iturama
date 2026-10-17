@@ -98,6 +98,28 @@ html,body{max-width:100%!important;overflow-x:hidden!important}
 .cmCat.cmTheme-navy{background:linear-gradient(160deg,#173b6b,#061d3b)!important}
 .cmCat.cmTheme-orange{background:linear-gradient(160deg,#ff8d1c,#e63a0a)!important}
 .cmCat.cmTheme-red{background:linear-gradient(160deg,#f21a2b,#a6000b)!important}
+
+/* PRODUCT INCENTIVE CARDS */
+.cmCat{height:236px!important;padding:138px 10px 12px!important;border-radius:20px!important;box-shadow:0 12px 24px rgba(18,31,45,.20)!important;background:linear-gradient(160deg,#f21a2b,#a6000b)!important}
+.cmCat:before{content:'';position:absolute;left:0;right:0;top:0;height:128px;background-position:center;background-repeat:no-repeat;background-size:contain;background-color:rgba(255,255,255,.96);border-radius:20px 20px 0 0}
+.cmCat .emoji{display:none!important}
+.cmCat b{font-size:14px!important;line-height:1.05!important;min-height:32px!important;text-transform:uppercase!important;text-shadow:0 1px 2px rgba(0,0,0,.2)}
+.cmCat small{font-size:10.5px!important;color:#fff!important;margin-top:6px!important}
+.cmCat:after{width:32px!important;height:32px!important;right:9px!important;bottom:9px!important}
+.cmCat.prod-perfetti{background:linear-gradient(160deg,#1d74d8,#173a91)!important}.cmCat.prod-perfetti:before{background-image:url('assets/incentivos/perfetti.svg')}
+.cmCat.prod-fini{background:linear-gradient(160deg,#ff2b7e,#c90055)!important}.cmCat.prod-fini:before{background-image:url('assets/incentivos/fini.svg')}
+.cmCat.prod-black{background:linear-gradient(160deg,#2b2b2b,#050505)!important}.cmCat.prod-black:before{background-image:url('assets/incentivos/black-label.svg')}
+.cmCat.prod-whitehorse{background:linear-gradient(160deg,#f2b410,#a96a00)!important}.cmCat.prod-whitehorse:before{background-image:url('assets/incentivos/white-horse.svg')}
+.cmCat.prod-oldparr{background:linear-gradient(160deg,#855127,#3f210f)!important}.cmCat.prod-oldparr:before{background-image:url('assets/incentivos/old-parr.svg')}
+.cmCat.prod-frut{background:linear-gradient(160deg,#72a927,#27690f)!important}.cmCat.prod-frut:before{background-image:url('assets/incentivos/del-valle-frut.svg')}
+.cmCat.prod-estrella{background:linear-gradient(160deg,#df1824,#7e0810)!important}.cmCat.prod-estrella:before{background-image:url('assets/incentivos/estrella.svg')}
+.cmCat.prod-trio{background:linear-gradient(160deg,#ed111f,#9f0008)!important}.cmCat.prod-trio:before{background-image:url('assets/incentivos/trio-pao-de-queijo.svg');background-size:cover}
+.cmCat.prod-tanqueray{background:linear-gradient(160deg,#19a54c,#075b28)!important}.cmCat.prod-tanqueray:before{background-image:url('assets/incentivos/tanqueray.svg')}
+.cmCat.prod-compra{background:linear-gradient(160deg,#18a6e7,#0758af)!important}.cmCat.prod-compra:before{background-image:url('assets/incentivos/b2b.svg')}
+.cmCat.prod-recompra{background:linear-gradient(160deg,#9237e9,#55149f)!important}.cmCat.prod-recompra:before{background-image:url('assets/incentivos/b2b.svg')}
+.cmCat.prod-campari{background:linear-gradient(160deg,#153966,#071c39)!important}.cmCat.prod-campari:before{background-image:url('assets/incentivos/campari.svg')}
+.cmCat.prod-aperol{background:linear-gradient(160deg,#ff8b1d,#e23c0a)!important}.cmCat.prod-aperol:before{background-image:url('assets/incentivos/aperol.svg')}
+
 #dash .tabs{margin-top:13px!important}.cmGraph{background:#fff;border:1px solid #e0e7ed;border-radius:17px;padding:13px;margin:0 0 12px;box-shadow:0 5px 15px #172b400d}.cmGraphTop{display:flex;align-items:center;gap:12px}.cmDonut{--p:0;width:88px;height:88px;border-radius:50%;background:conic-gradient(#0b9b57 calc(var(--p)*1%),#edf1f4 0);display:grid;place-items:center;flex:0 0 auto}.cmDonut:after{content:attr(data-p);width:65px;height:65px;border-radius:50%;background:#fff;display:grid;place-items:center;font-size:18px;font-weight:950;color:#163046}.cmGraphText{min-width:0}.cmGraphText h3{font-size:16px;margin:0 0 7px;color:#172736;line-height:1.15}.cmGraphStats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:11px}.cmGraphStat{background:#f5f8fa;border-radius:10px;padding:8px;text-align:center}.cmGraphStat small{display:block;font-size:9px;color:#687987;font-weight:800}.cmGraphStat b{display:block;font-size:16px;margin-top:2px}
 .cvPrioritySection,.cvPriorityWrap,.cvHomePriorities,#cvPriorityBlock{display:none!important}
 @media(max-width:380px){#dash .wrap{padding-left:7px!important;padding-right:7px!important}.cmSearchRow{grid-template-columns:1fr!important}.cmSearchRow button{width:100%!important;font-size:11px!important}.cmCat{flex-basis:120px!important;width:120px!important;min-width:120px!important;max-width:120px!important}.cmAct{font-size:12px}}
