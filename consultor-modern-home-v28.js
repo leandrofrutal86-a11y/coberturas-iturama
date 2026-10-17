@@ -5,7 +5,9 @@ const E=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt
 const num=v=>Number(v||0);
 function D(){try{return typeof DATA!=='undefined'?DATA:null}catch{return null}}
 
-function productMeta(name){
+function productMeta(item){
+ const name=typeof item==='object'?(item?.nome||''):item;
+ if(item&&typeof item==='object'&&item.imagem_card_url)return{img:String(item.imagem_card_url),theme:'custom',fit:'logo',color:String(item.cor_card||'#e30613')};
  const s=String(name||'').toUpperCase();
  if(s.includes('IMPERDO')&&(s.includes('SSRD')||s.includes('SSD')))return{img:'assets/incentivos/imperdoaveis-ssrd.webp?v=20261017-imp-v34',theme:'red',fit:'logo'};
  if(s.includes('IMPERDO')&&(s.includes('STILL')||s.includes('ESTILO')))return{img:'assets/incentivos/imperdoaveis-still.webp?v=20261017-imp-v35',theme:'blue',fit:'logo'};
@@ -107,7 +109,7 @@ html,body{max-width:100%!important;overflow-x:hidden!important}
 .cmCat.cmTheme-purple{background:linear-gradient(160deg,#8b43e6,#4d1498)!important}
 .cmCat.cmTheme-navy{background:linear-gradient(160deg,#1f4f8f,#071b38)!important}
 .cmCat.cmTheme-orange{background:linear-gradient(160deg,#ff9a25,#e3420c)!important}
-.cmCat.cmTheme-red{background:linear-gradient(160deg,#f52633,#9e0009)!important}
+.cmCat.cmTheme-red{background:linear-gradient(160deg,#f52633,#9e0009)!important}.cmTheme-custom{background:var(--cm-custom,#e30613)!important}
 
 #dash .tabs{margin-top:13px!important}.cmGraph{background:#fff;border:1px solid #e0e7ed;border-radius:17px;padding:13px;margin:0 0 12px;box-shadow:0 5px 15px #172b400d}.cmGraphTop{display:flex;align-items:center;gap:12px}.cmDonut{--p:0;width:88px;height:88px;border-radius:50%;background:conic-gradient(#0b9b57 calc(var(--p)*1%),#edf1f4 0);display:grid;place-items:center;flex:0 0 auto}.cmDonut:after{content:attr(data-p);width:65px;height:65px;border-radius:50%;background:#fff;display:grid;place-items:center;font-size:18px;font-weight:950;color:#163046}.cmGraphText{min-width:0}.cmGraphText h3{font-size:16px;margin:0 0 7px;color:#172736;line-height:1.15}.cmGraphStats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:11px}.cmGraphStat{background:#f5f8fa;border-radius:10px;padding:8px;text-align:center}.cmGraphStat small{display:block;font-size:9px;color:#687987;font-weight:800}.cmGraphStat b{display:block;font-size:16px;margin-top:2px}
 .cvPrioritySection,.cvPriorityWrap,.cvHomePriorities,#cvPriorityBlock{display:none!important}
@@ -319,7 +321,7 @@ function build(){const wrap=Q('#dash .wrap');if(!wrap)return false;css();let hom
 function render(){
  if(!build())return;const d=D();if(!d?.own)return;
  const name=d.consultor?.nome||'Consultor';
- const cards=(d.own||[]).map(x=>{const pm=productMeta(x.nome),meta=num(x.meta),real=num(x.realizado),pct=meta?Math.min(100,Math.round(real/meta*100)):0;return '<button class="cmCat cmTheme-'+pm.theme+'" type="button" data-cat="'+E(x.nome)+'"><span class="cmProd">'+(pm.img?'<img loading="eager" decoding="async" referrerpolicy="no-referrer" data-fit="'+(pm.fit||'logo')+'" src="'+pm.img+'" alt="">':'<span class="cmFallback">'+icon(x.nome)+'</span>')+'</span><b>'+E(x.nome)+'</b><small>'+real+' / '+meta+' realizados</small><span class="cmProgress"><i style="width:'+pct+'%"></i></span><span class="cmArrow">›</span></button>'}).join('');
+ const cards=(d.own||[]).map(x=>{const pm=productMeta(x),meta=num(x.meta),real=num(x.realizado),pct=meta?Math.min(100,Math.round(real/meta*100)):0;return '<button class="cmCat cmTheme-'+pm.theme+'"'+(pm.theme==='custom'?' style="--cm-custom:'+E(pm.color)+'"':'')+' type="button" data-cat="'+E(x.nome)+'"><span class="cmProd">'+(pm.img?'<img loading="eager" decoding="async" referrerpolicy="no-referrer" data-fit="'+(pm.fit||'logo')+'" src="'+pm.img+'" alt="">':'<span class="cmFallback">'+icon(x.nome)+'</span>')+'</span><b>'+E(x.nome)+'</b><small>'+real+' / '+meta+' realizados</small><span class="cmProgress"><i style="width:'+pct+'%"></i></span><span class="cmArrow">›</span></button>'}).join('');
  const h=document.getElementById('consultorModernHome');
  h.innerHTML='<div class="cmHello"><div class="cmAvatar">👤</div><div><strong>Olá, '+E(String(name).split(' ')[0])+'</strong><small>Bora conquistar mais hoje! 🚀</small></div></div>'+
  '<div class="cmSearchHero"><div class="cmSearchTitle"><div class="cmSearchIcon">🔎</div><div><b>Pesquisa de PV</b><small>Pesquise PV, cliente ou razão social</small></div></div><div class="cmSearchRow"><input id="cmPvInput" inputmode="numeric" placeholder="Digite o PV do cliente"></div><div class="cmPvControls"><div class="cmPvLabel">📍 Escolha o dia da visita</div><div class="cmWeekDays">'+['SEG','TER','QUA','QUI','SEX'].map(d=>'<span role="button" tabindex="0" class="cmWeekDay" data-day="'+d+'">'+d+'</span>').join('')+'</div><button type="button" id="cmClientListBtn" class="cmClientListBtn">Listar clientes do dia ▾</button></div></div>'+
@@ -347,6 +349,6 @@ function render(){
  hideOldPriority();
  try{window.__renderPvHomePanel?.()}catch{}
 }
-let sig='';setInterval(()=>{const d=D();const s=d?JSON.stringify([(d.own||[]).map(x=>[x.nome,x.realizado,x.meta]),d.consultor?.nome]):'';if(s&&s!==sig){sig=s;render()}},700);
+let sig='';setInterval(()=>{const d=D();const s=d?JSON.stringify([(d.own||[]).map(x=>[x.nome,x.realizado,x.meta,x.imagem_card_url,x.cor_card]),d.consultor?.nome]):'';if(s&&s!==sig){sig=s;render()}},700);
 window.addEventListener('pageshow',()=>setTimeout(render,350));
 })();
