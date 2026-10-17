@@ -7,7 +7,7 @@ const norm=v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim
 const n=v=>Number(v||0);
 const ALLOWED=new Set(['visao da equipe','atualizar vendas','acoes vigentes','contratos','relatorios']);
 
-function getDash(){try{return typeof dash!=='undefined'?dash:null}catch{return null}}
+function getDash(){try{return w.eval('dash')}catch{try{return typeof dash!=='undefined'?dash:null}catch{return null}}}
 function getTeam(){const x=getDash();return Array.isArray(x?.individual)?x.individual:[]}
 function getCats(){const x=getDash();return Array.isArray(x?.team)?x.team:[]}
 
@@ -42,7 +42,7 @@ function css(){
 .acvList{width:100%;margin-top:8px;border:0;border-radius:10px;padding:10px;background:#202020;color:#fff;font-weight:900}
 .acvQuickBox{background:#fff;border:1px solid #e0e7ed;border-radius:19px;padding:13px;box-shadow:0 5px 16px #172b400e}
 .acvSecTitle{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 2px 10px}.acvSecTitle h3{font-size:20px;margin:0}.acvSecTitle small{font-size:11px;color:#6f7d89}
-.acvActions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.acvActions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
 .acvAct{min-height:95px;border:1px solid #dfe6ec;border-radius:17px;background:#fff;padding:13px;text-align:left;font-weight:900;color:#152738;box-shadow:0 4px 12px #172b400b}
 .acvAct .ic{width:40px;height:40px;border-radius:12px;background:#fff0f1;display:grid;place-items:center;font-size:21px;margin-bottom:8px}.acvAct.blue .ic{background:#e9f3ff}.acvAct.green .ic{background:#e8f8ef}.acvAct.orange .ic{background:#fff0df}
 .acvCarouselShell{position:relative;min-width:0}.acvCarousel{display:flex;gap:10px;overflow-x:auto;padding:2px 1px 12px;scrollbar-width:none;scroll-snap-type:x proximity}.acvCarousel::-webkit-scrollbar{display:none}
@@ -51,8 +51,8 @@ function css(){
 .acvProd{height:125px;margin:0 -13px 10px;border-radius:20px 20px 14px 14px;background:linear-gradient(180deg,#fff,#f5f7fa);display:grid;place-items:center;font-size:43px}.acvCat b{font-size:14px;line-height:1.08;display:block;min-height:31px}.acvCat small{display:block;margin-top:6px;color:#fff;font-size:10.5px}.acvProgress{height:6px;border-radius:999px;background:#ffffff38;overflow:hidden;margin-top:8px;margin-right:34px}.acvProgress i{display:block;height:100%;background:#fff;border-radius:inherit}.acvArrow{position:absolute;right:9px;bottom:9px;width:32px;height:32px;border-radius:50%;background:#fff;color:#e30613;display:grid;place-items:center;font-size:23px;font-weight:950}
 .acvStats{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}.acvStat{background:#fff;border:1px solid #e1e7ed;border-radius:15px;padding:12px;box-shadow:0 4px 12px #172b4009}.acvStat span{font-size:9px;color:#607386;font-weight:950}.acvStat b{display:block;font-size:22px;margin-top:4px}
 .acvResults{background:#fff;border:1px solid #e0e7ed;border-radius:18px;padding:13px;box-shadow:0 5px 15px #172b400d}.acvTableWrap{overflow:auto;border:1px solid #e2e8ed;border-radius:12px}.acvTable{width:100%;border-collapse:collapse;min-width:720px}.acvTable th,.acvTable td{padding:10px 8px;border-bottom:1px solid #edf0f2;text-align:center;font-size:12px}.acvTable th{background:#f5f7f9}.acvTable th:first-child,.acvTable td:first-child{text-align:left;font-weight:900}.good{color:#087249;font-weight:950}.bad{color:#b3141c;font-weight:950}
-@media(max-width:900px){.acvTopIn{flex-wrap:wrap}.acvBrand{flex-basis:calc(100% - 125px)}.acvSupervisor{order:3}.acvMainGrid{grid-template-columns:1fr}.acvHello{align-items:flex-start;flex-wrap:wrap}.acvRouteBox{width:100%;min-width:0}.acvStats{grid-template-columns:1fr 1fr}}
-@media(max-width:520px){.acvWrap{width:calc(100% - 14px);margin-top:8px}.acvTop{padding:10px}.acvBrand b{font-size:16px}.acvBrand small{font-size:9px}.acvBack{font-size:11px;padding:8px 10px}.acvSupervisor{font-size:10px;padding:6px 9px}.acvSearchRow{grid-template-columns:1fr}.acvSearchRow button{padding:11px}.acvCat{flex-basis:148px;height:220px}.acvProd{height:118px}.acvSecTitle h3{font-size:18px}}
+@media(max-width:900px){.acvActions{grid-template-columns:repeat(3,minmax(0,1fr))}.acvTopIn{flex-wrap:wrap}.acvBrand{flex-basis:calc(100% - 125px)}.acvSupervisor{order:3}.acvMainGrid{grid-template-columns:1fr}.acvHello{align-items:flex-start;flex-wrap:wrap}.acvRouteBox{width:100%;min-width:0}.acvStats{grid-template-columns:1fr 1fr}}
+@media(max-width:520px){.acvActions{grid-template-columns:1fr}.acvWrap{width:calc(100% - 14px);margin-top:8px}.acvTop{padding:10px}.acvBrand b{font-size:16px}.acvBrand small{font-size:9px}.acvBack{font-size:11px;padding:8px 10px}.acvSupervisor{font-size:10px;padding:6px 9px}.acvSearchRow{grid-template-columns:1fr}.acvSearchRow button{padding:11px}.acvCat{flex-basis:148px;height:220px}.acvProd{height:118px}.acvSecTitle h3{font-size:18px}}
 `;d.head.appendChild(s);
 }
 
@@ -94,7 +94,7 @@ function rowsFor(route){
 function ensureView(){
  let v=d.getElementById('admConsultorView');if(v)return v;
  css();v=d.createElement('section');v.id='admConsultorView';v.hidden=true;
- v.innerHTML='<header class="acvTop"><div class="acvTopIn"><div class="acvBrand"><b>COBERTURAS • EQUIPE ITURAMA</b><small>Painel do Supervisor • Visão da Equipe</small></div><span class="acvSupervisor">Leandro • Supervisor</span><button type="button" id="acvBack" class="acvBack">← Voltar ao DM</button></div></header><main class="acvWrap"><section class="acvHello"><div class="acvAvatar">👤</div><div class="acvHelloText"><strong>Olá, Leandro</strong><small>Bora conquistar mais hoje! 🚀</small></div><div class="acvRouteBox"><label>Visualizar</label><select id="acvRoute" class="acvRoute"></select></div></section><section class="acvMainGrid"><div class="acvSearch"><div class="acvSearchTitle"><div class="acvSearchIcon">🔎</div><div><b>Pesquisa de PV</b><small>Pesquise PV, cliente ou razão social</small></div></div><div class="acvSearchRow"><input id="acvPv" inputmode="numeric" placeholder="Digite o PV do cliente"><button type="button" id="acvSearchBtn">Pesquisar ›</button></div><div class="acvPvControls"><div class="acvPvLabel">📍 Escolha o dia da visita</div><div class="acvDays">'+['SEG','TER','QUA','QUI','SEX'].map(x=>'<button type="button" class="acvDay" data-day="'+x+'">'+x+'</button>').join('')+'</div><button type="button" id="acvListDay" class="acvList">Listar clientes do dia ▾</button></div></div><div class="acvQuickBox"><div class="acvSecTitle"><h3>Acesso rápido</h3><small>Ferramentas da equipe</small></div><div class="acvActions"><button type="button" class="acvAct" data-act="contratos"><span class="ic">📄</span>Contratos</button><button type="button" class="acvAct blue" data-act="visitas"><span class="ic">📅</span>Visita de Clientes</button><button type="button" class="acvAct green" data-act="subcanais"><span class="ic">🏪</span>Subcanais</button><button type="button" class="acvAct orange" data-act="contatos"><span class="ic">📞</span>Contato dos Clientes</button></div></div></section><section><div class="acvSecTitle"><h3>Coberturas dos Incentivos</h3><small>↔ arraste para o lado</small></div><div class="acvCarouselShell"><div id="acvCats" class="acvCarousel"></div></div></section><section id="acvStats" class="acvStats"></section><section class="acvResults"><div class="acvSecTitle"><div><h3 id="acvResultTitle">Resultado da Equipe por incentivo</h3><small id="acvResultHint">Selecione um incentivo para visualizar os resultados.</small></div></div><div id="acvResultBody"></div></section></main>';
+ v.innerHTML='<header class="acvTop"><div class="acvTopIn"><div class="acvBrand"><b>COBERTURAS • EQUIPE ITURAMA</b><small>Painel do Supervisor • Visão da Equipe</small></div><span class="acvSupervisor">Leandro • Supervisor</span><button type="button" id="acvBack" class="acvBack">← Voltar ao DM</button></div></header><main class="acvWrap"><section class="acvHello"><div class="acvAvatar">👤</div><div class="acvHelloText"><strong>Olá, Leandro</strong><small>Bora conquistar mais hoje! 🚀</small></div><div class="acvRouteBox"><label>Visualizar</label><select id="acvRoute" class="acvRoute"></select></div></section><section class="acvMainGrid"><div class="acvSearch"><div class="acvSearchTitle"><div class="acvSearchIcon">🔎</div><div><b>Pesquisa de PV</b><small>Pesquise PV, cliente ou razão social</small></div></div><div class="acvSearchRow"><input id="acvPv" inputmode="numeric" placeholder="Digite o PV do cliente"><button type="button" id="acvSearchBtn">Pesquisar ›</button></div><div class="acvPvControls"><div class="acvPvLabel">📍 Escolha o dia da visita</div><div class="acvDays">'+['SEG','TER','QUA','QUI','SEX'].map(x=>'<button type="button" class="acvDay" data-day="'+x+'">'+x+'</button>').join('')+'</div><button type="button" id="acvListDay" class="acvList">Listar clientes do dia ▾</button></div></div><div class="acvQuickBox"><div class="acvSecTitle"><h3>Acesso rápido</h3><small>Ferramentas da equipe</small></div><div class="acvActions"><button type="button" class="acvAct blue" data-act="visitas"><span class="ic">📅</span>Visita de Clientes</button><button type="button" class="acvAct green" data-act="subcanais"><span class="ic">🏪</span>Subcanais</button><button type="button" class="acvAct orange" data-act="contatos"><span class="ic">📞</span>Contato dos Clientes</button></div></div></section><section><div class="acvSecTitle"><h3>Coberturas dos Incentivos</h3><small>↔ arraste para o lado</small></div><div class="acvCarouselShell"><div id="acvCats" class="acvCarousel"></div></div></section><section id="acvStats" class="acvStats"></section><section class="acvResults"><div class="acvSecTitle"><div><h3 id="acvResultTitle">Resultado da Equipe por incentivo</h3><small id="acvResultHint">Selecione um incentivo para visualizar os resultados.</small></div></div><div id="acvResultBody"></div></section></main>';
  d.body.appendChild(v);
  $('#acvBack').onclick=closeView;
  $('#acvRoute').onchange=()=>renderView();
@@ -102,7 +102,7 @@ function ensureView(){
  $('#acvPv').onkeydown=e=>{if(e.key==='Enter')searchPv()};
  $$('.acvDay',v).forEach(b=>b.onclick=()=>{$$('.acvDay',v).forEach(x=>x.classList.remove('on'));b.classList.add('on');try{sessionStorage.setItem('pv_dia_visita',b.dataset.day)}catch{}});
  $('#acvListDay').onclick=()=>openAdminFeature('Visita de Clientes');
- $$('.acvAct',v).forEach(b=>b.onclick=()=>{const a=b.dataset.act;if(a==='contratos')openAdminFeature('Contratos');if(a==='visitas')openAdminFeature('Visita de Clientes');if(a==='subcanais')openAdminFeature('Subcanais');if(a==='contatos')openAdminFeature('Contato dos Clientes')});
+ $$('.acvAct',v).forEach(b=>b.onclick=()=>{const a=b.dataset.act;if(a==='visitas')openAdminFeature('Visita de Clientes');if(a==='subcanais')openAdminFeature('Subcanais');if(a==='contatos')openAdminFeature('Contato dos Clientes')});
  return v;
 }
 function openAdminFeature(label){
@@ -156,5 +156,18 @@ function sweep(){
  css();d.getElementById('admQuickNav')?.remove();d.getElementById('admQuickOverlay')?.remove();patchHome();patchSidebar();
 }
 let tries=0;const timer=setInterval(()=>{sweep();if(++tries>90)clearInterval(timer)},500);
+let liveSig='';
+setInterval(()=>{
+ const v=d.getElementById('admConsultorView');
+ if(!v||v.hidden)return;
+ const x=getDash();
+ const sig=x?JSON.stringify([(x.consultores||[]).map(a=>[a.rota,a.nome]),(x.team||[]).map(a=>[a.nome,a.meta,a.realizado]),(x.individual||[]).map(a=>[a.rota,(a.resultados||[]).map(r=>[r.nome,r.meta,r.realizado])])]):'';
+ if(sig&&sig!==liveSig){
+   liveSig=sig;
+   const sel=d.getElementById('acvRoute'),old=sel?.value||'TEAM';
+   if(sel){sel.innerHTML=options();sel.value=[...sel.options].some(o=>o.value===old)?old:'TEAM'}
+   renderView();
+ }
+},700);
 w.addEventListener('pageshow',()=>setTimeout(sweep,250));
 })();
