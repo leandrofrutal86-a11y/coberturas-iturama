@@ -1,0 +1,17 @@
+(()=>{const d=document,$=id=>d.getElementById(id);
+function css(){if($('cimStyle'))return;const s=d.createElement('style');s.id='cimStyle';s.textContent=`
+#cimOverlay{display:none;position:fixed;inset:0;z-index:39000;background:#000a;padding:12px;align-items:center;justify-content:center}#cimOverlay.show{display:flex}
+#cimBox{width:min(680px,100%);max-height:90dvh;overflow:auto;background:#fff;border-radius:20px;box-shadow:0 24px 70px #0007;padding:18px}
+.cimIcon{width:68px;height:68px;border-radius:50%;background:#e30613;color:#fff;display:grid;place-items:center;font-size:32px;margin:0 auto 10px}
+#cimTitle{text-align:center;margin:0 0 12px;font-size:25px;color:#172534}.cimRule{height:1px;background:#dce3e8;margin:0 0 13px}
+#cimContent{font-size:16px;line-height:1.5;color:#202d39;overflow-wrap:anywhere}#cimContent p{margin:0 0 9px}#cimContent ul,#cimContent ol{padding-left:22px}
+.cimActions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}.cimActions button{border:0;border-radius:11px;padding:12px;font-weight:950;font-size:14px}.cimClose{background:#edf1f4;color:#202020}.cimOk{background:#e30613;color:#fff}
+@media(max-width:600px){#cimOverlay{padding:8px}#cimBox{max-height:92dvh;padding:14px;border-radius:18px}.cimIcon{width:58px;height:58px;font-size:27px}#cimTitle{font-size:21px}#cimContent{font-size:14px}.cimActions{grid-template-columns:1fr 1fr}.cimActions button{font-size:13px;padding:11px 7px}}
+`;d.head.appendChild(s)}
+function clean(html){const t=d.createElement('template');t.innerHTML=String(html||'');const allowed=new Set(['P','BR','B','STRONG','I','EM','U','UL','OL','LI','SPAN']);[...t.content.querySelectorAll('*')].forEach(el=>{if(!allowed.has(el.tagName)){el.replaceWith(...el.childNodes);return}[...el.attributes].forEach(a=>{if(el.tagName==='SPAN'&&a.name==='style'&&/^color\s*:\s*(#[0-9a-f]{3,6}|rgb\([^)]*\)|red|black|white|blue|green|orange|purple)\s*;?$/i.test(a.value))return;el.removeAttribute(a.name)})});return t.innerHTML}
+function ensure(){css();let ov=$('cimOverlay');if(ov)return ov;ov=d.createElement('div');ov.id='cimOverlay';ov.innerHTML='<div id="cimBox" role="dialog" aria-modal="true" aria-labelledby="cimTitle"><div class="cimIcon">📣</div><h2 id="cimTitle">Mensagem do Dia</h2><div class="cimRule"></div><div id="cimContent"></div><div class="cimActions"><button type="button" id="cimClose" class="cimClose">Fechar</button><button type="button" id="cimOk" class="cimOk">Entendi</button></div></div>';d.body.appendChild(ov);return ov}
+function data(){try{return window.eval('DATA')}catch{return null}}
+function token(){return sessionStorage.getItem('iturama_token')||''}
+function showIfNeeded(){const x=data(),m=x?.initial_message,t=token();if(!t||!m||!String(m.conteudo_html||'').trim())return false;const key='cim_seen_'+t+'_'+String(m.versao||1);if(sessionStorage.getItem(key)==='1')return false;const ov=ensure();$('cimTitle').textContent=m.titulo||'Mensagem do Dia';$('cimContent').innerHTML=clean(m.conteudo_html);const done=()=>{sessionStorage.setItem(key,'1');ov.classList.remove('show')};$('cimClose').onclick=done;$('cimOk').onclick=done;ov.classList.add('show');return true}
+let n=0;const timer=setInterval(()=>{if(showIfNeeded()||++n>80)clearInterval(timer)},250);window.addEventListener('pageshow',()=>setTimeout(showIfNeeded,300));
+})();
