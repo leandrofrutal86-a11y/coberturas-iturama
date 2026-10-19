@@ -253,7 +253,7 @@ html,body{width:100%!important;max-width:100%!important;overflow-x:hidden!import
 
 function getCardLabel(card){return norm(card.querySelector('b')?.textContent||card.textContent)}
 function patchHome(){
- const home=d.getElementById('cokeHome');if(!home)return;
+ const home=d.getElementById('cokeHome');if(!home)return;if(!home.classList.contains('hide'))d.getElementById('vendas')?.classList.add('hide');
  home.querySelector('.topicIncentivos')?.remove();
  const vendas=home.querySelector('.topicVendas .menuGrid');if(!vendas)return;
  $$('.menuCard',vendas).forEach(card=>{if(!ALLOWED.has(getCardLabel(card)))card.remove()});

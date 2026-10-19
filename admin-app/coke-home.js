@@ -62,6 +62,10 @@ function nav(label){
  if(String(label)==='Histórico de Acesso'){const url=new URL('historico.html?v=20260920-who-accessed-02',window.location.href).href;try{window.top.location.assign(url)}catch{window.location.assign(url)}return}
  if(String(label)==='Ações Vigentes'){openContent('acoes_vigentes');return}
  if(String(label)==='Premiações de Incentivos'){openContent('premiacoes_incentivos');return}
+ if(String(label)==='Atualizar Base de Clientes'){
+   if(typeof window.abrirAtualizarBaseClientesAdm==='function'){window.abrirAtualizarBaseClientesAdm();return}
+   if(typeof window.abrirVisitaClientesAdm==='function'){window.abrirVisitaClientesAdm();setTimeout(()=>document.getElementById('vfOpenUpload')?.click(),120);return}
+ }
  if(String(label)==='Atualizar Metas'){openMeta('meta');return}
  if(String(label)==='Metas e Categorias'){openMeta('categorias');return}
  const aliases={'Visão Consultor':'Visão do Consultor'};
@@ -85,6 +89,7 @@ function build(){if($('cokeHome')){syncSalesPeriod();return;}const tabs=document
   <button class="menuCard" onclick="window.cokeNav('Subcanais')"><span class="mi" style="background:#0d8f6a">🏪</span><span><b>Subcanais</b><small>Clientes e quantidades por perfil</small></span></button>
   <button class="menuCard" data-cmgr="acoes" onclick="window.cokeNav('Ações Vigentes')"><span class="mi" style="background:#e85d04">⚡</span><span><b>Ações Vigentes</b><small>Cadastrar e atualizar ações comerciais</small></span></button>
   <button class="menuCard" onclick="window.cokeNav('Atualizar Vendas')"><span class="mi" style="background:#2563eb">📊</span><span><b>Atualizar Vendas</b><small>Anexar planilha Excel e atualizar a base de vendas</small></span></button>
+  <button class="menuCard" id="admUpdateClientBaseCard" onclick="window.cokeNav('Atualizar Base de Clientes')"><span class="mi" style="background:#0b63ce">👥</span><span><b>Atualizar Base de Clientes</b><small>Anexar planilha Excel e atualizar clientes, rotas e dias de visita</small></span></button>
  </div>
 </div>
 
