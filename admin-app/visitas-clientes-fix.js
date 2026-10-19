@@ -131,6 +131,19 @@
     if(!build())return;hideAll();$('visitasClientesFix').classList.remove('hide');addBack();$('vfInfo').textContent=rows.length?'Atualizando lista...':'Carregando clientes...';window.scrollTo({top:0,behavior:'smooth'});await ensureRows();render();
   }
   window.abrirVisitaClientesAdm=open;
+  window.abrirAtualizarBaseClientesAdm=async function(){
+    if(!build())return;
+    hideAll();
+    $('visitasClientesFix').classList.remove('hide');
+    addBack();
+    $('vfUpload').classList.remove('hide');
+    $('vfImportStatus').textContent='';
+    $('vfInfo').textContent=rows.length?'Base atual carregada. Selecione a nova planilha para atualizar.':'Carregando base atual...';
+    window.scrollTo({top:0,behavior:'smooth'});
+    try{await ensureRows()}catch{}
+    render();
+    setTimeout(()=>{try{$('vfUpload').scrollIntoView({behavior:'smooth',block:'start'})}catch{}},120);
+  };
 
   document.addEventListener('click',e=>{
     const card=e.target.closest?.('.menuCard');if(!card)return;
