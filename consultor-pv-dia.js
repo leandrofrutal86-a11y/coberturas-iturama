@@ -9,9 +9,10 @@ const DAYS=[
 ];
 const norm=v=>String(v??'').trim().toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const savedDay=sessionStorage.getItem('pv_dia_visita')||'',savedRoute=sessionStorage.getItem('pv_rota_pesquisa')||'TODOS';let selectedDay=(DAYS.some(x=>x.code===savedDay)&&savedDay!=='TODOS')?savedDay:currentDay(),selectedRoute=savedRoute,clients=[],baseClients=[],visitRows=null,loading=false,baseLoading=false,lastKey='',baseKey='',reportData=null,preparedPdfDoc=null,preparedPdfName='',preparedPdfBlob=null,preparedPdfFile=null,preparedPdfUrl='',preparingPdf=false;let pickerSource='overlay';
+const savedRoute=sessionStorage.getItem('pv_rota_pesquisa')||'TODOS';let selectedDay=currentDay(),selectedRoute=savedRoute,clients=[],baseClients=[],visitRows=null,loading=false,baseLoading=false,lastKey='',baseKey='',reportData=null,preparedPdfDoc=null,preparedPdfName='',preparedPdfBlob=null,preparedPdfFile=null,preparedPdfUrl='',preparingPdf=false;let pickerSource='overlay';
 
 function currentDay(){const d=['DOM','SEG','TER','QUA','QUI','SEX','SAB'][new Date().getDay()];return DAYS.some(x=>x.code===d)?d:'SEG'}
+sessionStorage.setItem('pv_dia_visita',selectedDay);window.__pvDiaSelectedDay=selectedDay;
 function route(){
  try{
   if(typeof DATA!=='undefined'&&DATA?.perfil==='consultor'&&DATA?.consultor?.rota)return String(DATA.consultor.rota).trim();
@@ -95,16 +96,35 @@ async function getDayClients(force=false){
  loading=true;renderPanel();
  try{
   if(!baseClients.length||baseKey!==rt)await getBaseClients(false);
-  const rows=await loadVisitRows(),baseMap=new Map(baseClients.map(x=>[String(x.rota||'').trim()+'|'+String(x.pv||x.cliente||'').trim(),x]));
-  clients=rows.filter(x=>{
-   const xr=String(x.Rota||'').trim(),pv=String(x.Cliente||'').trim();
-   if(rt!=='TODOS'&&xr!==rt)return false;
-   if(selectedDay==='TODOS'?!['SEG','TER','QUA','QUI','SEX'].some(d=>Number(x[d]||0)>0):Number(x[selectedDay]||0)<=0)return false;
-   return !baseClients.length||baseMap.has(xr+'|'+pv);
-  }).map(x=>{
-   const xr=String(x.Rota||'').trim(),pv=String(x.Cliente||'').trim(),b=baseMap.get(xr+'|'+pv)||{};
-   return{pv,cliente:pv,razao:String(b.razao||x['Razão Social']||'').trim(),rota:xr,subcanal:String(b.subcanal||x.SubCanal||'').trim(),ordem:selectedDay==='TODOS'?Math.min(...['SEG','TER','QUA','QUI','SEX'].map(d=>Number(x[d]||0)).filter(n=>n>0)):Number(x[selectedDay]||0)};
-  }).sort((a,b)=>String(a.rota).localeCompare(String(b.rota))||Number(a.ordem)-Number(b.ordem)||String(a.razao).localeCompare(String(b.razao),'pt-BR'));
+  let online=[];
+  try{
+    if(selectedDay==='TODOS'){
+      const days=['SEG','TER','QUA','QUI','SEX'],parts=await Promise.all(days.map(day=>api('day_clients',{day,rota:rt}))),mp=new Map();
+      parts.forEach((j,di)=>(j.clients||[]).forEach(x=>{
+        const xr=String(x.rota||'').trim(),pv=String(x.pv||x.cliente||'').trim(),k=xr+'|'+pv;if(!xr||!pv)return;
+        const row={...x,rota:xr,pv,cliente:pv,ordem:Number(x.ordem||0),_day:days[di]},cur=mp.get(k);
+        if(!cur||Number(row.ordem||9999)<Number(cur.ordem||9999))mp.set(k,row);
+      }));
+      online=[...mp.values()];
+    }else{
+      const j=await api('day_clients',{day:selectedDay,rota:rt});online=j.clients||[];
+    }
+  }catch{}
+  if(online.length){
+    clients=online.map(x=>({pv:String(x.pv||x.cliente||'').trim(),cliente:String(x.pv||x.cliente||'').trim(),razao:String(x.razao||'').trim(),rota:String(x.rota||rt).trim(),subcanal:String(x.subcanal||'').trim(),ordem:Number(x.ordem||0)}))
+      .sort((a,b)=>String(a.rota).localeCompare(String(b.rota))||Number(a.ordem)-Number(b.ordem)||String(a.razao).localeCompare(String(b.razao),'pt-BR'));
+  }else{
+    const rows=await loadVisitRows(),baseMap=new Map(baseClients.map(x=>[String(x.rota||'').trim()+'|'+String(x.pv||x.cliente||'').trim(),x]));
+    clients=rows.filter(x=>{
+      const xr=String(x.Rota||'').trim(),pv=String(x.Cliente||'').trim();
+      if(rt!=='TODOS'&&xr!==rt)return false;
+      if(selectedDay==='TODOS'?!['SEG','TER','QUA','QUI','SEX'].some(d=>Number(x[d]||0)>0):Number(x[selectedDay]||0)<=0)return false;
+      return !baseClients.length||baseMap.has(xr+'|'+pv);
+    }).map(x=>{
+      const xr=String(x.Rota||'').trim(),pv=String(x.Cliente||'').trim(),b=baseMap.get(xr+'|'+pv)||{};
+      return{pv,cliente:pv,razao:String(b.razao||x['Razão Social']||'').trim(),rota:xr,subcanal:String(b.subcanal||x.SubCanal||'').trim(),ordem:selectedDay==='TODOS'?Math.min(...['SEG','TER','QUA','QUI','SEX'].map(d=>Number(x[d]||0)).filter(n=>n>0)):Number(x[selectedDay]||0)};
+    }).sort((a,b)=>String(a.rota).localeCompare(String(b.rota))||Number(a.ordem)-Number(b.ordem)||String(a.razao).localeCompare(String(b.razao),'pt-BR'));
+  }
   lastKey=key;window.__pvDiaSelectedDay=selectedDay;window.__pvDiaClients=clients;
   renderPanel();return clients;
  }finally{loading=false;renderPanel()}
@@ -149,7 +169,15 @@ function renderHomePanel(){
  host.querySelectorAll('[data-home-day]').forEach(btn=>{btn.onclick=()=>setSelectedDay(btn.dataset.homeDay);btn.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();setSelectedDay(btn.dataset.homeDay)}}});
  const b=host.querySelector('#pvHomeClientBtn');if(b)b.onclick=()=>openClientPicker('home')
 }
-function openClientPicker(source='overlay'){pickerSource=source;let modal=document.getElementById('pvDiaPicker');if(!modal){modal=document.createElement('div');modal.id='pvDiaPicker';modal.className='pvDiaPicker';modal.hidden=true;modal.innerHTML='<div class="pvDiaPickerPanel" role="dialog" aria-modal="true" aria-label="Selecionar cliente"><div class="pvDiaPickerTop"><button type="button" id="pvDiaPickerClose" style="float:right">✕ Fechar</button><b>Selecione um cliente</b><input id="pvDiaPickerSearch" type="search" placeholder="Buscar código PV ou razão social" autocomplete="off"></div><div id="pvDiaPickerList" class="pvDiaPickerList"></div></div>';document.body.appendChild(modal);document.getElementById('pvDiaPickerClose').onclick=()=>modal.hidden=true;modal.onclick=e=>{if(e.target===modal)modal.hidden=true};document.getElementById('pvDiaPickerSearch').oninput=renderClientPicker}modal.hidden=false;document.getElementById('pvDiaPickerSearch').value='';renderClientPicker();document.getElementById('pvDiaPickerSearch').focus()}
+async function openClientPicker(source='overlay'){
+ pickerSource=source;
+ if(selectedDay!=='TODOS'&&(!clients.length||lastKey!==effectiveRoute()+'|'+selectedDay)){
+   try{await getDayClients(true)}catch{}
+ }
+ let modal=document.getElementById('pvDiaPicker');
+ if(!modal){modal=document.createElement('div');modal.id='pvDiaPicker';modal.className='pvDiaPicker';modal.hidden=true;modal.innerHTML='<div class="pvDiaPickerPanel" role="dialog" aria-modal="true" aria-label="Selecionar cliente"><div class="pvDiaPickerTop"><button type="button" id="pvDiaPickerClose" style="float:right">✕ Fechar</button><b>Selecione um cliente</b><input id="pvDiaPickerSearch" type="search" placeholder="Buscar código PV ou razão social" autocomplete="off"></div><div id="pvDiaPickerList" class="pvDiaPickerList"></div></div>';document.body.appendChild(modal);document.getElementById('pvDiaPickerClose').onclick=()=>modal.hidden=true;modal.onclick=e=>{if(e.target===modal)modal.hidden=true};document.getElementById('pvDiaPickerSearch').oninput=renderClientPicker}
+ modal.hidden=false;document.getElementById('pvDiaPickerSearch').value='';renderClientPicker();document.getElementById('pvDiaPickerSearch').focus()
+}
 function renderClientPicker(){const host=document.getElementById('pvDiaPickerList');if(!host)return;const q=norm(document.getElementById('pvDiaPickerSearch').value);const matches=(selectedDay==='TODOS'?baseClients:clients).filter(x=>!q||norm([x.pv,x.razao].join(' ')).includes(q));host.innerHTML=matches.length?matches.slice(0,250).map(x=>`<button type="button" data-pv="${esc(x.pv)}">${effectiveRoute()==='TODOS'?esc(x.rota)+' • ':''}${esc(x.pv)} • ${esc(x.razao)}</button>`).join(''):'<p style="padding:12px">Nenhum cliente encontrado.</p>';host.querySelectorAll('[data-pv]').forEach(btn=>btn.onclick=async()=>{document.getElementById('pvDiaPicker').hidden=true;const pv=btn.dataset.pv;window.__pvSearchRoute=effectiveRoute();if(pickerSource==='home'){const hi=document.getElementById('cmPvInput');if(hi)hi.value=pv;try{openPv()}catch{}await new Promise(r=>setTimeout(r,40))}const b=searchBox();if(!b)return;b.input.value=pv;b.input.dispatchEvent(new Event('input',{bubbles:true}));if(typeof window.searchPv==='function')await window.searchPv();else b.btn.click();pickerSource='overlay'})}
 function fallbackClient(pv){return baseClients.find(x=>String(x.pv)===String(pv))||clients.find(x=>String(x.pv)===String(pv))}
 function renderFallback(c){
