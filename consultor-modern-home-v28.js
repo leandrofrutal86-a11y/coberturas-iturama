@@ -372,6 +372,17 @@ html,body{max-width:100%!important;overflow-x:hidden!important}
 .cmCoverageStats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:13px}.cmCoverageStat{background:#f4f7f9;border-radius:12px;padding:10px;text-align:center}.cmCoverageStat small{display:block;font-size:9px;color:#687987;font-weight:900}.cmCoverageStat b{display:block;font-size:19px;margin-top:3px}
 .cmCoverageResults{background:#fff;border:1px solid #e0e7ed;border-radius:18px;padding:13px;box-shadow:0 5px 15px #172b400d}.cmCoverageResults h3{margin:0 0 10px;font-size:18px}
 .cmCoverageTableWrap{overflow:auto;border:1px solid #dbe2e8;border-radius:12px}.cmCoverageTable{width:100%;min-width:620px;border-collapse:collapse}.cmCoverageTable th{background:#d90000;color:#fff;text-align:left;padding:9px;font-size:11px}.cmCoverageTable td{padding:9px;border-bottom:1px solid #dde5eb;font-size:11px}.cmCoverageTable tbody tr:nth-child(odd){background:#eef5fa}.cmCoverageEmpty{text-align:center;padding:25px;color:#677987;font-weight:800}
+.cmCoverageOpp{background:#fff;border:1px solid #e0e7ed;border-radius:18px;padding:13px;box-shadow:0 5px 15px #172b400d}
+.cmCoverageOpp h3{margin:0;font-size:18px;color:#17344f}.cmCoverageOppLead{margin:4px 0 12px;color:#657687;font-size:11px;line-height:1.35}
+.cmCoverageOppControls{display:grid;grid-template-columns:minmax(180px,300px) auto;gap:9px;align-items:end}
+.cmCoverageOppControls label{display:block;font-size:9px;font-weight:950;color:#607386;margin-bottom:4px}
+.cmCoverageOppControls select{width:100%;height:42px;border:1px solid #cbd6df;border-radius:10px;background:#fff;padding:0 9px;font-weight:850}
+.cmCoverageOppBtn{height:42px;border:0;border-radius:10px;background:#e30613;color:#fff;padding:0 15px;font-weight:950}
+.cmCoverageOppStatus{margin-top:9px;font-size:10px;color:#5e7080;font-weight:800}.cmCoverageOppProgress{height:6px;background:#e4e9ed;border-radius:999px;overflow:hidden;margin-top:5px}.cmCoverageOppProgress i{display:block;height:100%;background:#1378d4}
+.cmCoverageOppResult{margin-top:9px}.cmCoverageOppCount{font-size:11px;font-weight:900;color:#17344f;margin-bottom:7px}
+.cmCoverageOppTable{width:100%;border-collapse:collapse;table-layout:fixed}.cmCoverageOppTable th{background:#d90000;color:#fff;text-align:left;padding:8px 6px;font-size:10px}.cmCoverageOppTable td{padding:8px 6px;border-bottom:1px solid #dce4ea;font-size:10px;vertical-align:top;overflow-wrap:anywhere}.cmCoverageOppTable tbody tr:nth-child(odd){background:#eef5fa}
+.cmCoverageOppTable th:nth-child(1),.cmCoverageOppTable td:nth-child(1){width:18%}.cmCoverageOppTable th:nth-child(2),.cmCoverageOppTable td:nth-child(2){width:42%}.cmCoverageOppTable th:nth-child(3),.cmCoverageOppTable td:nth-child(3){width:20%}.cmCoverageOppTable th:nth-child(4),.cmCoverageOppTable td:nth-child(4){width:20%}
+.cmCoverageOppTag{display:inline-block;background:#fff0d8;color:#7c5200;border-radius:999px;padding:3px 6px;font-size:8px;font-weight:900}
 @media(orientation:portrait) and (max-width:700px){
   #cmCoveragePage,#cmCoveragePage *{box-sizing:border-box}
   #cmCoveragePage{width:100vw!important;max-width:100vw!important;overflow-x:hidden!important}
@@ -402,6 +413,15 @@ html,body{max-width:100%!important;overflow-x:hidden!important}
   .cmCoverageTable th:nth-child(2),.cmCoverageTable td:nth-child(2){width:43%!important}
   .cmCoverageTable th:nth-child(3),.cmCoverageTable td:nth-child(3){width:24%!important}
   .cmCoverageTable th:nth-child(4),.cmCoverageTable td:nth-child(4){width:18%!important}
+  .cmCoverageOpp{padding:9px!important;border-radius:15px!important;overflow:hidden!important}
+  .cmCoverageOpp h3{font-size:15px!important}.cmCoverageOppLead{font-size:9px!important;margin-bottom:8px!important}
+  .cmCoverageOppControls{grid-template-columns:1fr!important;gap:6px!important}
+  .cmCoverageOppControls select,.cmCoverageOppBtn{height:39px!important;font-size:10px!important;width:100%!important}
+  .cmCoverageOppTable th,.cmCoverageOppTable td{padding:5px 3px!important;font-size:7.8px!important;line-height:1.15!important;word-break:break-word!important}
+  .cmCoverageOppTable th:nth-child(1),.cmCoverageOppTable td:nth-child(1){width:17%!important}
+  .cmCoverageOppTable th:nth-child(2),.cmCoverageOppTable td:nth-child(2){width:43%!important}
+  .cmCoverageOppTable th:nth-child(3),.cmCoverageOppTable td:nth-child(3){width:22%!important}
+  .cmCoverageOppTable th:nth-child(4),.cmCoverageOppTable td:nth-child(4){width:18%!important}
 }
 
 `;document.head.appendChild(s);
@@ -429,6 +449,28 @@ function clientStatus(c,row){
  }
  return 'REALIZADO'
 }
+function coverageOppDayOptions(){
+ return '<option value="SEG">Segunda-feira</option><option value="TER">Terça-feira</option><option value="QUA">Quarta-feira</option><option value="QUI">Quinta-feira</option><option value="SEX">Sexta-feira</option><option value="ALL">Todos os clientes</option>'
+}
+async function loadCoverageOpportunities(cat){
+ const scope=document.getElementById('cmCoverageOppScope')?.value||'ALL',status=document.getElementById('cmCoverageOppStatus'),result=document.getElementById('cmCoverageOppResult');
+ if(!result)return;
+ result.innerHTML='<div class="cmCoverageEmpty">Verificando os clientes elegíveis...</div>';
+ if(status)status.textContent='Preparando análise...';
+ try{
+   if(typeof window.getIturamaOpportunitiesForCategory!=='function')throw new Error('A consulta de oportunidades ainda está carregando. Tente novamente.');
+   const data=await window.getIturamaOpportunitiesForCategory(cat,scope,(done,total)=>{
+     if(status)status.innerHTML='Analisando '+done+' de '+total+' cliente(s)...<div class="cmCoverageOppProgress"><i style="width:'+(total?Math.round(done/total*100):100)+'%"></i></div>';
+   });
+   const rows=data?.rows||[],label=scope==='ALL'?'Todos os clientes':({SEG:'Segunda-feira',TER:'Terça-feira',QUA:'Quarta-feira',QUI:'Quinta-feira',SEX:'Sexta-feira'}[scope]||scope);
+   if(status)status.textContent=label+' • '+Number(data?.total||0)+' cliente(s) analisado(s)';
+   result.innerHTML='<div class="cmCoverageOppCount">💡 '+rows.length+' cliente(s) ainda não compraram esta cobertura</div>'+
+    (rows.length?'<table class="cmCoverageOppTable"><thead><tr><th>PV</th><th>Cliente</th><th>Subcanal</th><th>Falta</th></tr></thead><tbody>'+rows.map(x=>'<tr><td><b>'+E(x.pv)+'</b></td><td>'+E(x.razao)+'</td><td>'+E(x.subcanal)+'</td><td>'+(x.detalhe?'<span class="cmCoverageOppTag">'+E(x.detalhe)+'</span>':'—')+'</td></tr>').join('')+'</tbody></table>':'<div class="cmCoverageEmpty">Nenhuma oportunidade para esta cobertura neste filtro.</div>');
+ }catch(e){
+   if(status)status.textContent='';
+   result.innerHTML='<div class="cmCoverageEmpty">'+E(e?.message||'Não foi possível pesquisar as oportunidades.')+'</div>';
+ }
+}
 function openCoveragePage(cat){
  const row=(D()?.own||[]).find(x=>x.nome===cat);if(!row)return;
  const p=ensureCoveragePage(),body=document.getElementById('cmCoverageBody');
@@ -436,8 +478,12 @@ function openCoveragePage(cat){
  const meta=num(row.meta),real=num(row.realizado),falta=Math.max(0,num(row.falta)),pct=meta?Math.round(real/meta*100):num(row.percentual);
  const clients=(row.clientes||[]).slice().sort((a,b)=>(Number(b.completo!==false)-Number(a.completo!==false))||String(a.razao||'').localeCompare(String(b.razao||''),'pt-BR'));
  body.innerHTML='<section class="cmCoverageGraph"><div class="cmCoverageGraphTop"><div class="cmCoverageDonut" style="--p:'+Math.min(100,pct)+'" data-p="'+pct+'%"></div><div><h2>'+E(cat)+'</h2><p>Andamento da cobertura deste incentivo</p></div></div><div class="cmCoverageStats"><div class="cmCoverageStat"><small>META</small><b>'+meta+'</b></div><div class="cmCoverageStat"><small>REALIZADO</small><b>'+real+'</b></div><div class="cmCoverageStat"><small>FALTA</small><b>'+falta+'</b></div><div class="cmCoverageStat"><small>ATINGIMENTO</small><b>'+pct+'%</b></div></div></section>'+
- '<section class="cmCoverageResults"><h3>Resultados da cobertura</h3>'+(clients.length?'<div class="cmCoverageTableWrap"><table class="cmCoverageTable"><thead><tr><th>PV</th><th>Cliente</th><th>Subcanal</th><th>Situação</th></tr></thead><tbody>'+clients.map(c=>'<tr><td><b>'+E(c.cliente||c.pv||'')+'</b></td><td>'+E(c.razao||'')+'</td><td>'+E(c.subcanal||'')+'</td><td><b>'+E(clientStatus(c,row))+'</b></td></tr>').join('')+'</tbody></table></div>':'<div class="cmCoverageEmpty">Nenhum cliente realizado nesta cobertura.</div>')+'</section>';
- p.hidden=false;try{p.scrollTo(0,0)}catch{}
+ '<section class="cmCoverageResults"><h3>Resultados da cobertura</h3>'+(clients.length?'<div class="cmCoverageTableWrap"><table class="cmCoverageTable"><thead><tr><th>PV</th><th>Cliente</th><th>Subcanal</th><th>Situação</th></tr></thead><tbody>'+clients.map(c=>'<tr><td><b>'+E(c.cliente||c.pv||'')+'</b></td><td>'+E(c.razao||'')+'</td><td>'+E(c.subcanal||'')+'</td><td><b>'+E(clientStatus(c,row))+'</b></td></tr>').join('')+'</tbody></table></div>':'<div class="cmCoverageEmpty">Nenhum cliente realizado nesta cobertura.</div>')+'</section>'+
+ '<section class="cmCoverageOpp"><h3>💡 Clientes que ainda não compraram</h3><p class="cmCoverageOppLead">Pesquise os clientes elegíveis que ainda não realizaram esta cobertura. Os parâmetros e exclusões da categoria são respeitados automaticamente.</p><div class="cmCoverageOppControls"><div><label>DIA DA VISITA</label><select id="cmCoverageOppScope">'+coverageOppDayOptions()+'</select></div><button type="button" id="cmCoverageOppBtn" class="cmCoverageOppBtn">Pesquisar clientes</button></div><div id="cmCoverageOppStatus" class="cmCoverageOppStatus"></div><div id="cmCoverageOppResult" class="cmCoverageOppResult"></div></section>';
+ p.hidden=false;
+ const scope=document.getElementById('cmCoverageOppScope'),saved=(sessionStorage.getItem('pv_dia_visita')||'ALL').toUpperCase();if(scope&&[...scope.options].some(o=>o.value===saved))scope.value=saved;
+ const btn=document.getElementById('cmCoverageOppBtn');if(btn)btn.onclick=()=>loadCoverageOpportunities(cat);
+ try{p.scrollTo(0,0)}catch{}
 }
 function hideOldPriority(){QA('#dash .wrap > section,#dash .wrap > div').forEach(el=>{if(el.id==='consultorModernHome'||el.classList.contains('tabs')||el.classList.contains('panel')||el.classList.contains('footer'))return;const t=String(el.textContent||'').trim().toUpperCase();if(t.includes('INCENTIVOS PRIORITÁRIOS')&&t.length<160)el.style.setProperty('display','none','important')})}
 function build(){const wrap=Q('#dash .wrap');if(!wrap)return false;css();let home=document.getElementById('consultorModernHome');if(!home){home=document.createElement('section');home.id='consultorModernHome';home.className='cmHome';const tabs=Q('#dash .tabs');wrap.insertBefore(home,tabs||wrap.firstChild)}return true}

@@ -58,6 +58,37 @@ async function scan(){
  if(myId!==scanId)return;
  renderList(out,scope,scope==='ALL'?day:scope,catKey,list.length);
 }
+async function collectForCategory(catName,scope='ALL',onProgress){
+ const myId=++scanId,catKey=norm(catName||'');if(!catKey)return{rows:[],total:0,scope};
+ await loadVisits();
+ const list=clientBase(scope),rt=route(),out=[];let next=0,done=0;
+ async function worker(){
+   while(next<list.length&&myId===scanId){
+     const c=list[next++],pv=String(c.Cliente||'').trim();let result=null;
+     try{const req={pv};if(rt==='TEAM'&&c.Rota)req.rota=String(c.Rota).trim();result=await api('search_pv',req)}catch{}
+     if(myId!==scanId)return;
+     if(result?.found){
+       const x=(result.categorias||[]).find(y=>norm(y.nome)===catKey);
+       // Só entra quando a própria Pesquisa de PV considera a categoria aplicável ao cliente.
+       if(x&&opportunityFromResult(x))out.push({
+         pv,
+         razao:String(c['Razão Social']||result?.cliente?.razao||''),
+         rota:String(c.Rota||rt),
+         ordem:scope==='ALL'?'':String(c._ord||''),
+         subcanal:String(c.SubCanal||result?.cliente?.subcanal||''),
+         detalhe:detailFromResult(x)
+       });
+     }
+     done++;if(typeof onProgress==='function')onProgress(done,list.length);
+   }
+ }
+ await Promise.all(Array.from({length:Math.min(6,list.length||1)},worker));
+ if(myId!==scanId)return{rows:[],total:list.length,scope,cancelled:true};
+ out.sort((a,b)=>String(a.rota).localeCompare(String(b.rota))||Number(a.ordem||9999)-Number(b.ordem||9999)||a.razao.localeCompare(b.razao,'pt-BR'));
+ return{rows:out,total:list.length,scope};
+}
+window.getIturamaOpportunitiesForCategory=collectForCategory;
+
 function renderList(rows,scope,day,catKey,total){
  const box=document.getElementById('oppResult'),seed=seedRows().find(x=>norm(x.nome)===catKey),name=seed?.nome||catKey;
  if(!box)return;
