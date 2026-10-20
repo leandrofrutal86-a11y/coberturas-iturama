@@ -20,6 +20,6 @@ function render(j){lastData=j;const body=$('ccdBody'),dlabel=fmt(j.date),prev=fm
 async function open(opts={}){if(opening)return;opening=true;const ov=ensure();ov.classList.add('show');$('ccdBody').innerHTML='<div class="ccdLoading">Calculando suas coberturas...</div>';try{const j=await post({action:'coverage_by_day',date:opts.date||yesterday()});render(j);if(opts.auto){const k='ccd_auto_'+token()+'_'+j.date;sessionStorage.setItem(k,'1')}}catch(e){$('ccdBody').innerHTML='<div class="ccdLoading">'+E(e.message)+'</div>'}finally{opening=false}}
 function maybeAuto(){const x=data(),t=token();if(!t||!x||isRogerio())return;const m=x.initial_message;if(!m)return;if(m.mostrar_coberturas_dia===false)return;/* aguarda o consultor tocar em Entendi na mensagem inicial */}
 window.openConsultorCoverageDay=()=>open({auto:false,date:(data()?.sales_period?.fim&&data().sales_period.fim<yesterday())?data().sales_period.fim:yesterday()});
-window.addEventListener('iturama:initial-message-ack',()=>{const x=data(),m=x?.initial_message;if(isRogerio()||!m||m.mostrar_coberturas_dia===false)return;setTimeout(()=>open({auto:true,date:(x?.sales_period?.fim&&x.sales_period.fim<yesterday())?x.sales_period.fim:yesterday()}),180)});
+
 let tries=0;const timer=setInterval(()=>{const x=data(),t=token();if(x&&t){clearInterval(timer);setTimeout(maybeAuto,500)}else if(++tries>80)clearInterval(timer)},250);
 })();
