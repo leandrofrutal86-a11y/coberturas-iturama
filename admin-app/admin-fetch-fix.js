@@ -22,7 +22,14 @@ async function robustPost(payload){
   if(payload?.action==='login'){
     // Uma falha de rede não significa senha inválida: preserve a sessão e
     // tente novamente antes de mostrar o erro ao usuário.
-    const targets=[[LOGIN,15000],[`${fallback}/admin-login-api`,15000],[LOGIN,20000],[`${fallback}/admin-login-api`,20000]];
+    const targets=[
+      [LOGIN,12000],
+      [ADMIN,15000],
+      [`${fallback}/admin-login-api`,15000],
+      [FALLBACK_ADMIN,15000],
+      [LOGIN,20000],
+      [ADMIN,20000]
+    ];
     let last=null;
     for(let i=0;i<targets.length;i++){
       try{return await call(targets[i][0],payload,targets[i][1])}
@@ -32,7 +39,7 @@ async function robustPost(payload){
         await wait(Math.min(800*(i+1),2400))
       }
     }
-    throw new Error(navigator.onLine===false?'Sem conexão com a internet. Verifique a rede e tente novamente.':'Não foi possível conectar ao ADM. Aguarde alguns segundos e toque em ENTRAR novamente.');
+    throw new Error(navigator.onLine===false?'Sem conexão com a internet. Verifique a rede e tente novamente.':'Não foi possível conectar ao ADM por nenhuma das rotas disponíveis. Atualize a página e tente novamente.');
   }
   try{return await call(ADMIN,payload,ms)}catch(e){
     if(e?.noRetry)throw e;
