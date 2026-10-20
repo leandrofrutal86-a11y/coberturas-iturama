@@ -13,5 +13,5 @@ function ensure(){css();let ov=$('cimOverlay');if(ov)return ov;ov=d.createElemen
 function data(){try{return window.eval('DATA')}catch{return null}}
 function token(){return sessionStorage.getItem('iturama_token')||''}
 function showIfNeeded(){const x=data(),m=x?.initial_message,t=token();if(!t||!m||!String(m.conteudo_html||'').trim())return false;const key='cim_seen_'+t+'_'+String(m.versao||1);if(sessionStorage.getItem(key)==='1')return false;const ov=ensure();$('cimTitle').textContent=m.titulo||'Mensagem do Dia';$('cimContent').innerHTML=clean(m.conteudo_html);const done=()=>{sessionStorage.setItem(key,'1');ov.classList.remove('show');setTimeout(()=>{try{window.dispatchEvent(new CustomEvent('iturama:initial-message-ack'))}catch{}},120)};$('cimClose').onclick=done;$('cimOk').onclick=done;ov.classList.add('show');return true}
-let n=0;const timer=setInterval(()=>{if(showIfNeeded()||++n>80)clearInterval(timer)},250);window.addEventListener('pageshow',()=>setTimeout(showIfNeeded,300));
+let n=0;const timer=setInterval(()=>{if(showIfNeeded()||++n>80)clearInterval(timer)},250);window.addEventListener('pageshow',()=>setTimeout(showIfNeeded,300));window.addEventListener('iturama:dashboard-ready',()=>setTimeout(showIfNeeded,120));
 })();
