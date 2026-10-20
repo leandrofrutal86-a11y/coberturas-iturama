@@ -66,6 +66,7 @@ function nav(label){
    if(typeof window.abrirAtualizarBaseClientesAdm==='function'){window.abrirAtualizarBaseClientesAdm();return}
    if(typeof window.abrirVisitaClientesAdm==='function'){window.abrirVisitaClientesAdm();setTimeout(()=>document.getElementById('vfOpenUpload')?.click(),120);return}
  }
+ if(String(label)==='Coberturas por Dia'){if(typeof window.openCoverageByDayAdmin==='function'){window.openCoverageByDayAdmin();return}}
  if(String(label)==='Atualizar Metas'){openMeta('meta');return}
  if(String(label)==='Metas e Categorias'){openMeta('categorias');return}
  const aliases={'Visão Consultor':'Visão do Consultor'};
@@ -90,6 +91,7 @@ function build(){if($('cokeHome')){syncSalesPeriod();return;}const tabs=document
   <button class="menuCard" data-cmgr="acoes" onclick="window.cokeNav('Ações Vigentes')"><span class="mi" style="background:#e85d04">⚡</span><span><b>Ações Vigentes</b><small>Cadastrar e atualizar ações comerciais</small></span></button>
   <button class="menuCard" onclick="window.cokeNav('Atualizar Vendas')"><span class="mi" style="background:#2563eb">📊</span><span><b>Atualizar Vendas</b><small>Anexar planilha Excel e atualizar a base de vendas</small></span></button>
   <button class="menuCard" id="admUpdateClientBaseCard" onclick="window.cokeNav('Atualizar Base de Clientes')"><span class="mi" style="background:#0b63ce">👥</span><span><b>Atualizar Base de Clientes</b><small>Anexar planilha Excel e atualizar clientes, rotas e dias de visita</small></span></button>
+  <button class="menuCard" id="admCoverageDayCard" onclick="window.cokeNav('Coberturas por Dia')"><span class="mi" style="background:#e30613">📈</span><span><b>Coberturas por Dia</b><small>Acompanhe quanto cada consultor fez em cada data</small></span></button>
  </div>
 </div>
 

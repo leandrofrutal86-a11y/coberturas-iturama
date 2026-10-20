@@ -5,7 +5,7 @@ const $=(s,r=d)=>r.querySelector(s), $$=(s,r=d)=>[...r.querySelectorAll(s)];
 const E=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const norm=v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().toLowerCase();
 const n=v=>Number(v||0);
-const ALLOWED=new Set(['visao da equipe','atualizar vendas','atualizar base de clientes','acoes vigentes','contratos','relatorios','premiacoes de incentivos']);
+const ALLOWED=new Set(['visao da equipe','atualizar vendas','atualizar base de clientes','coberturas por dia','acoes vigentes','contratos','relatorios','premiacoes de incentivos']);
 
 function getDash(){try{return w.eval('dash')}catch{try{return typeof dash!=='undefined'?dash:null}catch{return null}}}
 function getTeam(){const x=getDash();return Array.isArray(x?.individual)?x.individual:[]}
@@ -271,7 +271,7 @@ function patchHome(){
    vendas.appendChild(base);
  }
  base.onclick=()=>{if(typeof w.abrirAtualizarBaseClientesAdm==='function')w.abrirAtualizarBaseClientesAdm();else if(typeof w.abrirVisitaClientesAdm==='function')w.abrirVisitaClientesAdm()};
- const order=['visao da equipe','atualizar vendas','atualizar base de clientes','acoes vigentes','contratos','relatorios','premiacoes de incentivos'];
+ const order=['visao da equipe','atualizar vendas','atualizar base de clientes','coberturas por dia','acoes vigentes','contratos','relatorios','premiacoes de incentivos'];
  const cards=$$('.menuCard',vendas),sorted=[...cards].sort((a,b)=>order.indexOf(getCardLabel(a))-order.indexOf(getCardLabel(b)));
  if(cards.some((x,i)=>x!==sorted[i]))sorted.forEach(x=>vendas.appendChild(x));
 }
