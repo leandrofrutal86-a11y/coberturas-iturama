@@ -35,15 +35,16 @@
       padding-bottom:calc(110px + env(safe-area-inset-bottom))!important;
     }
 
-    /* Enquanto qualquer tela interna estiver aberta, o menu inferior fica atrás dela */
-    body:has(#ov.show) #cvBottomNav,
-    body:has(.cvOverlay.show) #cvBottomNav,
-    body:has(.contOverlay.show) #cvBottomNav,
-    body:has(.impOverlay.show) #cvBottomNav,
-    body:has(.cvContentOverlay.show) #cvBottomNav,
-    body:has(.recOverlay.show) #cvBottomNav{
-      z-index:10!important;
-      pointer-events:none!important;
+    /* O menu inferior deve continuar recebendo toque; telas abertas ficam acima dele */
+    #cvBottomNav{
+      z-index:50000!important;
+      pointer-events:auto!important;
+      visibility:visible!important;
+    }
+    .cvContentOverlay.show,
+    .recOverlay.show,
+    .matV2Overlay.show{
+      z-index:60000!important;
     }
 
     @media(max-width:760px){
