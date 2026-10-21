@@ -10,11 +10,11 @@ function css(){if(d.getElementById('cvBottomStyle'))return;const s=d.createEleme
 body.cvMenuOpen #cvBottomNav{visibility:hidden!important;pointer-events:none!important}
 @media(min-width:760px){.cvBottomNav{left:50%;transform:translateX(-50%);width:min(760px,100%);border-radius:16px 16px 0 0}}@media(max-width:520px){.cvBottomNav button{font-size:9px}.cvBottomNav .ico{font-size:20px}}
 `;d.head.appendChild(s)}
-function build(){if(d.getElementById('cvBottomNav'))return;css();d.body.insertAdjacentHTML('beforeend','<nav id="cvBottomNav" class="cvBottomNav"><button type="button" data-a="acoes"><span class="ico">⚡</span><span>Ações Vigentes</span></button><button type="button" data-a="premios"><span class="ico">🏆</span><span>Premiações de Incentivos</span></button><button type="button" data-a="materiais"><span class="ico">📚</span><span>Materiais de Apoio</span></button><button type="button" data-a="telefones"><span class="ico">☎️</span><span>Telefones Úteis</span></button></nav><div id="cvContentOverlay" class="cvContentOverlay"><div class="cvContentSheet"><div class="cvContentTop"><h2 id="cvContentTitle"></h2><button type="button" id="cvContentClose">Fechar</button></div><div id="cvContentBody" class="cvContentBody"></div></div></div>');
+function build(){if(d.getElementById('cvBottomNav'))return;css();d.body.insertAdjacentHTML('beforeend','<nav id="cvBottomNav" class="cvBottomNav"><button type="button" data-a="acoes" onclick="window.cvBottomOpen(this.dataset.a)"><span class="ico">⚡</span><span>Ações Vigentes</span></button><button type="button" data-a="premios" onclick="window.cvBottomOpen(this.dataset.a)"><span class="ico">🏆</span><span>Premiações de Incentivos</span></button><button type="button" data-a="materiais" onclick="window.cvBottomOpen(this.dataset.a)"><span class="ico">📚</span><span>Materiais de Apoio</span></button><button type="button" data-a="telefones" onclick="window.cvBottomOpen(this.dataset.a)"><span class="ico">☎️</span><span>Telefones Úteis</span></button></nav><div id="cvContentOverlay" class="cvContentOverlay"><div class="cvContentSheet"><div class="cvContentTop"><h2 id="cvContentTitle"></h2><button type="button" id="cvContentClose">Fechar</button></div><div id="cvContentBody" class="cvContentBody"></div></div></div>');
  const nav=d.getElementById('cvBottomNav'),ov=d.getElementById('cvContentOverlay');
  d.getElementById('cvContentClose').addEventListener('click',()=>{ov.classList.remove('show');d.body.classList.remove('cvMenuOpen')});
  ov.addEventListener('click',e=>{if(e.target===ov){ov.classList.remove('show');d.body.classList.remove('cvMenuOpen')}});
- nav.querySelectorAll('button[data-a]').forEach(btn=>btn.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();open(btn.dataset.a)}));
+ nav.querySelectorAll('button[data-a]').forEach(btn=>btn.addEventListener('touchend',e=>{e.preventDefault();e.stopPropagation();open(btn.dataset.a)},{passive:false}));
  sync();
 }
 async function open(a){
@@ -30,5 +30,6 @@ async function open(a){
  d.getElementById('cvContentTitle').textContent=title;d.body.classList.add('cvMenuOpen');ov.classList.add('show');body.innerHTML='<div class="empty">Carregando...</div>';
  try{const items=await list(tipo);body.innerHTML=items.length?items.map(x=>'<article class="cvContentCard">'+(x.titulo?'<h3>'+E(x.titulo)+'</h3>':'')+(x.texto?'<p>'+E(x.texto)+'</p>':'')+(x.imagem_url?'<img src="'+E(x.imagem_url)+'" alt="'+E(x.titulo||title)+'">':'')+'</article>').join(''):'<div class="empty">Nenhuma informação cadastrada.</div>'}catch(e){body.innerHTML='<div class="empty">'+E(e.message)+'</div>'}
 }
+window.cvBottomOpen=open;
 function boot(){build();sync()}if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',boot);else boot();setTimeout(build,300);setInterval(sync,700);
 })();
