@@ -15,7 +15,7 @@ function token(){return sessionStorage.getItem('iturama_token')||''}
 function fmt(iso){const m=String(iso||'').match(/^(\d{4})-(\d{2})-(\d{2})$/);return m?m[3]+'/'+m[2]+'/'+m[1]:String(iso||'')}
 function yesterday(){const n=new Date(),d2=new Date(n.getFullYear(),n.getMonth(),n.getDate()-1,12,0,0);return d2.getFullYear()+'-'+String(d2.getMonth()+1).padStart(2,'0')+'-'+String(d2.getDate()).padStart(2,'0')}
 function isRogerio(x){return String(x?.perfil||'')==='acompanhante'&&String(x?.acesso?.matricula||x?.consultor?.matricula||'')==='5125'}
-async function loadCoverageInline(x,m){
+async function loadCoverageInline(x,m,showId){
  const host=$('cimCoverage');if(!host)return;
  if(!m?.mostrar_coberturas_dia||isRogerio(x)){host.innerHTML='';return}
  host.innerHTML='<div class="cimCov"><div class="cimCovLoading">Carregando as coberturas do dia anterior...</div></div>';
@@ -23,14 +23,15 @@ async function loadCoverageInline(x,m){
    const y=yesterday(),date=(x?.sales_period?.fim&&x.sales_period.fim<y)?x.sales_period.fim:y;
    const r=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'coverage_by_day',token:token(),date})});
    const j=await r.json().catch(()=>({}));if(!r.ok||j.error)throw Error(j.error||'Não foi possível carregar as coberturas.');
+   const ov=$('cimOverlay');if(!ov||!ov.classList.contains('show')||String(ov.dataset.showId||'')!==String(showId))return;
    const dl=fmt(j.date),pl=fmt(j.previous_date);
    host.innerHTML='<div class="cimCov"><div class="cimCovHead"><b>📈 Coberturas realizadas no dia '+dl+'</b><small>'+String(j.route||'')+' - '+String(j.nome||'')+'</small></div>'+
    '<div class="cimCovSummary"><div class="cimCovSum"><small>COBERTURAS EM '+pl+'</small><b>'+Number(j.total_anterior||0)+'</b></div><div class="cimCovSum red"><small>FEZ NO DIA '+dl+'</small><b>+'+Number(j.total_dia||0)+'</b></div><div class="cimCovSum"><small>COBERTURA REAL</small><b>'+Number(j.total_real||0)+'</b></div></div>'+
    '<div class="cimCovTableWrap"><table class="cimCovTable"><thead><tr><th>Categoria</th><th>Meta</th><th><span class="cimDesk">Coberturas em '+pl+'</span><span class="cimMob">Anterior<br>'+pl.slice(0,5)+'</span></th><th><span class="cimDesk">Realizado no dia '+dl+'</span><span class="cimMob">Fez<br>'+dl.slice(0,5)+'</span></th><th><span class="cimDesk">Cobertura Real</span><span class="cimMob">Cobertura<br>Real</span></th></tr></thead><tbody>'+
    (j.categorias||[]).map(v=>'<tr><td><b>'+String(v.nome||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))+'</b></td><td>'+Number(v.meta||0)+'</td><td>'+Number(v.realizado_anterior||0)+'</td><td class="'+(Number(v.realizado_dia||0)>0?'cimCovNew':'cimCovZero')+'">'+(Number(v.realizado_dia||0)>0?'+':'')+Number(v.realizado_dia||0)+'</td><td><b>'+Number(v.realizado_acumulado||0)+'</b></td></tr>').join('')+
    '</tbody></table></div></div>';
- }catch(e){host.innerHTML='<div class="cimCov"><div class="cimCovLoading">Coberturas indisponíveis no momento.</div></div>'}
+ }catch(e){const ov=$('cimOverlay');if(ov&&ov.classList.contains('show')&&String(ov.dataset.showId||'')===String(showId))host.innerHTML='<div class="cimCov"><div class="cimCovLoading">Coberturas indisponíveis no momento.</div></div>'}
 }
-function showIfNeeded(){const x=data(),m=x?.initial_message,t=token();if(!t||!m||!String(m.conteudo_html||'').trim())return false;const key='cim_seen_'+t+'_'+String(m.versao||1);if(sessionStorage.getItem(key)==='1')return false;const ov=ensure();$('cimTitle').textContent=m.titulo||'Mensagem do Dia';$('cimContent').innerHTML=clean(m.conteudo_html);$('cimCoverage').innerHTML='';const done=()=>{sessionStorage.setItem(key,'1');ov.classList.remove('show')};$('cimClose').onclick=done;$('cimOk').onclick=done;ov.classList.add('show');loadCoverageInline(x,m);return true}
-let n=0;const timer=setInterval(()=>{if(showIfNeeded()||++n>80)clearInterval(timer)},250);window.addEventListener('pageshow',()=>setTimeout(showIfNeeded,300));window.addEventListener('iturama:dashboard-ready',()=>setTimeout(showIfNeeded,120));
+function showIfNeeded(){const x=data(),m=x?.initial_message,t=token();if(!t||!m||!String(m.conteudo_html||'').trim())return false;const key='cim_seen_'+t+'_'+String(m.versao||1);if(sessionStorage.getItem(key)==='1')return false;const ov=ensure(),showId=Date.now()+'_'+Math.random().toString(36).slice(2);ov.dataset.showId=showId;$('cimTitle').textContent=m.titulo||'Mensagem do Dia';$('cimContent').innerHTML=clean(m.conteudo_html);$('cimCoverage').innerHTML=m.mostrar_coberturas_dia&&!isRogerio(x)?'<div class="cimCov"><div class="cimCovLoading">Carregando coberturas...</div></div>':'';const done=()=>{sessionStorage.setItem(key,'1');ov.classList.remove('show');ov.dataset.showId=''};$('cimClose').onclick=done;$('cimOk').onclick=done;ov.classList.add('show');setTimeout(()=>loadCoverageInline(x,m,showId),0);return true}
+let n=0;const timer=setInterval(()=>{if(showIfNeeded()||++n>160)clearInterval(timer)},80);window.addEventListener('pageshow',()=>setTimeout(showIfNeeded,80));window.addEventListener('iturama:dashboard-ready',()=>setTimeout(showIfNeeded,0));
 })();
