@@ -4,13 +4,18 @@ let STATE={forms:[],consultores:[],editing:null,report:null};
 function token(){return sessionStorage.getItem('admToken')||''}
 async function formsPost(body){
  const map={admin_list:'forms_admin_list',admin_get:'forms_admin_get',admin_save:'forms_admin_save',admin_toggle:'forms_admin_toggle',admin_delete:'forms_admin_delete'};
- const payload={...body,action:map[body.action]||body.action};
+ const payload={...body,action:map[body.action]||body.action,token:token()};
+ const ctrl=new AbortController(),to=setTimeout(()=>ctrl.abort(),20000);
  try{
-   const legacyPost=window.eval('post');
-   const legacyToken=window.eval('token');
-   if(typeof legacyPost!=='function')throw new Error('Conexão interna do ADM indisponível.');
-   return await legacyPost({...payload,token:legacyToken});
- }catch(e){throw e}
+   const r=await fetch(API+'?forms='+Date.now(),{method:'POST',mode:'cors',cache:'no-store',credentials:'omit',headers:{'Content-Type':'text/plain;charset=UTF-8','Accept':'application/json'},body:JSON.stringify(payload),signal:ctrl.signal});
+   const raw=await r.text();let j={};try{j=raw?JSON.parse(raw):{}}catch{throw new Error('Resposta inválida do servidor ('+r.status+').')}
+   if(!r.ok||j.error)throw new Error(j.error||('Erro '+r.status));
+   return j;
+ }catch(err){
+   if(err?.name==='AbortError')throw new Error('O servidor demorou para responder. Tente novamente.');
+   if(navigator.onLine===false)throw new Error('Sem internet. Verifique a conexão.');
+   throw err;
+ }finally{clearTimeout(to)}
 }
 function css(){if($('formsAdmStyle'))return;const s=d.createElement('style');s.id='formsAdmStyle';s.textContent=`
 #formsAdm{display:none;position:fixed;inset:0;z-index:38000;background:#eef2f5;overflow:auto;color:#172534;font-family:Arial,sans-serif}#formsAdm.show{display:block}
@@ -34,7 +39,7 @@ async function toggle(id,ativo){try{await formsPost({action:'admin_toggle',id,at
 async function del(id){if(!confirm('Excluir este formulário e todas as respostas?'))return;try{await formsPost({action:'admin_delete',id});await loadList()}catch(e){alert(e.message)}}
 async function report(id){$('formsReport').classList.add('show');$('fadmReportBody').innerHTML='<div class="fadmEmpty">Carregando relatório...</div>';try{const j=await formsPost({action:'admin_get',id}),f=j.formulario,rows=j.respostas||[];$('fadmReportTitle').textContent='Relatório • '+f.titulo;if(!rows.length){$('fadmReportBody').innerHTML='<div class="fadmEmpty">Nenhuma resposta enviada ainda.</div>';return}const fields=f.campos||[];$('fadmReportBody').innerHTML='<div class="fadmTableWrap"><table class="fadmTable"><thead><tr><th>Consultor</th><th>Rota</th>'+fields.map(q=>'<th>'+E(q.label)+'</th>').join('')+'</tr></thead><tbody>'+rows.map(r=>'<tr><td><b>'+E(r.nome)+'</b></td><td>'+E(r.rota)+'</td>'+fields.map(q=>'<td>'+E(r.respostas?.[q.id]||'')+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>'}catch(e){$('fadmReportBody').innerHTML='<div class="fadmEmpty">'+E(e.message)+'</div>'}}
 function renderList(){const host=$('fadmList');if(!STATE.forms.length){host.innerHTML='<div class="fadmEmpty">Nenhum formulário criado. Toque em “Novo” para começar.</div>';return}host.innerHTML='<div class="fadmGrid">'+STATE.forms.map(f=>'<article class="fadmCard"><div class="fadmCardTop"><div><h3>'+E(f.titulo)+'</h3><p>Botão: <b>'+E(f.botao_texto||f.titulo)+'</b></p></div><span class="fadmBadge '+(f.ativo?'fadmOn':'fadmOff')+'">'+(f.ativo?'ATIVO':'DESATIVADO')+'</span></div><div class="fadmMeta">'+(f.rotas||[]).length+' consultor(es) • '+Number(f.total_respostas||0)+' resposta(s)</div><div class="fadmBtns"><button data-edit="'+f.id+'">Editar</button><button data-report="'+f.id+'">Relatório</button><button data-toggle="'+f.id+'" data-active="'+(f.ativo?'1':'0')+'">'+(f.ativo?'Desativar':'Ativar')+'</button><button data-del="'+f.id+'">Excluir</button></div></article>').join('')+'</div>';host.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>editForm(STATE.forms.find(x=>String(x.id)===b.dataset.edit)));host.querySelectorAll('[data-report]').forEach(b=>b.onclick=()=>report(b.dataset.report));host.querySelectorAll('[data-toggle]').forEach(b=>b.onclick=()=>toggle(b.dataset.toggle,b.dataset.active!=='1'));host.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>del(b.dataset.del))}
-async function loadList(){ensure();$('fadmList').innerHTML='<div class="fadmEmpty">Carregando...</div>';try{const j=await formsPost({action:'admin_list'});STATE.forms=j.formularios||[];STATE.consultores=j.consultores||[];renderList()}catch(e){$('fadmList').innerHTML='<div class="fadmEmpty">'+E(e.message)+'</div>'}}
+async function loadList(){ensure();$('fadmList').innerHTML='<div class="fadmEmpty">Carregando...</div>';try{try{const ds=window.eval('dash');if(ds?.consultores?.length)STATE.consultores=ds.consultores}catch{}const j=await formsPost({action:'admin_list'});STATE.forms=j.formularios||[];STATE.consultores=j.consultores?.length?j.consultores:STATE.consultores;renderList()}catch(e){renderList();const host=$('fadmList');if(!STATE.forms.length)host.innerHTML='<div class="fadmEmpty">'+E(e.message)+'</div>'}}
 async function open(){ensure();$('formsAdm').classList.add('show');await loadList()}
 function addHome(){const home=$('cokeHome');if(!home||$('admFormsTopic'))return;const info=home.querySelector('.topicInfo');if(!info)return;const sec=d.createElement('div');sec.id='admFormsTopic';sec.className='menuTopic topicInfo';sec.innerHTML='<div class="topicHead" style="background:linear-gradient(110deg,#7b22d3,#5d18ae 68%,#421178)"><span class="topicIcon" style="background:#52149a">📝</span><div><h2>Formulários</h2><small>Crie pesquisas, solicitações e acompanhe respostas</small></div></div><div class="menuGrid"><button class="menuCard" id="admFormsCard"><span class="mi" style="background:#7b22d3">📝</span><span><b>Gerenciar Formulários</b><small>Criar, publicar, desativar e consultar relatórios</small></span></button></div>';info.parentNode.insertBefore(sec,info);$('admFormsCard').onclick=open}
 window.openFormulariosAdmin=open;let tries=0;const it=setInterval(()=>{addHome();if(++tries>120)clearInterval(it)},300);new MutationObserver(addHome).observe(d.documentElement,{childList:true,subtree:true});

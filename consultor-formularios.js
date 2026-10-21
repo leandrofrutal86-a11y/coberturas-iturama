@@ -2,7 +2,15 @@
 let forms=[],loaded=false,loading=false;
 function token(){return sessionStorage.getItem('iturama_token')||''}
 function data(){try{return window.eval('DATA')}catch{return null}}
-async function post(body){const map={list:'forms_list',submit:'forms_submit'};const payload={...body,action:map[body.action]||body.action,token:token()},targets=[API,API2,API];let last=null;for(let i=0;i<targets.length;i++){const ctrl=new AbortController(),to=setTimeout(()=>ctrl.abort(),i===2?18000:12000);try{const r=await fetch(targets[i]+'?v='+Date.now(),{method:'POST',mode:'cors',cache:'no-store',credentials:'omit',headers:{'Content-Type':'text/plain;charset=UTF-8','Accept':'application/json'},body:JSON.stringify(payload),signal:ctrl.signal});const j=await r.json().catch(()=>({}));if(r.ok&&!j.error)return j;const e=new Error(j.error||('Erro '+r.status));if([400,401,403].includes(r.status))throw Object.assign(e,{noRetry:true});last=e}catch(e){if(e?.noRetry)throw e;last=e}finally{clearTimeout(to)}if(i<targets.length-1)await new Promise(r=>setTimeout(r,400*(i+1)))}throw new Error(navigator.onLine===false?'Sem internet. Verifique a conexão.':'Não foi possível carregar o formulário agora. Tente novamente.')}
+async function post(body){
+ const map={list:'forms_list',submit:'forms_submit'},action=map[body.action]||body.action;
+ try{
+   const fn=window.eval('api');
+   if(typeof fn==='function'){const rest={...body};delete rest.action;return await fn(action,rest)}
+ }catch{}
+ const payload={...body,action,token:token()},ctrl=new AbortController(),to=setTimeout(()=>ctrl.abort(),18000);
+ try{const r=await fetch(API,{method:'POST',mode:'cors',cache:'no-store',credentials:'omit',headers:{'Content-Type':'text/plain;charset=UTF-8','Accept':'application/json'},body:JSON.stringify(payload),signal:ctrl.signal});const j=await r.json().catch(()=>({}));if(!r.ok||j.error)throw Error(j.error||'Não foi possível acessar o formulário.');return j}finally{clearTimeout(to)}
+}
 function css(){if(d.getElementById('cfStyle'))return;const s=d.createElement('style');s.id='cfStyle';s.textContent=`
 #cfOverlay{display:none;position:fixed;inset:0;z-index:39200;background:#000a;padding:10px;align-items:center;justify-content:center}#cfOverlay.show{display:flex}.cfBox{width:min(650px,100%);max-height:94dvh;overflow:auto;background:#fff;border-radius:20px;padding:15px}.cfBox h2{margin:0;font-size:21px}.cfDesc{color:#687987;font-size:11px;margin:5px 0 12px}.cfField{margin:12px 0}.cfField label{display:block;font-weight:900;font-size:12px;margin-bottom:5px}.cfField textarea{width:100%;min-height:90px;border:1px solid #cbd6df;border-radius:10px;padding:10px;resize:vertical;box-sizing:border-box}.cfChoice{display:grid;gap:6px}.cfChoice label{display:flex;align-items:center;gap:8px;border:1px solid #dde5eb;border-radius:10px;padding:9px;font-size:11px}.cfActions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:14px}.cfActions button{border:0;border-radius:10px;padding:11px;font-weight:950}.cfCancel{background:#edf1f4}.cfSave{background:#e30613;color:#fff}.cfStatus{font-size:11px;font-weight:850;margin-top:8px}.cmFormBtn .ic{background:#f2eafe!important}
 @media(max-width:600px){.cfBox{padding:11px;border-radius:16px}.cfBox h2{font-size:18px}.cfField label{font-size:11px}}
