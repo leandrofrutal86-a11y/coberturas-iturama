@@ -72,7 +72,10 @@ function fillRoutes(){
 function renderEntries(){
  const rows=state.entries||[],vol=rows.reduce((s,x)=>s+Number(x.volume||0),0),tot=rows.reduce((s,x)=>s+Number(x.total||0),0);
  $('ctAdmSummary').innerHTML='<span class="ctChip">'+rows.length+' contrato(s)</span><span class="ctChip">Volume: '+vol.toLocaleString('pt-BR')+'</span><span class="ctChip">Total: '+money(tot)+'</span>';
- $('ctAdmEntries').innerHTML=rows.length?'<div class="ctTableWrap"><table class="ctTable"><thead><tr><th>Data</th><th>Rota</th><th>Consultor</th><th>PV</th><th>Descrição</th><th>Volume</th><th>Valor/Cx</th><th>Total</th></tr></thead><tbody>'+rows.map(x=>'<tr><td>'+E(new Date(x.data+'T12:00:00').toLocaleDateString('pt-BR'))+'</td><td><b>'+E(x.rota)+'</b></td><td>'+E(x.consultor_nome)+'</td><td>'+E(x.pv)+'</td><td>'+E(x.descricao)+'</td><td class="num">'+Number(x.volume||0).toLocaleString('pt-BR')+'</td><td class="num">'+money(x.valor_caixa)+'</td><td class="num">'+money(x.total)+'</td></tr>').join('')+'</tbody></table></div>':'<div class="empty">Nenhum contrato lançado neste mês.</div>'
+ $('ctAdmEntries').innerHTML=rows.length?'<div class="ctTableWrap"><table class="ctTable"><thead><tr><th>Data</th><th>Rota</th><th>Consultor</th><th>PV</th><th>Descrição</th><th>Foto</th><th>Volume</th><th>Valor/Cx</th><th>Total</th></tr></thead><tbody>'+rows.map(x=>'<tr><td>'+E(new Date(x.data+'T12:00:00').toLocaleDateString('pt-BR'))+'</td><td><b>'+E(x.rota)+'</b></td><td>'+E(x.consultor_nome)+'</td><td>'+E(x.pv)+'</td><td>'+E(x.descricao)+'</td><td>'+(x.foto_signed_url?'<div class="ctEntryPhoto"><a class="ctPhotoView" href="'+E(x.foto_signed_url)+'" target="_blank" rel="noopener">👁 VISUALIZAR</a><button class="ctPhotoDown" type="button" data-photo-url="'+E(x.foto_signed_url)+'" data-photo-name="'+E(x.foto_nome||('contrato_'+x.pv+'.jpg'))+'">⬇ BAIXAR</button></div>':'<span style="color:#8795a1">Sem foto</span>')+'</td><td class="num">'+Number(x.volume||0).toLocaleString('pt-BR')+'</td><td class="num">'+money(x.valor_caixa)+'</td><td class="num">'+money(x.total)+'</td></tr>').join('')+'</tbody></table></div>':'<div class="empty">Nenhum contrato lançado neste mês.</div>';document.querySelectorAll('[data-photo-url]').forEach(b=>b.onclick=()=>downloadEntryPhoto(b.dataset.photoUrl,b.dataset.photoName))
+}
+async function downloadEntryPhoto(url,name){
+ try{const r=await fetch(url,{cache:'no-store'});if(!r.ok)throw Error('Falha ao baixar a foto.');const blob=await r.blob(),u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name||'foto_contrato.jpg';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),30000)}catch(e){alert(e.message||'Não foi possível baixar a foto.')}
 }
 function renderDocs(){
  const docs=state.documents||[];
@@ -124,8 +127,8 @@ async function extractReport(){
   const width=doc.internal.pageSize.getWidth(),height=doc.internal.pageSize.getHeight();
   doc.autoTable({
    startY:39,margin:{top:39,left:9,right:9,bottom:17},
-   head:[['DATA','ROTA','CONSULTOR','PV','DESCRIÇÃO','VOLUME','VALOR/CX','TOTAL']],
-   body:rows.map(x=>[fmtDate(x.data),String(x.rota||''),String(x.consultor_nome||''),String(x.pv||''),String(x.descricao||''),nf.format(Number(x.volume||0)),money(x.valor_caixa),money(x.total)]),
+   head:[['DATA','ROTA','CONSULTOR','PV','DESCRIÇÃO','FOTO','VOLUME','VALOR/CX','TOTAL']],
+   body:rows.map(x=>[fmtDate(x.data),String(x.rota||''),String(x.consultor_nome||''),String(x.pv||''),String(x.descricao||''),x.foto_storage_path?'SIM':'NÃO',nf.format(Number(x.volume||0)),money(x.valor_caixa),money(x.total)]),
    styles:{font:'helvetica',fontSize:8,cellPadding:2,overflow:'linebreak',valign:'middle',lineColor:[222,229,235],lineWidth:.1},
    headStyles:{fillColor:[24,39,55],textColor:[255,255,255],fontStyle:'bold',fontSize:8},
    alternateRowStyles:{fillColor:[244,248,251]},
