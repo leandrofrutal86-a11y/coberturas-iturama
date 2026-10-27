@@ -1,45 +1,37 @@
 (()=>{
 const d=document,$=id=>d.getElementById(id);
+const CONTENT='https://harlrfhukjvhpufwhtep.supabase.co/functions/v1/conteudos-consultor-api';
+const MATERIALS='https://harlrfhukjvhpufwhtep.supabase.co/functions/v1/materiais-api';
+const SUPA='https://harlrfhukjvhpufwhtep.supabase.co';
+const KEY='sb_publishable_gxhN7WK6y9j_m3TJwGDHNw_x_lszXgO';
+const E=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let matCache=null,matAt=0;
+function token(){return sessionStorage.getItem('admToken')||''}
 function css(){if($('admBottomStyle'))return;const s=d.createElement('style');s.id='admBottomStyle';s.textContent=`
 #admBottomNav{position:fixed;left:0;right:0;bottom:0;z-index:52000;background:#fff;border-top:1px solid #dce3e9;box-shadow:0 -5px 18px #0002;display:grid;grid-template-columns:repeat(4,1fr);padding:7px 8px calc(7px + env(safe-area-inset-bottom));gap:4px}
 #admBottomNav button{appearance:none;-webkit-appearance:none;border:0;background:#fff;color:#41566b;padding:6px 3px;min-height:58px;border-radius:10px;font-size:10px;font-weight:850;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;touch-action:manipulation;cursor:pointer}
 #admBottomNav button:active{background:#e9eef2}#admBottomNav .ico{font-size:22px;line-height:1}
 body{padding-bottom:82px!important}
+#admPreviewOverlay{display:none;position:fixed;inset:0;z-index:61000;background:#0009;padding:10px;align-items:center;justify-content:center}#admPreviewOverlay.show{display:flex}
+.admPrevSheet{width:min(760px,100%);max-height:94dvh;overflow:auto;background:#f4f6f8;border-radius:18px}.admPrevTop{position:sticky;top:0;z-index:3;background:linear-gradient(135deg,#090909,#9f0000);color:#fff;display:flex;align-items:center;justify-content:space-between;padding:14px 16px}.admPrevTop h2{margin:0;font-size:20px}.admPrevTop button{border:0;background:#fff;border-radius:9px;padding:9px 12px;font-weight:900}.admPrevBody{padding:13px}.admPrevCard{background:#fff;border-radius:14px;padding:14px;margin-bottom:11px;box-shadow:0 3px 12px #0001}.admPrevCard h3{margin:0 0 8px}.admPrevCard p{white-space:pre-wrap;line-height:1.45;margin:0;color:#33485b}.admPrevCard img{width:100%;height:auto;border-radius:10px;margin-top:10px;display:block;background:#eef1f4}.admPrevPhone{display:flex;justify-content:space-between;gap:12px;align-items:center}.admPrevPhone b{display:block}.admPrevPhone strong{display:block;color:#087249;font-size:18px;margin-top:4px}.admPrevAction{display:inline-block;background:#e30613;color:#fff;border:0;border-radius:10px;padding:10px 13px;text-decoration:none;font-weight:900;cursor:pointer}.admPrevAction.alt{background:#243447}.admPrevActions{display:flex;gap:8px;flex-wrap:wrap;margin-top:9px}.admPrevGroup{background:#fff;border:1px solid #dae2e8;border-radius:16px;overflow:hidden;margin-bottom:11px}.admPrevGroupHead{display:grid;grid-template-columns:78px 1fr;gap:10px;align-items:center}.admPrevCover{height:78px;background:linear-gradient(135deg,#111,#9e0000);display:grid;place-items:center;color:#fff;font-size:32px;overflow:hidden}.admPrevCover img{width:100%;height:100%;object-fit:cover}.admPrevGroupHead b{font-size:16px}.admPrevGroupBody{padding:10px;border-top:1px solid #e5eaee}.admPrevMaterial{border:1px solid #e0e6eb;border-radius:12px;padding:10px;margin-bottom:9px;background:#fff}.admPrevMaterial img{width:100%;max-height:320px;object-fit:contain;border-radius:9px;background:#f4f6f8;margin:8px 0}.admPrevEmpty{background:#fff;border-radius:14px;padding:22px;text-align:center;color:#68778a;font-weight:800}
 @media(min-width:760px){#admBottomNav{left:50%;transform:translateX(-50%);width:min(760px,100%);border-radius:16px 16px 0 0}}
-@media(max-width:520px){#admBottomNav button{font-size:9px}.admBottomNav .ico{font-size:20px}}
+@media(max-width:520px){#admBottomNav button{font-size:9px}#admBottomNav .ico{font-size:20px}.admPrevTop h2{font-size:17px}}
 `;d.head.appendChild(s)}
-function clickText(text){
- const all=[...d.querySelectorAll('button,.menuCard,.tile,a')];
- const el=all.find(x=>String(x.textContent||'').toLowerCase().includes(text.toLowerCase()));
- if(el){el.click();return true}return false;
+function ensure(){css();if($('admBottomNav'))return;
+ const nav=d.createElement('nav');nav.id='admBottomNav';nav.innerHTML='<button type="button" data-a="acoes"><span class="ico">⚡</span><span>Ações Vigentes</span></button><button type="button" data-a="premios"><span class="ico">🏆</span><span>Premiações de Incentivos</span></button><button type="button" data-a="materiais"><span class="ico">📚</span><span>Materiais de Apoio</span></button><button type="button" data-a="telefones"><span class="ico">☎️</span><span>Telefones Úteis</span></button>';nav.querySelectorAll('button').forEach(b=>b.onclick=()=>openItem(b.dataset.a));d.body.appendChild(nav);
+ const ov=d.createElement('div');ov.id='admPreviewOverlay';ov.innerHTML='<div class="admPrevSheet"><div class="admPrevTop"><h2 id="admPrevTitle"></h2><button id="admPrevClose">Fechar</button></div><div id="admPrevBody" class="admPrevBody"></div></div>';d.body.appendChild(ov);$('admPrevClose').onclick=()=>ov.classList.remove('show');ov.onclick=e=>{if(e.target===ov)ov.classList.remove('show')}
 }
-function openItem(a){
- if(a==='acoes'){
-   if(typeof window.cokeNav==='function'){try{window.cokeNav('Ações Vigentes');return}catch{}}
-   if(clickText('Ações Vigentes'))return;
- }
- if(a==='premios'){
-   if(typeof window.cokeNav==='function'){try{window.cokeNav('Premiações de Incentivos');return}catch{}}
-   if(clickText('Premiações de Incentivos'))return;
- }
- if(a==='materiais'){
-   if(typeof window.openMaterialManagerV2==='function'){window.openMaterialManagerV2();return}
-   if(clickText('Materiais de Apoio'))return;
- }
- if(a==='telefones'){
-   if(clickText('Telefones Úteis'))return;
-   alert('Telefones Úteis ainda não possui uma tela específica no ADM.');
- }
+function show(title){ensure();$('admPrevTitle').textContent=title;$('admPrevBody').innerHTML='<div class="admPrevEmpty">Carregando...</div>';$('admPreviewOverlay').classList.add('show')}
+async function content(tipo,title){show(title);try{const r=await fetch(CONTENT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'list_public',tipo})}),j=await r.json();if(!r.ok)throw Error(j.error||'Erro');const a=j.items||[];$('admPrevBody').innerHTML=a.length?a.map(x=>'<article class="admPrevCard">'+(x.titulo?'<h3>'+E(x.titulo)+'</h3>':'')+(x.texto?'<p>'+E(x.texto)+'</p>':'')+(x.imagem_url?'<img src="'+E(x.imagem_url)+'" alt="'+E(x.titulo||title)+'" loading="eager" decoding="async">':'')+'</article>').join(''):'<div class="admPrevEmpty">Nenhuma informação cadastrada.</div>'}catch(e){$('admPrevBody').innerHTML='<div class="admPrevEmpty">'+E(e.message)+'</div>'}}
+async function phones(){show('☎️ Telefones Úteis');try{const r=await fetch(SUPA+'/rest/v1/telefones_uteis?ativo=eq.true&order=ordem.asc',{cache:'no-store',headers:{apikey:KEY,Authorization:'Bearer '+KEY}});if(!r.ok)throw Error('Não foi possível carregar os contatos.');const a=await r.json();$('admPrevBody').innerHTML=a.length?a.map(x=>'<div class="admPrevCard admPrevPhone"><div><b>'+E(x.nome)+'</b><strong>'+E(x.telefone)+'</strong>'+(x.observacao?'<small>'+E(x.observacao)+'</small>':'')+'</div><a class="admPrevAction" href="tel:'+E(String(x.telefone).replace(/[^0-9+]/g,''))+'">📞 Ligar</a></div>').join(''):'<div class="admPrevEmpty">Nenhum contato disponível.</div>'}catch(e){$('admPrevBody').innerHTML='<div class="admPrevEmpty">'+E(e.message)+'</div>'}}
+async function materials(){
+ show('📚 Materiais de Apoio');
+ try{
+  let j=matCache;if(!j||Date.now()-matAt>300000){const r=await fetch(MATERIALS,{method:'POST',cache:'no-store',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'list',token:token()})});j=await r.json();if(!r.ok||j.error)throw Error(j.error||'Não foi possível carregar os materiais');matCache=j;matAt=Date.now()}
+  const fs=j.faixas||[],its=j.items||[];$('admPrevBody').innerHTML=fs.length?fs.map((f,fi)=>{const a=its.filter(x=>Number(x.faixa_id)===Number(f.id)).sort((x,y)=>Number(x.ordem||0)-Number(y.ordem||0)||Number(x.id)-Number(y.id));return '<section class="admPrevGroup"><div class="admPrevGroupHead"><div class="admPrevCover">'+(f.imagem_url?'<img src="'+E(f.imagem_url)+'" alt="" loading="'+(fi===0?'eager':'lazy')+'" decoding="async">':E(f.icone||'📚'))+'</div><div><b>'+E(f.nome)+'</b><small style="display:block;color:#667585">'+a.length+' material(is)</small></div></div><div class="admPrevGroupBody">'+(a.length?a.map(i=>'<div class="admPrevMaterial"><b>'+E(i.nome)+'</b>'+(i.descricao?'<p style="color:#697786">'+E(i.descricao)+'</p>':'')+(i.tipo==='imagem'?'<img src="'+E(i.url)+'" alt="'+E(i.nome)+'" loading="lazy" decoding="async"><div class="admPrevActions"><a class="admPrevAction alt" href="'+E(i.url)+'" download>⬇ Baixar imagem</a></div>':i.tipo==='pdf'?'<div class="admPrevActions"><a class="admPrevAction" href="'+E(i.url)+'" target="_blank" rel="noopener">📄 Abrir PDF</a><a class="admPrevAction alt" href="'+E(i.url)+'" download>⬇ Baixar PDF</a></div>':'<div class="admPrevActions"><a class="admPrevAction" href="'+E(i.url)+'" target="_blank" rel="noopener">🔗 Abrir link</a></div>')+'</div>').join(''):'<div class="admPrevEmpty">Nenhum material nesta categoria.</div>')+'</div></section>'}).join(''):'<div class="admPrevEmpty">Nenhum material disponível.</div>'
+ }catch(e){$('admPrevBody').innerHTML='<div class="admPrevEmpty">'+E(e.message)+'</div>'}
 }
-function build(){
- css();if($('admBottomNav'))return;
- const nav=d.createElement('nav');nav.id='admBottomNav';
- nav.innerHTML='<button type="button" data-a="acoes"><span class="ico">⚡</span><span>Ações Vigentes</span></button><button type="button" data-a="premios"><span class="ico">🏆</span><span>Premiações de Incentivos</span></button><button type="button" data-a="materiais"><span class="ico">📚</span><span>Materiais de Apoio</span></button><button type="button" data-a="telefones"><span class="ico">☎️</span><span>Telefones Úteis</span></button>';
- nav.querySelectorAll('button').forEach(b=>b.onclick=()=>openItem(b.dataset.a));
- d.body.appendChild(nav);
-}
-function sync(){const login=$('login');const nav=$('admBottomNav');if(!nav)return;const logged=!!sessionStorage.getItem('admToken');nav.style.display=logged?'grid':'none'}
-if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',()=>{build();sync()});else{build();sync()}
-setInterval(sync,700);
-window.openAdmBottomItem=openItem;
+function openItem(a){if(a==='acoes')return content('acoes_vigentes','⚡ Ações Vigentes');if(a==='premios')return content('premiacoes_incentivos','🏆 Premiações de Incentivos');if(a==='materiais')return materials();if(a==='telefones')return phones()}
+function sync(){const nav=$('admBottomNav');if(nav)nav.style.display=sessionStorage.getItem('admToken')?'grid':'none'}
+if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',()=>{ensure();sync()});else{ensure();sync()}setInterval(sync,700);window.openAdmBottomItem=openItem;
 })();
