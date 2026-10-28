@@ -1,5 +1,5 @@
 (()=>{
-const API='https://harlrfhukjvhpufwhtep.supabase.co/functions/v1/contratos-api';
+const API='https://harlrfhukjvhpufwhtep.supabase.co/functions/v1/contratos-api',API2='https://harlrfhukjvhpufwhtep.functions.supabase.co/contratos-api';
 const $=id=>document.getElementById(id);
 const E=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
@@ -8,8 +8,36 @@ let state={routes:[],entries:[],documents:[]},mounted=false;
 let report=null,reportBusy=false,loadRevision=0,clearing=false;
 
 function token(){return sessionStorage.getItem('admToken')||String(window.token||'')}
-async function call(body){const r=await fetch(API+'?v='+Date.now(),{method:'POST',cache:'no-store',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:token(),...body})});const j=await r.json().catch(()=>({}));if(!r.ok||j.error)throw Error(j.error||'Erro de conexão');return j}
-async function callForm(fd){fd.set('token',token());const r=await fetch(API+'?v='+Date.now(),{method:'POST',cache:'no-store',body:fd});const j=await r.json().catch(()=>({}));if(!r.ok||j.error)throw Error(j.error||'Erro de conexão');return j}
+async function call(body){
+ const payload={token:token(),...body},targets=[API,API2],last=null;
+ for(let i=0;i<targets.length;i++){
+  const ctrl=new AbortController(),to=setTimeout(()=>ctrl.abort(),i?18000:14000);
+  try{
+   const r=await fetch(targets[i]+'?v='+Date.now(),{method:'POST',mode:'cors',cache:'no-store',credentials:'omit',headers:{'Content-Type':'text/plain;charset=UTF-8','Accept':'application/json'},body:JSON.stringify(payload),signal:ctrl.signal});
+   const j=await r.json().catch(()=>({}));
+   if(r.ok&&!j.error)return j;
+   const e=new Error(j.error||('Erro '+r.status));if([400,401,403].includes(r.status))e.noRetry=true;throw e;
+  }catch(e){if(e?.noRetry)throw e;last=e}
+  finally{clearTimeout(to)}
+ }
+ throw new Error(navigator.onLine===false?'Sem internet. Verifique a conexão.':'Não foi possível conectar ao módulo de Contratos. Tente novamente.')
+}
+async function callForm(fd){
+ fd.set('token',token());
+ const targets=[API,API2];let last=null;
+ for(let i=0;i<targets.length;i++){
+  const ctrl=new AbortController(),to=setTimeout(()=>ctrl.abort(),i?30000:22000);
+  try{
+   const copy=new FormData();for(const [k,v] of fd.entries())copy.append(k,v);
+   const r=await fetch(targets[i]+'?v='+Date.now(),{method:'POST',mode:'cors',cache:'no-store',credentials:'omit',body:copy,signal:ctrl.signal});
+   const j=await r.json().catch(()=>({}));
+   if(r.ok&&!j.error)return j;
+   const e=new Error(j.error||('Erro '+r.status));if([400,401,403].includes(r.status))e.noRetry=true;throw e;
+  }catch(e){if(e?.noRetry)throw e;last=e}
+  finally{clearTimeout(to)}
+ }
+ throw new Error(navigator.onLine===false?'Sem internet. Verifique a conexão.':'Não foi possível enviar o contrato. Tente novamente.')
+}
 
 function css(){
  if($('admContractsCss'))return;
