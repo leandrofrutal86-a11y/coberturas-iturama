@@ -18,8 +18,13 @@ async function call(url,payload,ms){
 }
 const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 async function robustPost(payload){
+  payload={...(payload||{})};
+  const isLogin=payload?.action==='login';
+  if(!isLogin&&!payload.token){
+    try{payload.token=String(sessionStorage.getItem('admToken')||'')}catch{}
+  }
   const ms=timeoutFor(payload);
-  if(payload?.action==='login'){
+  if(isLogin){
     // Uma falha de rede não significa senha inválida: preserve a sessão e
     // tente novamente antes de mostrar o erro ao usuário.
     const targets=[
@@ -32,7 +37,15 @@ async function robustPost(payload){
     ];
     let last=null;
     for(let i=0;i<targets.length;i++){
-      try{return await call(targets[i][0],payload,targets[i][1])}
+      try{
+        const res=await call(targets[i][0],payload,targets[i][1]);
+        if(res?.token){
+          try{sessionStorage.setItem('admToken',String(res.token))}catch{}
+          try{token=String(res.token)}catch{}
+          try{window.token=String(res.token)}catch{}
+        }
+        return res
+      }
       catch(e){
         if(e?.noRetry)throw e;
         last=e;
@@ -56,6 +69,7 @@ function publishDash(d){
   try{window.dispatchEvent(new CustomEvent('iturama:admindash',{detail:d}))}catch{}
 }
 async function refreshAdminData(force=false){
+  try{if((typeof token==='undefined'||!token)&&sessionStorage.getItem('admToken'))token=sessionStorage.getItem('admToken')}catch{}
   const now=Date.now();
   if(refreshPromise)return refreshPromise;
   if(!force&&now-lastRefresh<15000&&typeof dash!=='undefined'&&dash&&typeof config!=='undefined'&&config){publishDash(dash);return {dash,config}}
@@ -81,6 +95,7 @@ async function refreshAdminData(force=false){
 
 async function fetchDashboardOnly(force=false){
   try{
+    try{if((typeof token==='undefined'||!token)&&sessionStorage.getItem('admToken'))token=sessionStorage.getItem('admToken')}catch{}
     if(!force&&window.__adminDash?.individual?.length)return window.__adminDash;
     const d=await robustPost({action:'dashboard',token});
     if(d){try{dash=d}catch{}publishDash(d);lastRefresh=Date.now()}
@@ -89,6 +104,7 @@ async function fetchDashboardOnly(force=false){
 }
 
 function fastCarregarTudo(){
+  try{if((typeof token==='undefined'||!token)&&sessionStorage.getItem('admToken'))token=sessionStorage.getItem('admToken')}catch{}
   try{document.getElementById('login')?.classList.add('hide');document.getElementById('app')?.classList.remove('hide')}catch{}
   setTimeout(()=>refreshAdminData(false),120);
   return Promise.resolve();
