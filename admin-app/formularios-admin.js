@@ -5,17 +5,23 @@ function token(){return sessionStorage.getItem('admToken')||''}
 async function formsPost(body){
  const map={admin_list:'forms_admin_list',admin_get:'forms_admin_get',admin_save:'forms_admin_save',admin_toggle:'forms_admin_toggle',admin_delete:'forms_admin_delete'};
  const payload={...body,action:map[body.action]||body.action,token:token()};
- const ctrl=new AbortController(),to=setTimeout(()=>ctrl.abort(),20000);
  try{
-   const r=await fetch(API+'?forms='+Date.now(),{method:'POST',mode:'cors',cache:'no-store',credentials:'omit',headers:{'Content-Type':'text/plain;charset=UTF-8','Accept':'application/json'},body:JSON.stringify(payload),signal:ctrl.signal});
-   const raw=await r.text();let j={};try{j=raw?JSON.parse(raw):{}}catch{throw new Error('Resposta inválida do servidor ('+r.status+').')}
-   if(!r.ok||j.error)throw new Error(j.error||('Erro '+r.status));
-   return j;
+   if(typeof window.__adminRobustPost==='function'){
+     const j=await window.__adminRobustPost(payload);
+     if(j?.error)throw new Error(j.error);
+     return j
+   }
+   if(typeof window.post==='function'){
+     const j=await window.post(payload);
+     if(j?.error)throw new Error(j.error);
+     return j
+   }
+   throw new Error('Conexão do ADM ainda não está pronta.');
  }catch(err){
-   if(err?.name==='AbortError')throw new Error('O servidor demorou para responder. Tente novamente.');
-   if(navigator.onLine===false)throw new Error('Sem internet. Verifique a conexão.');
-   throw err;
- }finally{clearTimeout(to)}
+   const msg=String(err?.message||err||'Falha ao acessar formulários');
+   if(/failed to fetch/i.test(msg))throw new Error('Falha de conexão com o ADM. Feche e abra Formulários novamente.');
+   throw err
+ }
 }
 function css(){if($('formsAdmStyle'))return;const s=d.createElement('style');s.id='formsAdmStyle';s.textContent=`
 #formsAdm{display:none;position:fixed;inset:0;z-index:38000;background:#eef2f5;overflow:auto;color:#172534;font-family:Arial,sans-serif}#formsAdm.show{display:block}
