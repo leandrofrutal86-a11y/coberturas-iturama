@@ -9,10 +9,15 @@ const DAYS=[
 ];
 const norm=v=>String(v??'').trim().toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const savedRoute=sessionStorage.getItem('pv_rota_pesquisa')||'TODOS';let selectedDay=currentDay(),selectedRoute=savedRoute,clients=[],baseClients=[],visitRows=null,loading=false,baseLoading=false,lastKey='',baseKey='',reportData=null,preparedPdfDoc=null,preparedPdfName='',preparedPdfBlob=null,preparedPdfFile=null,preparedPdfUrl='',preparingPdf=false;let pickerSource='overlay';
+const savedRoute=sessionStorage.getItem('pv_rota_pesquisa')||'TODOS';let selectedDay=currentDay(),selectedRoute=savedRoute,clients=[],baseClients=[],visitRows=null,loading=false,baseLoading=false,lastKey='',baseKey='',reportData=null,preparedPdfDoc=null,preparedPdfName='',preparedPdfBlob=null,preparedPdfFile=null,preparedPdfUrl='',preparingPdf=false;let pickerSource='overlay',initialPreloadPromise=null,initialPreloadedKey='';
 
 function currentDay(){const d=['DOM','SEG','TER','QUA','QUI','SEX','SAB'][new Date().getDay()];return DAYS.some(x=>x.code===d)?d:'SEG'}
 sessionStorage.setItem('pv_dia_visita',selectedDay);window.__pvDiaSelectedDay=selectedDay;
+function syncModernHomeDay(){
+ const day=selectedDay;
+ document.querySelectorAll('#consultorModernHome .cmWeekDay').forEach(b=>b.classList.toggle('active',String(b.dataset.day||'')===day));
+}
+
 function route(){
  try{
   if(typeof DATA!=='undefined'&&DATA?.perfil==='consultor'&&DATA?.consultor?.rota)return String(DATA.consultor.rota).trim();
@@ -132,7 +137,9 @@ async function getDayClients(force=false){
 async function setSelectedDay(code){
  if(!DAYS.some(x=>x.code===code))return;
  selectedDay=code;sessionStorage.setItem('pv_dia_visita',selectedDay);window.__pvDiaSelectedDay=selectedDay;
- clients=[];lastKey='';renderPanel();renderHomePanel();await getDayClients(true);renderHomePanel();
+ clients=[];lastKey='';initialPreloadedKey='';syncModernHomeDay();renderPanel();renderHomePanel();
+ await ensureInitialDayLoaded(true);
+ renderHomePanel();syncModernHomeDay();
 }
 async function setSelectedRoute(v){
  if(!isRogerioMulti())return;
@@ -141,6 +148,22 @@ async function setSelectedRoute(v){
  sessionStorage.setItem('pv_rota_pesquisa',selectedRoute);
  window.__pvSearchRoute=selectedRoute;
  clients=[];baseClients=[];lastKey='';baseKey='';renderPanel();renderHomePanel();await Promise.all([getBaseClients(true),getDayClients(true)]);renderHomePanel();
+}
+async function ensureInitialDayLoaded(force=false){
+ const rt=effectiveRoute();
+ if(!rt||rt==='TODOS'&&!isRogerioMulti())return false;
+ const key=rt+'|'+selectedDay;
+ if(!force&&initialPreloadedKey===key&&lastKey===key)return true;
+ if(initialPreloadPromise)return initialPreloadPromise;
+ initialPreloadPromise=(async()=>{
+   syncModernHomeDay();
+   if(force||baseKey!==rt||!baseClients.length)await getBaseClients(force);
+   if(force||lastKey!==key||!clients.length)await getDayClients(force);
+   initialPreloadedKey=key;
+   syncModernHomeDay();
+   return true;
+ })().finally(()=>{initialPreloadPromise=null});
+ return initialPreloadPromise;
 }
 function renderPanel(){
  const b=searchBox();if(!b?.body)return;
@@ -171,8 +194,9 @@ function renderHomePanel(){
 }
 async function openClientPicker(source='overlay'){
  pickerSource=source;
+ try{await ensureInitialDayLoaded(false)}catch{}
  if(selectedDay!=='TODOS'&&(!clients.length||lastKey!==effectiveRoute()+'|'+selectedDay)){
-   try{await getDayClients(true)}catch{}
+   try{await ensureInitialDayLoaded(true)}catch{}
  }
  let modal=document.getElementById('pvDiaPicker');
  if(!modal){modal=document.createElement('div');modal.id='pvDiaPicker';modal.className='pvDiaPicker';modal.hidden=true;modal.innerHTML='<div class="pvDiaPickerPanel" role="dialog" aria-modal="true" aria-label="Selecionar cliente"><div class="pvDiaPickerTop"><button type="button" id="pvDiaPickerClose" style="float:right">✕ Fechar</button><b>Selecione um cliente</b><input id="pvDiaPickerSearch" type="search" placeholder="Buscar código PV ou razão social" autocomplete="off"></div><div id="pvDiaPickerList" class="pvDiaPickerList"></div></div>';document.body.appendChild(modal);document.getElementById('pvDiaPickerClose').onclick=()=>modal.hidden=true;modal.onclick=e=>{if(e.target===modal)modal.hidden=true};document.getElementById('pvDiaPickerSearch').oninput=renderClientPicker}
@@ -455,26 +479,29 @@ async function downloadReportPdf(){
  }
 }
 async function inject(force=false){
- css();ensureReportOverlay();wrapSearch();const b=searchBox();if(!b)return;
- renderPanel();
+ css();ensureReportOverlay();wrapSearch();
  if(isRogerioMulti())window.__pvSearchRoute=effectiveRoute();
- const rt=effectiveRoute(),dayKey=rt+'|'+selectedDay;
- const jobs=[];
- if(force||rt!==baseKey||!baseClients.length)jobs.push(getBaseClients(force));
- if(force||dayKey!==lastKey||!clients.length)jobs.push(getDayClients(force));
- if(jobs.length)await Promise.all(jobs);
+ syncModernHomeDay();
+ try{await ensureInitialDayLoaded(force)}catch{}
+ const b=searchBox();
+ if(b)renderPanel();
  renderHomePanel();
+ syncModernHomeDay();
 }
 function watch(){
  inject().catch(()=>{});
  setInterval(()=>{
    wrapSearch();
+   syncModernHomeDay();
+   const rt=effectiveRoute(),key=rt?rt+'|'+selectedDay:'';
+   if(rt&&(!initialPreloadedKey||initialPreloadedKey!==key||lastKey!==key))ensureInitialDayLoaded(false).catch(()=>{});
    const ov=document.getElementById('ov');
    if(ov?.classList.contains('show')&&!ov.querySelector('.pvDiaBox'))inject(false).catch(()=>{});
    renderHomePanel();
- },700);
+ },350);
 }
-window.addEventListener('iturama:routechange',()=>{clients=[];baseClients=[];lastKey='';baseKey='';inject(true).catch(()=>{})});
+window.addEventListener('iturama:dashboard-ready',()=>{initialPreloadedKey='';setTimeout(()=>ensureInitialDayLoaded(true).catch(()=>{}),0)});
+window.addEventListener('iturama:routechange',()=>{clients=[];baseClients=[];lastKey='';baseKey='';initialPreloadedKey='';inject(true).catch(()=>{})});
 window.__openPvDayReport=()=>openReport();
 window.__renderPvHomePanel=renderHomePanel;
 window.__setPvHomeDay=setSelectedDay;
