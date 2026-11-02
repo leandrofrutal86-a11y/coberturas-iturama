@@ -8,8 +8,36 @@ const n=v=>Number(v||0);
 const ALLOWED=new Set(['visao da equipe','atualizar vendas','atualizar base de clientes','coberturas por dia','acoes vigentes','contratos','relatorios','premiacoes de incentivos']);
 
 function getDash(){try{return w.eval('dash')}catch{try{return typeof dash!=='undefined'?dash:null}catch{return null}}}
-function getTeam(){const x=getDash();return Array.isArray(x?.individual)?x.individual:[]}
-function getCats(){const x=getDash();return Array.isArray(x?.team)?x.team:[]}
+function isB2BName(v){const s=norm(v);return s==='compra b2b'||s==='recompra b2b'}
+const b2bStable={team:new Map(),routes:new Map()};
+function stabilizeB2B(x){
+ if(!x)return x;
+ for(const row of (x.team||[])){
+   if(!isB2BName(row?.nome))continue;
+   const k=norm(row.nome),val=n(row.realizado);
+   if(val>0)b2bStable.team.set(k,val);
+   else if(b2bStable.team.has(k)){
+     row.realizado=b2bStable.team.get(k);row.falta=Math.max(n(row.meta)-n(row.realizado),0);row.percentual=n(row.meta)?Math.round(n(row.realizado)/n(row.meta)*100):0;
+   }
+ }
+ for(const item of (x.individual||[])){
+   const route=String(item?.rota||'');
+   if(!b2bStable.routes.has(route))b2bStable.routes.set(route,new Map());
+   const mp=b2bStable.routes.get(route);
+   for(const row of (item.resultados||[])){
+     if(!isB2BName(row?.nome))continue;
+     const k=norm(row.nome),val=n(row.realizado);
+     if(val>0)mp.set(k,val);
+     else if(mp.has(k)){
+       row.realizado=mp.get(k);row.falta=Math.max(n(row.meta)-n(row.realizado),0);row.percentual=n(row.meta)?Math.round(n(row.realizado)/n(row.meta)*100):0;
+     }
+   }
+ }
+ return x
+}
+
+function getTeam(){const x=stabilizeB2B(getDash());return Array.isArray(x?.individual)?x.individual:[]}
+function getCats(){const x=stabilizeB2B(getDash());return Array.isArray(x?.team)?x.team:[]}
 
 function css(){
  if(d.getElementById('admTeamRestructureStyle'))return;
@@ -500,7 +528,7 @@ let liveSig='';
 setInterval(()=>{
  const v=d.getElementById('admConsultorView');
  if(!v||v.hidden)return;
- const x=getDash();
+ const x=stabilizeB2B(getDash());
  const sig=x?JSON.stringify([(x.consultores||[]).map(a=>[a.rota,a.nome]),(x.team||[]).map(a=>[a.nome,a.meta,a.realizado]),x.sales_period,(x.individual||[]).map(a=>[a.rota,(a.resultados||[]).map(r=>[r.nome,r.meta,r.realizado])])]):'';
  if(sig&&sig!==liveSig){
    liveSig=sig;
