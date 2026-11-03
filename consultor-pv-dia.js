@@ -25,11 +25,10 @@ function route(){
  return String(window.getIturamaContext?.()||window.__ituramaContext||document.querySelector('#route')?.textContent||'').trim()
 }
 function isRogerioMulti(){try{return String(DATA?.perfil||'')==='acompanhante'&&(String(DATA?.acesso?.matricula||DATA?.consultor?.matricula||'')==='5125'||String(DATA?.acesso?.modo_acesso||'')==='team')}catch{return false}}
-function canPickSearchRoute(){try{return String(DATA?.perfil||'')==='acompanhante'&&String(DATA?.acesso?.matricula||DATA?.consultor?.matricula||'')==='5125'}catch{return false}}
+function canPickSearchRoute(){try{return String(DATA?.perfil||'')==='acompanhante'&&(String(DATA?.acesso?.matricula||DATA?.consultor?.matricula||'')==='5125'||String(DATA?.acesso?.modo_acesso||'')==='team')}catch{return false}}
 function isTeamOnlySearch(){try{return String(DATA?.perfil||'')==='acompanhante'&&String(DATA?.acesso?.modo_acesso||'')==='team'}catch{return false}}
 function availableRoutes(){try{return Array.isArray(DATA?.consultores)&&DATA.consultores.length?DATA.consultores:[{rota:'8A1',nome:'Lucas'},{rota:'8B1',nome:'Pedro Henrique'},{rota:'8C1',nome:'Pedro Afonso'},{rota:'8D1',nome:'Poliana'},{rota:'8F1',nome:'Heitor'}]}catch{return[]}}
 function effectiveRoute(){
- if(isTeamOnlySearch()){selectedRoute='TODOS';return 'TODOS'}
  if(!isRogerioMulti())return route();
  const v=String(selectedRoute||'TODOS').trim().toUpperCase();
  if(v==='TODOS'||availableRoutes().some(x=>String(x.rota)===v))return v;
@@ -508,6 +507,7 @@ window.addEventListener('iturama:routechange',()=>{clients=[];baseClients=[];las
 window.__openPvDayReport=()=>openReport();
 window.__renderPvHomePanel=renderHomePanel;
 window.__setPvHomeDay=setSelectedDay;
+window.__setPvSearchRoute=setSelectedRoute;
 window.__openPvHomePicker=()=>openClientPicker('home');
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',watch);else watch();
 })();
