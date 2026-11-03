@@ -146,10 +146,14 @@ async function setSelectedDay(code){
 async function setSelectedRoute(v){
  if(!canPickSearchRoute())return;
  const val=String(v||'TODOS').trim().toUpperCase();
- selectedRoute=(val==='TODOS'||availableRoutes().some(x=>String(x.rota)===val))?val:'TODOS';
+ selectedRoute=(val==='TODOS'||availableRoutes().some(x=>String(x.rota).toUpperCase()===val))?val:'TODOS';
  sessionStorage.setItem('pv_rota_pesquisa',selectedRoute);
  window.__pvSearchRoute=selectedRoute;
- clients=[];baseClients=[];lastKey='';baseKey='';renderPanel();renderHomePanel();await Promise.all([getBaseClients(true),getDayClients(true)]);renderHomePanel();
+ clients=[];baseClients=[];lastKey='';baseKey='';initialPreloadedKey='';
+ renderPanel();renderHomePanel();
+ await getBaseClients(true);
+ await getDayClients(true);
+ renderPanel();renderHomePanel();
 }
 async function ensureInitialDayLoaded(force=false){
  const rt=effectiveRoute();

@@ -5,6 +5,11 @@ function isTrainee(){const x=data();return x?.perfil==='acompanhante'&&String(x?
 function mode(){return String(data()?.acesso?.modo_acesso||'team')}
 function route(){return String(data()?.acesso?.rota_permitida||'').trim()}
 function label(){const x=data();return String(x?.acesso?.nome||'Carlos')}
+function hideDefaultPvSearch(){
+ if(!isTrainee()||mode()!=='team')return;
+ const hero=d.querySelector('#consultorModernHome .cmSearchHero');
+ if(hero)hero.style.display='none';
+}
 function ensureTeamSearch(){
  if(!isTrainee()||mode()!=='team')return;
  let box=d.getElementById('traineeTeamSearch');
@@ -14,11 +19,11 @@ function ensureTeamSearch(){
    box=d.createElement('section');box.id='traineeTeamSearch';
    box.innerHTML='<div class="ttsHead"><div><b>🔎 Pesquisa de Clientes</b><small>Pesquise qualquer cliente da equipe ou liste os clientes pelo dia da visita.</small></div></div><div class="ttsRoute"><label>ROTA DA PESQUISA</label><select id="ttsRoute"><option value="TODOS">Todas as rotas</option>'+(data()?.consultores||[]).map(c=>'<option value="'+String(c.rota||'')+'">'+String(c.rota||'')+' - '+String(c.nome||'')+'</option>').join('')+'</select></div><div class="ttsPv"><input id="ttsPvInput" inputmode="numeric" placeholder="Digite o PV do cliente"><button type="button" id="ttsPvBtn">Pesquisar</button></div><div class="ttsDays"><b>Escolha o dia da visita</b><div>'+['SEG','TER','QUA','QUI','SEX'].map(x=>'<button type="button" data-tts-day="'+x+'">'+x+'</button>').join('')+'</div><button type="button" id="ttsListBtn" class="ttsList">Listar clientes do dia ▾</button></div>';
    panel.parentNode.insertBefore(box,panel);
-   d.getElementById('ttsRoute').onchange=async()=>{const rt=d.getElementById('ttsRoute').value||'TODOS';window.__pvSearchRoute=rt;try{await window.__setPvSearchRoute?.(rt)}catch{}};
+   d.getElementById('ttsRoute').onchange=async()=>{const rt=d.getElementById('ttsRoute').value||'TODOS';window.__pvSearchRoute=rt;try{sessionStorage.setItem('pv_rota_pesquisa',rt)}catch{}try{await window.__setPvSearchRoute?.(rt)}catch{}};
    d.getElementById('ttsPvBtn').onclick=async()=>{const v=d.getElementById('ttsPvInput').value.trim();if(!v)return;const rt=d.getElementById('ttsRoute')?.value||'TODOS';window.__pvSearchRoute=rt;try{openPv()}catch{}await new Promise(r=>setTimeout(r,30));const p=d.getElementById('pv');if(p)p.value=v;try{if(typeof searchPv==='function')await searchPv();else if(typeof window.searchPv==='function')await window.searchPv()}catch{}};
    d.getElementById('ttsPvInput').onkeydown=e=>{if(e.key==='Enter')d.getElementById('ttsPvBtn').click()};
    box.querySelectorAll('[data-tts-day]').forEach(btn=>btn.onclick=async()=>{box.querySelectorAll('[data-tts-day]').forEach(x=>x.classList.remove('active'));btn.classList.add('active');try{await window.__setPvHomeDay?.(btn.dataset.ttsDay)}catch{}});
-   d.getElementById('ttsListBtn').onclick=async()=>{const rt=d.getElementById('ttsRoute')?.value||'TODOS';window.__pvSearchRoute=rt;try{await window.__setPvSearchRoute?.(rt)}catch{}try{window.__openPvHomePicker?.()}catch{}};
+   d.getElementById('ttsListBtn').onclick=async()=>{const rt=d.getElementById('ttsRoute')?.value||'TODOS';window.__pvSearchRoute=rt;try{sessionStorage.setItem('pv_rota_pesquisa',rt)}catch{}try{await window.__setPvSearchRoute?.(rt)}catch{}try{window.__openPvHomePicker?.()}catch{}};
  }
  const rt=d.getElementById('ttsRoute');if(rt){const saved=sessionStorage.getItem('pv_rota_pesquisa')||'TODOS';rt.value=[...rt.options].some(o=>o.value===saved)?saved:'TODOS'}
  const cur=(sessionStorage.getItem('pv_dia_visita')||'SEG').toUpperCase();
@@ -44,6 +49,7 @@ function sync(){
  const routeEl=d.getElementById('route');if(routeEl)routeEl.textContent=m==='route'?r:'Visão da Equipe';
 
  if(m==='team'){
+   hideDefaultPvSearch();
    ensureTeamSearch();
    window.__pvSearchRoute='TODOS';
    try{
