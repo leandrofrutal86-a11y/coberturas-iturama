@@ -5,8 +5,36 @@ function isTrainee(){const x=data();return x?.perfil==='acompanhante'&&String(x?
 function mode(){return String(data()?.acesso?.modo_acesso||'team')}
 function route(){return String(data()?.acesso?.rota_permitida||'').trim()}
 function label(){const x=data();return String(x?.acesso?.nome||'Carlos')}
+function ensureTeamSearch(){
+ if(!isTrainee()||mode()!=='team')return;
+ let box=d.getElementById('traineeTeamSearch');
+ const panel=d.querySelector('#dash .panel');
+ if(!panel)return;
+ if(!box){
+   box=d.createElement('section');box.id='traineeTeamSearch';
+   box.innerHTML='<div class="ttsHead"><div><b>🔎 Pesquisa de Clientes</b><small>Pesquise qualquer cliente da equipe ou liste os clientes pelo dia da visita.</small></div></div><div class="ttsPv"><input id="ttsPvInput" inputmode="numeric" placeholder="Digite o PV do cliente"><button type="button" id="ttsPvBtn">Pesquisar</button></div><div class="ttsDays"><b>Escolha o dia da visita</b><div>'+['SEG','TER','QUA','QUI','SEX'].map(x=>'<button type="button" data-tts-day="'+x+'">'+x+'</button>').join('')+'</div><button type="button" id="ttsListBtn" class="ttsList">Listar clientes do dia ▾</button></div>';
+   panel.parentNode.insertBefore(box,panel);
+   d.getElementById('ttsPvBtn').onclick=async()=>{const v=d.getElementById('ttsPvInput').value.trim();if(!v)return;window.__pvSearchRoute='TODOS';try{openPv()}catch{}await new Promise(r=>setTimeout(r,30));const p=d.getElementById('pv');if(p)p.value=v;try{if(typeof searchPv==='function')await searchPv();else if(typeof window.searchPv==='function')await window.searchPv()}catch{}};
+   d.getElementById('ttsPvInput').onkeydown=e=>{if(e.key==='Enter')d.getElementById('ttsPvBtn').click()};
+   box.querySelectorAll('[data-tts-day]').forEach(btn=>btn.onclick=async()=>{box.querySelectorAll('[data-tts-day]').forEach(x=>x.classList.remove('active'));btn.classList.add('active');try{await window.__setPvHomeDay?.(btn.dataset.ttsDay)}catch{}});
+   d.getElementById('ttsListBtn').onclick=()=>{window.__pvSearchRoute='TODOS';try{window.__openPvHomePicker?.()}catch{}};
+ }
+ const cur=(sessionStorage.getItem('pv_dia_visita')||'SEG').toUpperCase();
+ box.querySelectorAll('[data-tts-day]').forEach(x=>x.classList.toggle('active',x.dataset.ttsDay===cur));
+}
+function ensureTeamSearchCss(){
+ if(d.getElementById('traineeTeamSearchStyle'))return;
+ const s=d.createElement('style');s.id='traineeTeamSearchStyle';s.textContent=`
+ #traineeTeamSearch{margin:16px auto;width:min(1280px,calc(100% - 40px));background:#ef0000;border-radius:22px;padding:18px;color:#fff;box-shadow:0 8px 24px #0001}
+ .ttsHead b{font-size:24px;display:block}.ttsHead small{font-size:13px;font-weight:700;opacity:.9}
+ .ttsPv{display:grid;grid-template-columns:1fr auto;gap:10px;margin-top:14px}.ttsPv input{border:0;border-radius:13px;padding:14px;font-size:16px}.ttsPv button,.ttsList{border:0;border-radius:13px;padding:0 22px;font-weight:950;background:#fff;color:#d50000}
+ .ttsDays{margin-top:13px;border:1px solid #ffffff55;border-radius:15px;padding:12px}.ttsDays>b{font-size:13px}.ttsDays>div{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:9px 0}.ttsDays [data-tts-day]{border:1px solid #ffffff88;background:#ffffff14;color:#fff;border-radius:9px;padding:10px 4px;font-weight:900}.ttsDays [data-tts-day].active{background:#fff;color:#d50000}.ttsList{width:100%;height:44px;background:#171717;color:#fff}
+ @media(max-width:600px){#traineeTeamSearch{width:calc(100% - 16px);padding:12px;border-radius:17px}.ttsHead b{font-size:19px}.ttsPv{grid-template-columns:1fr}.ttsPv button{height:42px}.ttsDays [data-tts-day]{font-size:10px;padding:9px 1px}}
+ `;d.head.appendChild(s)
+}
 function sync(){
  if(!isTrainee())return;
+ ensureTeamSearchCss();
  const m=mode(),r=route(),x=data();
  try{sessionStorage.setItem('iturama_context',m==='route'?r:'TEAM')}catch{}
  const hello=d.querySelector('#consultorModernHome .cmHello strong');if(hello)hello.textContent='Olá, '+label();
@@ -14,6 +42,8 @@ function sync(){
  const routeEl=d.getElementById('route');if(routeEl)routeEl.textContent=m==='route'?r:'Visão da Equipe';
 
  if(m==='team'){
+   ensureTeamSearch();
+   window.__pvSearchRoute='TODOS';
    try{
      TAB='equipe';
      const cat=d.getElementById('cat');

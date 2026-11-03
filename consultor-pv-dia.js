@@ -24,9 +24,12 @@ function route(){
  }catch{}
  return String(window.getIturamaContext?.()||window.__ituramaContext||document.querySelector('#route')?.textContent||'').trim()
 }
-function isRogerioMulti(){try{return String(DATA?.perfil||'')==='acompanhante'&&String(DATA?.acesso?.matricula||DATA?.consultor?.matricula||'')==='5125'}catch{return false}}
+function isRogerioMulti(){try{return String(DATA?.perfil||'')==='acompanhante'&&(String(DATA?.acesso?.matricula||DATA?.consultor?.matricula||'')==='5125'||String(DATA?.acesso?.modo_acesso||'')==='team')}catch{return false}}
+function canPickSearchRoute(){try{return String(DATA?.perfil||'')==='acompanhante'&&String(DATA?.acesso?.matricula||DATA?.consultor?.matricula||'')==='5125'}catch{return false}}
+function isTeamOnlySearch(){try{return String(DATA?.perfil||'')==='acompanhante'&&String(DATA?.acesso?.modo_acesso||'')==='team'}catch{return false}}
 function availableRoutes(){try{return Array.isArray(DATA?.consultores)&&DATA.consultores.length?DATA.consultores:[{rota:'8A1',nome:'Lucas'},{rota:'8B1',nome:'Pedro Henrique'},{rota:'8C1',nome:'Pedro Afonso'},{rota:'8D1',nome:'Poliana'},{rota:'8F1',nome:'Heitor'}]}catch{return[]}}
 function effectiveRoute(){
+ if(isTeamOnlySearch()){selectedRoute='TODOS';return 'TODOS'}
  if(!isRogerioMulti())return route();
  const v=String(selectedRoute||'TODOS').trim().toUpperCase();
  if(v==='TODOS'||availableRoutes().some(x=>String(x.rota)===v))return v;
@@ -142,7 +145,7 @@ async function setSelectedDay(code){
  renderHomePanel();syncModernHomeDay();
 }
 async function setSelectedRoute(v){
- if(!isRogerioMulti())return;
+ if(!canPickSearchRoute())return;
  const val=String(v||'TODOS').trim().toUpperCase();
  selectedRoute=(val==='TODOS'||availableRoutes().some(x=>String(x.rota)===val))?val:'TODOS';
  sessionStorage.setItem('pv_rota_pesquisa',selectedRoute);
@@ -170,7 +173,7 @@ function renderPanel(){
  let box=b.body.querySelector('.pvDiaBox');
  if(!box){box=document.createElement('div');box.className='pvDiaBox';b.body.insertBefore(box,b.body.firstChild)}
  const dayBtns=DAYS.map(d=>`<button type="button" class="pvDayChoice ${d.code===selectedDay?'active':''}" data-day="${d.code}">${d.code}</button>`).join('');
-  const routePicker=isRogerioMulti()?`<div class="pvDiaFilters" style="margin-bottom:10px"><div><label>ROTA DA PESQUISA</label><select id="pvDiaRoute" class="pvDiaSelect" ${loading||baseLoading?'disabled':''}><option value="TODOS">TODAS AS ROTAS</option>${availableRoutes().map(x=>`<option value="${esc(x.rota)}" ${effectiveRoute()===String(x.rota)?'selected':''}>${esc(x.rota)} - ${esc(x.nome||'')}</option>`).join('')}</select></div></div>`:'';
+  const routePicker=canPickSearchRoute()?`<div class="pvDiaFilters" style="margin-bottom:10px"><div><label>ROTA DA PESQUISA</label><select id="pvDiaRoute" class="pvDiaSelect" ${loading||baseLoading?'disabled':''}><option value="TODOS">TODAS AS ROTAS</option>${availableRoutes().map(x=>`<option value="${esc(x.rota)}" ${effectiveRoute()===String(x.rota)?'selected':''}>${esc(x.rota)} - ${esc(x.nome||'')}</option>`).join('')}</select></div></div>`:'';
  box.innerHTML=`<div class="pvDiaHead"><b>📍 Pesquisa de clientes</b><span class="pvDiaCount">${esc(routeLabel(effectiveRoute()))} • ${selectedDay==='TODOS'?baseClients.length:clients.length} cliente(s)</span></div>
  ${routePicker}
  <div class="pvDayChoices">${dayBtns}</div>
