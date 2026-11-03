@@ -49,11 +49,12 @@ function sync(){
    try{
      TAB='equipe';
      const cat=d.getElementById('cat');
-     if(cat){
+     if(cat&&cat.dataset.traineeTeam!=='1'){
        const v=cat.value||'ALL';
        cat.innerHTML='<option value="ALL">Todos os incentivos</option>';
        (x?.team||[]).forEach(row=>cat.insertAdjacentHTML('beforeend','<option value="'+String(row.nome||'').replace(/"/g,'&quot;')+'">'+String(row.nome||'')+'</option>'));
        cat.value=[...cat.options].some(o=>o.value===v)?v:'ALL';
+       cat.dataset.traineeTeam='1';
      }
      d.querySelectorAll('#dash .tab,.tabs .tab').forEach(btn=>{btn.classList.toggle('active',btn.dataset.t==='equipe')});
      if(typeof render==='function')render();
@@ -74,9 +75,16 @@ function sync(){
  });
  d.querySelectorAll('.acessoHeaderWrap,.rogerioUiHead').forEach(w=>{w.style.display='none'});
 }
-window.addEventListener('iturama:dashboard-ready',()=>setTimeout(sync,0));
-window.addEventListener('iturama:routechange',()=>setTimeout(sync,0));
-if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',sync);else sync();
-new MutationObserver(sync).observe(d.documentElement,{childList:true,subtree:true});
-setInterval(sync,800);
+let lastSig='';
+function safeSync(force=false){
+ const x=data();const sig=x?JSON.stringify([x?.acesso?.tipo_perfil,x?.acesso?.modo_acesso,x?.acesso?.rota_permitida,x?.consultor?.rota,(x?.team||[]).map(r=>[r.nome,r.meta,r.realizado])]):'';
+ if(!force&&sig&&sig===lastSig)return;
+ lastSig=sig;
+ try{sync()}catch{}
+}
+window.addEventListener('iturama:dashboard-ready',()=>setTimeout(()=>safeSync(true),40));
+window.addEventListener('iturama:routechange',()=>setTimeout(()=>safeSync(true),40));
+window.addEventListener('pageshow',()=>setTimeout(()=>safeSync(true),120));
+if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',()=>setTimeout(()=>safeSync(true),80));else setTimeout(()=>safeSync(true),80);
+setInterval(()=>safeSync(false),3000);
 })();
