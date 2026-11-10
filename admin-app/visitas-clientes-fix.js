@@ -20,6 +20,21 @@
       #visitasClientesFix tbody tr:nth-child(even) td{background:#fff}
       #visitasClientesFix .vfPv{font-weight:900;white-space:nowrap}
       #visitasClientesFix .vfPhone{white-space:nowrap;color:#0b63ce;font-weight:800;text-decoration:none}
+      #visitasClientesFix tbody tr.vfClientRow{cursor:pointer}
+      #visitasClientesFix tbody tr.vfClientRow:hover td{background:#fff4f4!important}
+      #visitasClientesFix .vfPv{color:#b40000}
+      #vfClientOverlay{display:none;position:fixed;inset:0;z-index:70000;background:#0009;padding:10px;align-items:center;justify-content:center}
+      #vfClientOverlay.show{display:flex}
+      .vfClientSheet{width:min(820px,100%);max-height:94dvh;overflow:auto;background:#f4f6f8;border-radius:18px}
+      .vfClientTop{position:sticky;top:0;z-index:3;background:linear-gradient(135deg,#090909,#9f0000);color:#fff;padding:14px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+      .vfClientTop h2{margin:0;font-size:20px}.vfClientTop button{border:0;background:#fff;border-radius:9px;padding:9px 12px;font-weight:900}
+      .vfClientBody{padding:12px}.vfClientHead{background:#fff;border-radius:14px;padding:13px;margin-bottom:10px}
+      .vfClientHead b{font-size:18px}.vfClientHead small{display:block;color:#617182;margin-top:4px}
+      .vfClientTable{background:#fff;border-radius:14px;overflow:hidden;border:1px solid #dce3e8}
+      .vfClientTable table{width:100%;min-width:0!important;border-collapse:collapse}
+      .vfClientTable th{background:#e30613!important;color:#fff!important;position:static!important}.vfClientTable th,.vfClientTable td{padding:9px 8px!important}
+      .vfOk{color:#087249;font-weight:900}.vfBad{color:#c8151d;font-weight:900}.vfDetail{display:block;font-size:11px;color:#5d6c7a;margin-top:3px;font-weight:700}
+      .vfClientLoading{padding:30px;text-align:center;font-weight:900;color:#667788}
       #visitasClientesFix .vfUpload{border:2px dashed #ccd3da;border-radius:12px;padding:14px;background:#fafbfc;margin:12px 0}
       @media(max-width:760px){
         #visitasClientesFix .box{padding:10px!important}
@@ -115,13 +130,57 @@
     sel.value=rs.includes(old)?old:'ALL';
   }
   function phone(v){const t=String(v||'').trim();if(!t)return '-';const d=t.replace(/\D/g,'');return d.length>=8?`<a class="vfPhone" href="tel:${esc(d)}">☎ ${esc(t)}</a>`:esc(t)}
+  async function admPost(payload){
+    const body={...(payload||{}),token:sessionStorage.getItem('admToken')||''};
+    if(typeof window.__adminRobustPost==='function')return window.__adminRobustPost(body);
+    if(typeof window.post==='function')return window.post(body);
+    throw new Error('Conexão do ADM indisponível.');
+  }
+  function ensureClientOverlay(){
+    let ov=$('vfClientOverlay');if(ov)return ov;
+    ov=document.createElement('div');ov.id='vfClientOverlay';
+    ov.innerHTML='<div class="vfClientSheet"><div class="vfClientTop"><h2>🔎 Pesquisa do Cliente</h2><button type="button" id="vfClientClose">Fechar</button></div><div id="vfClientBody" class="vfClientBody"><div class="vfClientLoading">Carregando...</div></div></div>';
+    document.body.appendChild(ov);
+    $('vfClientClose').onclick=()=>ov.classList.remove('show');
+    ov.onclick=e=>{if(e.target===ov)ov.classList.remove('show')};
+    return ov;
+  }
+  function catDetail(x){
+    if(x?.excluido||x?.nao_aplicavel)return 'Não se aplica ao cliente';
+    if(Array.isArray(x?.grupos)&&x.grupos.length){
+      const faltam=x.grupos.filter(g=>!g.vendido).map(g=>'Grupo '+g.grupo);
+      return faltam.length?'Falta: '+faltam.join(', '):'Todos os grupos realizados';
+    }
+    if(String(x?.tipo_regra||'')==='quantidade'){
+      const q=Number(x.quantidade||0),m=Number(x.quantidade_minima||0);
+      return x.realizado?'Quantidade atingida: '+q:'Falta '+Math.max(m-q,0)+' • atual '+q+'/'+m;
+    }
+    if(String(x?.tipo_regra||'')==='recompra'){
+      const q=Number(x.compras||0),m=Number(x.compras_minimas||0);
+      return x.realizado?'Recompra realizada':'Falta '+Math.max(m-q,0)+' compra(s) • atual '+q+'/'+m;
+    }
+    return x?.realizado?'Cobertura realizada':'Cobertura ainda não realizada';
+  }
+  async function openClient(pv,rota){
+    const ov=ensureClientOverlay(),body=$('vfClientBody');ov.classList.add('show');
+    body.innerHTML='<div class="vfClientLoading">Consultando coberturas do PV '+esc(pv)+'...</div>';
+    try{
+      const req={action:'search_pv',pv:String(pv||'').trim()};
+      if(rota)req.rota=String(rota).trim();
+      const r=await admPost(req);
+      if(!r?.found){body.innerHTML='<div class="vfClientLoading">PV não encontrado na base atual.</div>';return}
+      const cats=(r.categorias||[]).filter(x=>!x?.nao_aplicavel);
+      body.innerHTML='<section class="vfClientHead"><b>PV '+esc(r.cliente?.pv||pv)+' - '+esc(r.cliente?.razao||'')+'</b><small>Rota: '+esc(r.cliente?.rota||rota||'')+' • Subcanal: '+esc(r.cliente?.subcanal||'-')+'</small></section><section class="vfClientTable"><table><thead><tr><th>Categoria</th><th>Situação</th></tr></thead><tbody>'+cats.map(x=>'<tr><td><b>'+esc(x.nome||'')+'</b></td><td class="'+(x.realizado?'vfOk':'vfBad')+'">'+(x.realizado?'✓ REALIZADO':'✕ NÃO REALIZADO')+'<span class="vfDetail">'+esc(catDetail(x))+'</span></td></tr>').join('')+'</tbody></table></section>';
+    }catch(e){body.innerHTML='<div class="vfClientLoading">'+esc(e.message||'Não foi possível consultar o cliente.')+'</div>'}
+  }
   function render(){
     if(!$('vfTb'))return;const rota=$('vfRota')?.value||'ALL',dia=$('vfDia')?.value||'ALL',busca=norm($('vfBusca')?.value);const days=['SEG','TER','QUA','QUI','SEX'];
     let base=rows.filter(x=>(rota==='ALL'||String(x.Rota)===rota)&&(dia==='ALL'||Number(x[dia]||0)>0)&&(!busca||norm([x.Cliente,x['Razão Social'],x.Cidade,x['Endereço'],x.SubCanal].join(' ')).includes(busca)));
     let out=[];base.forEach(x=>{let ds=days.filter(d=>Number(x[d]||0)>0);if(dia!=='ALL')ds=ds.filter(d=>d===dia);if(!ds.length)ds=['-'];ds.forEach(d=>out.push({...x,_dia:d,_ord:d==='-'?'':Number(x[d]||0)}))});
     out.sort((a,b)=>String(a.Rota).localeCompare(String(b.Rota),'pt-BR')||days.indexOf(a._dia)-days.indexOf(b._dia)||(a._ord||9999)-(b._ord||9999)||String(a['Razão Social']).localeCompare(String(b['Razão Social']),'pt-BR'));
     $('vfInfo').innerHTML=`<b>${base.length} cliente(s)</b>${rota==='ALL'?' • Todas as rotas':` • Rota ${esc(rota)}`}${dia==='ALL'?' • Todos os dias':` • ${esc(dia)}`}`;
-    $('vfTb').innerHTML=out.length?out.map(x=>`<tr><td>${esc(x._ord)}</td><td><b>${esc(x._dia)}</b></td><td class="vfPv">${esc(x.Cliente)}</td><td><b>${esc(x.Rota)}</b></td><td>${esc(x['Razão Social'])}</td><td>${esc(x['Freq visita'])}</td><td>${esc(x.Cidade)}</td><td>${esc(x['Endereço'])}</td><td>${phone(x.Telefone)}</td></tr>`).join(''):'<tr><td colspan="9" class="empty">Nenhum cliente encontrado.</td></tr>';
+    $('vfTb').innerHTML=out.length?out.map(x=>`<tr class="vfClientRow" data-pv="${esc(x.Cliente)}" data-rota="${esc(x.Rota)}" title="Clique para consultar as coberturas"><td>${esc(x._ord)}</td><td><b>${esc(x._dia)}</b></td><td class="vfPv">${esc(x.Cliente)}</td><td><b>${esc(x.Rota)}</b></td><td>${esc(x['Razão Social'])}</td><td>${esc(x['Freq visita'])}</td><td>${esc(x.Cidade)}</td><td>${esc(x['Endereço'])}</td><td>${phone(x.Telefone)}</td></tr>`).join(''):'<tr><td colspan="9" class="empty">Nenhum cliente encontrado.</td></tr>';
+    $('vfTb').querySelectorAll('.vfClientRow').forEach(tr=>tr.onclick=e=>{if(e.target.closest('a'))return;openClient(tr.dataset.pv,tr.dataset.rota)});
   }
   async function importExcel(){
     const f=$('vfExcel')?.files?.[0];if(!f){$('vfImportStatus').textContent='Selecione uma planilha Excel.';return}if(!window.XLSX){$('vfImportStatus').textContent='Leitor de Excel ainda não carregou.';return}
