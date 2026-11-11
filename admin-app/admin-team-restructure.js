@@ -380,7 +380,7 @@ function ensureView(){
  };
  if(prev)prev.onclick=e=>{e.preventDefault();e.stopPropagation();moveCarousel(-1)};
  if(next)next.onclick=e=>{e.preventDefault();e.stopPropagation();moveCarousel(1)};
- $$('.acvAct',v).forEach(b=>b.onclick=()=>{const a=b.dataset.act;if(a==='contratos')window.openTeamContracts?.();if(a==='visitas')openAdminFeature('Visita de Clientes');if(a==='subcanais')openAdminFeature('Subcanais');if(a==='contatos')openAdminFeature('Contato dos Clientes')});
+ $$('.acvAct',v).forEach(b=>b.onclick=()=>{const a=b.dataset.act;if(a==='contratos')window.openTeamContracts?.();if(a==='visitas')openAdminFeature('Visita de Clientes');if(a==='subcanais')openAcvSubcanais();if(a==='contatos')openAdminFeature('Contato dos Clientes')});
  return v;
 }
 
@@ -475,6 +475,59 @@ function renderAdmOppControls(){const body=d.getElementById('acvOppBody');if(!bo
 async function openAdmOpportunities(){const ov=ensureAdmOpp();ov.classList.add('show');renderAdmOppControls()}
 function admOppProgress(done,total){const s=d.getElementById('acvOppStatus');if(s)s.innerHTML='<div class="acvOppHint">Analisando '+done+' de '+total+' cliente(s)...<div class="acvOppProgress"><i style="width:'+(total?Math.round(done/total*100):100)+'%"></i></div></div>'}
 async function scanAdmOpp(){const myId=++admOppScanId,scope=d.getElementById('acvOppScope')?.value||admOppDay(),catKey=d.getElementById('acvOppCategory')?.value||'',route=d.getElementById('acvRoute')?.value||'TEAM';if(!catKey)return alert('Escolha uma categoria.');await admOppLoadVisits();const list=admOppClients(scope,route),rows=[],token=sessionStorage.getItem('admToken')||'';let next=0,done=0;async function worker(){while(next<list.length&&myId===admOppScanId){const c=list[next++],pv=String(c.Cliente||'').trim();let r=null;try{const req={action:'search_pv',token,pv};if(route==='TEAM'&&c.Rota)req.rota=String(c.Rota).trim();r=await w.post(req)}catch{}if(r?.found){const x=(r.categorias||[]).find(y=>norm(y.nome)===catKey);if(x&&admOppResult(x))rows.push({pv,razao:String(c['Razão Social']||r?.cliente?.razao||''),rota:String(c.Rota||route),ord:scope==='DAY'?(c._ord||''):'',subcanal:String(c.SubCanal||r?.cliente?.subcanal||''),detalhe:admOppDetail(x)})}done++;admOppProgress(done,list.length)}}await Promise.all(Array.from({length:Math.min(6,list.length||1)},worker));if(myId!==admOppScanId)return;const box=d.getElementById('acvOppResult'),name=rowsFor(route).find(x=>norm(x.nome)===catKey)?.nome||catKey;rows.sort((a,b)=>String(a.rota).localeCompare(String(b.rota))||Number(a.ord||9999)-Number(b.ord||9999)||a.razao.localeCompare(b.razao,'pt-BR'));box.innerHTML='<div class="acvOppList"><h3>💡 '+E(name)+' • '+rows.length+' oportunidade(s)</h3><div class="acvOppTable"><table><thead><tr><th>Ordem</th><th>PV</th><th>Cliente</th><th>Rota</th><th>Subcanal</th><th>Detalhe</th></tr></thead><tbody>'+rows.map(x=>'<tr><td>'+E(x.ord)+'</td><td><b>'+E(x.pv)+'</b></td><td>'+E(x.razao)+'</td><td>'+E(x.rota)+'</td><td>'+E(x.subcanal)+'</td><td>'+E(x.detalhe)+'</td></tr>').join('')+'</tbody></table></div></div>'}
+
+let acvSubCache=new Map();
+function ensureAcvSubcanais(){
+ let ov=d.getElementById('acvSubOverlay');if(ov)return ov;
+ ov=d.createElement('div');ov.id='acvSubOverlay';ov.className='acvDetailOverlay';
+ ov.innerHTML='<div class="acvDetailSheet"><div class="acvDetailTop"><div><h2>🏪 Subcanais</h2><small>Veja os clientes por subcanal e por rota.</small></div><button type="button" id="acvSubClose">Fechar</button></div><div class="acvDetailBody"><div class="acvDetailFilters"><div><label>VISUALIZAR</label><select id="acvSubRoute">'+detailRouteOptions('TEAM')+'</select></div><div><label>PESQUISAR SUBCANAL</label><input id="acvSubSearch" placeholder="Digite o subcanal"></div></div><div id="acvSubSummary" class="acvDetailSummary"></div><div id="acvSubCards" class="acvSubCards"></div><h3 id="acvSubTitle" style="margin:18px 0 8px">Clientes</h3><div id="acvSubTable"></div></div></div>';
+ d.body.appendChild(ov);
+ const st=d.createElement('style');st.textContent='.acvSubCards{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-top:12px}.acvSubCard{border:1px solid #dfe6ec;background:#fff;border-radius:13px;padding:12px;text-align:left;cursor:pointer}.acvSubCard b{display:block;color:#172533}.acvSubCard strong{display:block;font-size:24px;color:#d90000;margin-top:4px}.acvSubCard small{color:#657785}.acvSubTableWrap{overflow:auto;background:#fff;border:1px solid #dde4e9;border-radius:14px}.acvSubTable{width:100%;min-width:680px;border-collapse:collapse}.acvSubTable th{background:#e30613;color:#fff;text-align:left}.acvSubTable th,.acvSubTable td{padding:9px;border-bottom:1px solid #e3e8ec}.acvSubTable tr:last-child td{border-bottom:0}';
+ d.head.appendChild(st);
+ d.getElementById('acvSubClose').onclick=()=>ov.classList.remove('show');
+ ov.onclick=e=>{if(e.target===ov)ov.classList.remove('show')};
+ d.getElementById('acvSubRoute').onchange=()=>loadAcvSubcanais();
+ d.getElementById('acvSubSearch').oninput=()=>renderAcvSubcanais();
+ return ov
+}
+let acvSubRows=[],acvSubSelected='ALL';
+async function loadAcvSubcanais(force=false){
+ const ov=ensureAcvSubcanais(),route=d.getElementById('acvSubRoute')?.value||'TEAM',apiRoute=route==='TEAM'?'TODAS':route,key=apiRoute;
+ d.getElementById('acvSubSummary').innerHTML='<span class="acvDetailChip">Carregando...</span>';
+ try{
+   let res=acvSubCache.get(key);
+   if(!res||force){res=await w.post({action:'search_clients',token:sessionStorage.getItem('admToken')||'',rota:apiRoute});acvSubCache.set(key,res)}
+   acvSubRows=(res?.clients||[]).map(x=>({pv:String(x.pv||x.cliente||''),rota:String(x.rota||''),razao:String(x.razao||''),subcanal:String(x.subcanal||'').trim()||'SEM SUBCANAL'}));
+   acvSubSelected='ALL';
+   renderAcvSubcanais();
+ }catch(e){
+   d.getElementById('acvSubSummary').innerHTML='<span class="acvDetailChip">Erro ao carregar: '+E(e?.message||'Falha')+'</span>';
+   d.getElementById('acvSubCards').innerHTML='';d.getElementById('acvSubTable').innerHTML='';
+ }
+}
+function renderAcvSubcanais(){
+ const route=d.getElementById('acvSubRoute')?.value||'TEAM',search=norm(d.getElementById('acvSubSearch')?.value||''),counts={};
+ for(const x of acvSubRows){const k=x.subcanal;counts[k]=(counts[k]||0)+1}
+ const keys=Object.keys(counts).filter(k=>!search||norm(k).includes(search)).sort((a,b)=>counts[b]-counts[a]||a.localeCompare(b,'pt-BR'));
+ const routeName=route==='TEAM'?'Toda a Equipe':route+' - '+(getTeam().find(x=>String(x.rota)===route)?.nome||'');
+ d.getElementById('acvSubSummary').innerHTML='<span class="acvDetailChip">'+E(routeName)+'</span><span class="acvDetailChip">'+acvSubRows.length+' cliente(s)</span><span class="acvDetailChip">'+Object.keys(counts).length+' subcanal(is)</span>';
+ d.getElementById('acvSubCards').innerHTML=keys.map(k=>'<button type="button" class="acvSubCard" data-sub="'+E(k)+'"><b>'+E(k)+'</b><strong>'+counts[k]+'</strong><small>cliente(s) • clique para listar</small></button>').join('')||'<div class="acvDetailEmpty">Nenhum subcanal encontrado.</div>';
+ d.querySelectorAll('#acvSubCards .acvSubCard').forEach(b=>b.onclick=()=>{acvSubSelected=b.dataset.sub||'ALL';renderAcvSubTable()});
+ renderAcvSubTable();
+}
+function renderAcvSubTable(){
+ let rows=acvSubSelected==='ALL'?acvSubRows:acvSubRows.filter(x=>x.subcanal===acvSubSelected);
+ rows=[...rows].sort((a,b)=>a.rota.localeCompare(b.rota)||a.razao.localeCompare(b.razao,'pt-BR'));
+ d.getElementById('acvSubTitle').textContent=acvSubSelected==='ALL'?'Clientes • Todos ('+rows.length+')':'Clientes • '+acvSubSelected+' ('+rows.length+')';
+ d.getElementById('acvSubTable').innerHTML=rows.length?'<div class="acvSubTableWrap"><table class="acvSubTable"><thead><tr><th>Rota</th><th>PV</th><th>Razão Social</th><th>Subcanal</th></tr></thead><tbody>'+rows.map(x=>'<tr><td><b>'+E(x.rota)+'</b></td><td><b>'+E(x.pv)+'</b></td><td>'+E(x.razao)+'</td><td>'+E(x.subcanal)+'</td></tr>').join('')+'</tbody></table></div>':'<div class="acvDetailEmpty">Nenhum cliente encontrado neste subcanal.</div>'
+}
+function openAcvSubcanais(){
+ const ov=ensureAcvSubcanais(),topRoute=d.getElementById('acvRoute')?.value||'TEAM',sel=d.getElementById('acvSubRoute');
+ sel.innerHTML=detailRouteOptions(topRoute);sel.value=[...sel.options].some(o=>o.value===topRoute)?topRoute:'TEAM';
+ d.getElementById('acvSubSearch').value='';
+ ov.classList.add('show');try{ov.scrollTo(0,0)}catch{}
+ loadAcvSubcanais();
+}
 function openAdminFeature(label){
  closeView();
  try{w.cokeNav?.(label)}catch{}
