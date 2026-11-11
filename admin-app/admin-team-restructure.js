@@ -449,6 +449,7 @@ function renderDetailGraph(cat,route){
  host.innerHTML='<div class="acvDetailGraphTop"><div class="acvDetailDonut" style="--p:'+Math.min(100,pct)+'" data-p="'+pct+'%"></div><div><h3>'+E(cat)+'</h3><small>Andamento da cobertura selecionada</small></div></div><div class="acvDetailStats"><div class="acvDetailStat"><small>META</small><b>'+meta+'</b></div><div class="acvDetailStat"><small>REALIZADO</small><b>'+real+'</b></div><div class="acvDetailStat"><small>FALTA</small><b>'+falta+'</b></div><div class="acvDetailStat"><small>ATINGIMENTO</small><b>'+pct+'%</b></div></div>'
 }
 function openIncentiveDetail(cat){
+ acvDetailCache.clear();acvDayCache.clear();
  const ov=ensureIncentiveDetail(),body=d.getElementById('acvDetailBody'),current=d.getElementById('acvRoute')?.value||'TEAM';
  d.getElementById('acvDetailTitle').textContent=cat;
  body.innerHTML='<section id="acvDetailGraph" class="acvDetailGraph"></section><div class="acvDetailFilters"><div><label>VISUALIZAR</label><select id="acvDetailRoute">'+detailRouteOptions(current)+'</select></div><div><label>DIA DA SEMANA</label><select id="acvDetailDay">'+detailDayOptions()+'</select></div><button type="button" id="acvDetailGo" class="acvDetailGo">Ver clientes</button></div><input type="hidden" id="acvDetailCategory" value="'+E(cat)+'"><div id="acvDetailResult"></div>';
