@@ -29,7 +29,7 @@ function openGroup(g){
    const original=[...document.querySelectorAll('#consultorModernHome .cmCat')].find(b=>b.dataset.cat===ch.nome&&!b.dataset.groupPrincipal);
    const img=original?.querySelector('img')?.getAttribute('src')||row?.imagem_card_url||'';
    const meta=Number(row?.meta||0),real=Number(row?.realizado||0);
-   return '<button type="button" class="cmGroupChild" data-child="'+E(ch.nome)+'">'+(img?'<img src="'+E(img)+'" alt="">':'<span class="fallback">🏆</span>')+'<span><b>'+E(ch.nome)+'</b><small>'+real+' / '+meta+' realizados</small></span><span class="arr">›</span></button>'
+   return '<button type="button" class="cmGroupChild" data-child="'+E(ch.nome)+'">'+(img?'<img src="'+E(img)+'" alt="">':'<span class="fallback">🏆</span>')+'<span><b>'+E(ch.nome)+'</b><small><strong>Meta:</strong> '+meta+' <span style="opacity:.7">|</span> <strong>Real:</strong> '+real+'</small></span><span class="arr">›</span></button>'
  }).join('');
  o.innerHTML='<div class="cmGroupTop"><button type="button" class="cmGroupBack">← Voltar</button><div><div class="cmGroupTitle">'+E(g.nome)+'</div><small>Escolha uma categoria do incentivo</small></div></div><div class="cmGroupGrid">'+(children||'<p>Nenhuma categoria vinculada.</p>')+'</div>';
  o.hidden=false;o.scrollTo(0,0);
@@ -47,7 +47,7 @@ function apply(){
      b=document.createElement('button');b.type='button';b.className='cmCat cmTheme-custom cmGroupCard';b.dataset.groupPrincipal='1';b.dataset.groupId=String(g.id);car.appendChild(b)
    }
    const color=String(g.cor_card||'#e30613');b.style.setProperty('--cm-custom',color);
-   b.innerHTML='<span class="cmProd">'+(g.imagem_card_url?'<img loading="eager" decoding="async" referrerpolicy="no-referrer" data-fit="logo" src="'+E(g.imagem_card_url)+'" alt="">':'<span class="cmFallback">🏆</span>')+'</span><b>'+E(g.nome)+'</b><small class="cmGroupCount">'+(g.subcategorias||[]).length+' categoria(s)</small><span class="cmProgress"><i style="width:100%"></i></span><span class="cmArrow">›</span>';
+   b.innerHTML='<span class="cmProd">'+(g.imagem_card_url?'<img loading="eager" decoding="async" referrerpolicy="no-referrer" data-fit="logo" src="'+E(g.imagem_card_url)+'" alt="">':'<span class="cmFallback">🏆</span>')+'</span><b>'+E(g.nome)+'</b><small class="cmGroupCount">'+(g.subcategorias||[]).length+' categoria(s)</small><span class="cmArrow">›</span>';
    b.onclick=()=>openGroup(g)
  });
  car.querySelectorAll('.cmCat[data-group-principal="1"]').forEach(b=>{if(!groups.some(g=>String(g.id)===b.dataset.groupId))b.remove()})
