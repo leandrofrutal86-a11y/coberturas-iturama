@@ -57,10 +57,11 @@ function installUi(){
  if(visual)visual.parentElement.insertBefore(h,visual);
  else q('cmStatus')?.parentElement?.insertBefore(h,q('cmStatus'));
  const metaSel=q('metaCat');if(metaSel){const box=metaSel.closest('.box');if(box)box.id='cmMetaBox';}
- const catList=q('cmCatList');if(catList){
-   const orderBox=document.createElement('div');orderBox.id='cmIncentiveOrderBox';orderBox.style.cssText='margin-top:16px;border:1px solid #cbd8e5;border-radius:14px;padding:12px;background:#f8fbfd';
-   orderBox.innerHTML='<h3 style="margin:0 0 6px">Ordem em Coberturas dos Incentivos</h3><p class="small">Use as setas para definir qual card aparece em 1º, 2º, 3º... Inclui categorias principais. Subcategorias vinculadas ficam fora desta lista porque aparecem dentro da principal.</p><div id="cmIncentiveOrderList"></div><p id="cmIncentiveOrderStatus" class="small"></p>';
-   catList.parentElement.appendChild(orderBox);renderIncentiveOrder();
+ const visao=q('visao');if(visao&&!q('cmIncentiveOrderBox')){
+   const host=visao.querySelector('.box')||visao;
+   const orderBox=document.createElement('div');orderBox.id='cmIncentiveOrderBox';orderBox.style.cssText='margin:16px 0;border:1px solid #cbd8e5;border-radius:14px;padding:14px;background:#f8fbfd';
+   orderBox.innerHTML='<h2 style="margin:0 0 6px">Coberturas dos Incentivos</h2><p class="small">Organize aqui a sequência dos cards que o consultor verá. Use as setas para definir 1º, 2º, 3º... As categorias principais também entram nesta ordem. Subcategorias vinculadas aparecem somente dentro da principal.</p><div id="cmIncentiveOrderList"></div><p id="cmIncentiveOrderStatus" class="small"></p>';
+   const table=host.querySelector('table');if(table)host.insertBefore(orderBox,table);else host.appendChild(orderBox);renderIncentiveOrder();
  }
 
  window.cmHierarchySync=sync;
