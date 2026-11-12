@@ -10,6 +10,16 @@ async function post(x){
 }
 function currentCat(){const id=Number(q('cmId')?.value||0);return config?.categorias?.find(x=>Number(x.id)===id)||null}
 function selectedChildren(){return [...cmHierarchyDraft].filter(Boolean)}
+function incentiveTopCats(){return [...(config?.categorias||[])].filter(c=>c.ativo!==false&&(c.is_principal||!c.categoria_principal_id)).sort((x,y)=>Number(x.ordem||999)-Number(y.ordem||999)||Number(x.id)-Number(y.id))}
+function renderIncentiveOrder(){
+ const box=q('cmIncentiveOrderList');if(!box)return;const cats=incentiveTopCats();
+ box.innerHTML=cats.length?cats.map((c,i)=>'<div style="display:flex;align-items:center;gap:8px;padding:8px 9px;margin:6px 0;border:1px solid #dbe4ec;border-radius:10px;background:#fff"><b style="width:28px;text-align:center">'+(i+1)+'</b><span style="flex:1;min-width:0;font-weight:800">'+E(c.nome)+(c.is_principal?' <span style="font-size:10px;background:#111827;color:#fff;border-radius:999px;padding:3px 7px;margin-left:5px">PRINCIPAL</span>':'')+'</span><button type="button" '+(i===0?'disabled':'')+' onclick="cmMoveIncentiveOrder('+c.id+',-1)" style="padding:6px 10px">↑</button><button type="button" '+(i===cats.length-1?'disabled':'')+' onclick="cmMoveIncentiveOrder('+c.id+',1)" style="padding:6px 10px">↓</button></div>').join(''):'<p class="small">Nenhuma categoria disponível.</p>';
+}
+window.cmMoveIncentiveOrder=async function(id,dir){
+ const cats=incentiveTopCats(),i=cats.findIndex(c=>Number(c.id)===Number(id)),to=i+Number(dir);if(i<0||to<0||to>=cats.length)return;
+ [cats[i],cats[to]]=[cats[to],cats[i]];const ids=cats.map(c=>Number(c.id));const st=q('cmIncentiveOrderStatus');if(st)st.textContent='Salvando ordem...';
+ try{await post({action:'set_incentive_order',token,ids});cats.forEach((c,ix)=>c.ordem=ix+1);renderIncentiveOrder();if(st){st.className='ok';st.textContent='Ordem salva. Esta será a sequência dos cards no consultor.'}if(typeof carregarTudo==='function')await carregarTudo()}catch(e){if(st){st.className='bad';st.textContent=e.message}}
+};
 function renderChildren(){
  const box=q('cmHierarchyChildren');if(!box)return;
  const id=Number(q('cmId')?.value||0),cats=(config?.categorias||[]).filter(c=>Number(c.id)!==id&&!c.is_principal);
@@ -47,6 +57,11 @@ function installUi(){
  if(visual)visual.parentElement.insertBefore(h,visual);
  else q('cmStatus')?.parentElement?.insertBefore(h,q('cmStatus'));
  const metaSel=q('metaCat');if(metaSel){const box=metaSel.closest('.box');if(box)box.id='cmMetaBox';}
+ const catList=q('cmCatList');if(catList){
+   const orderBox=document.createElement('div');orderBox.id='cmIncentiveOrderBox';orderBox.style.cssText='margin-top:16px;border:1px solid #cbd8e5;border-radius:14px;padding:12px;background:#f8fbfd';
+   orderBox.innerHTML='<h3 style="margin:0 0 6px">Ordem em Coberturas dos Incentivos</h3><p class="small">Use as setas para definir qual card aparece em 1º, 2º, 3º... Inclui categorias principais. Subcategorias vinculadas ficam fora desta lista porque aparecem dentro da principal.</p><div id="cmIncentiveOrderList"></div><p id="cmIncentiveOrderStatus" class="small"></p>';
+   catList.parentElement.appendChild(orderBox);renderIncentiveOrder();
+ }
 
  window.cmHierarchySync=sync;
  return true;
@@ -69,7 +84,7 @@ function install(){
    }catch(e){st.className='bad';st.textContent=e.message}
  };
  const origRenderBase=window.renderBase;
- if(typeof origRenderBase==='function')window.renderBase=function(){origRenderBase();setTimeout(()=>{if(q('cmKind'))sync(false)},30)};
+ if(typeof origRenderBase==='function')window.renderBase=function(){origRenderBase();setTimeout(()=>{if(q('cmKind'))sync(false);renderIncentiveOrder()},30)};
  window.cmNewCategory();
 }
 let tries=0;const timer=setInterval(()=>{tries++;if(typeof window.cmEditCategory==='function'&&typeof window.cmSaveCategory==='function'&&q('cmName')){clearInterval(timer);install()}else if(tries>80)clearInterval(timer)},100);
