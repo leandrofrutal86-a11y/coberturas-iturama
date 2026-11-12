@@ -2,6 +2,7 @@
 'use strict';
 const E=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function D(){try{return typeof DATA!=='undefined'?DATA:null}catch{return null}}
+function K(v){return String(v??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().replace(/\s+/g,' ').toUpperCase()}
 function css(){
  if(document.getElementById('cmHierarchyStyle'))return;
  const s=document.createElement('style');s.id='cmHierarchyStyle';s.textContent=`
@@ -25,8 +26,8 @@ function ensureOverlay(){
 function openGroup(g){
  const d=D(),o=ensureOverlay(),rows=d?.own||[];
  const children=(g.subcategorias||[]).map(ch=>{
-   const row=rows.find(x=>String(x.nome)===String(ch.nome));
-   const original=[...document.querySelectorAll('#consultorModernHome .cmCat')].find(b=>b.dataset.cat===ch.nome&&!b.dataset.groupPrincipal);
+   const row=rows.find(x=>K(x.nome)===K(ch.nome));
+   const original=[...document.querySelectorAll('#consultorModernHome .cmCat')].find(b=>K(b.dataset.cat)===K(ch.nome)&&!b.dataset.groupPrincipal);
    const img=original?.querySelector('img')?.getAttribute('src')||row?.imagem_card_url||'';
    const meta=Number(row?.meta||0),real=Number(row?.realizado||0);
    return '<button type="button" class="cmGroupChild" data-child="'+E(ch.nome)+'">'+(img?'<img src="'+E(img)+'" alt="">':'<span class="fallback">🏆</span>')+'<span><b>'+E(ch.nome)+'</b><small><strong>Meta:</strong> '+meta+' <span style="opacity:.7">|</span> <strong>Real:</strong> '+real+'</small></span><span class="arr">›</span></button>'
@@ -34,13 +35,13 @@ function openGroup(g){
  o.innerHTML='<div class="cmGroupTop"><button type="button" class="cmGroupBack">← Voltar</button><div><div class="cmGroupTitle">'+E(g.nome)+'</div><small>Escolha uma categoria do incentivo</small></div></div><div class="cmGroupGrid">'+(children||'<p>Nenhuma categoria vinculada.</p>')+'</div>';
  o.hidden=false;o.scrollTo(0,0);
  o.querySelector('.cmGroupBack').onclick=()=>{o.hidden=true};
- o.querySelectorAll('.cmGroupChild').forEach(b=>b.onclick=()=>{const original=[...document.querySelectorAll('#consultorModernHome .cmCat')].find(x=>x.dataset.cat===b.dataset.child&&!x.dataset.groupPrincipal);o.hidden=true;original?.click()})
+ o.querySelectorAll('.cmGroupChild').forEach(b=>b.onclick=()=>{const original=[...document.querySelectorAll('#consultorModernHome .cmCat')].find(x=>K(x.dataset.cat)===K(b.dataset.child)&&!x.dataset.groupPrincipal);o.hidden=true;original?.click()})
 }
 function apply(){
  css();const d=D(),home=document.getElementById('consultorModernHome'),car=home?.querySelector('.cmCarousel');if(!d||!home||!car)return;
  const groups=Array.isArray(d.incentivo_grupos)?d.incentivo_grupos:[];
- const childNames=new Set(groups.flatMap(g=>(g.subcategorias||[]).map(x=>String(x.nome))));
- home.querySelectorAll('.cmCat:not([data-group-principal])').forEach(b=>{b.style.display=childNames.has(String(b.dataset.cat))?'none':''});
+ const childNames=new Set(groups.flatMap(g=>(g.subcategorias||[]).map(x=>K(x.nome))));
+ home.querySelectorAll('.cmCat:not([data-group-principal])').forEach(b=>{const linked=childNames.has(K(b.dataset.cat));b.hidden=linked;b.style.setProperty('display',linked?'none':'','important')});
  groups.forEach(g=>{
    let b=[...car.querySelectorAll('.cmCat[data-group-principal="1"]')].find(x=>x.dataset.groupId===String(g.id));
    if(!b){
