@@ -55,8 +55,17 @@ function apply(){
    b.innerHTML='<span class="cmProd">'+(g.imagem_card_url?'<img loading="eager" decoding="async" referrerpolicy="no-referrer" data-fit="logo" src="'+E(g.imagem_card_url)+'" alt="">':'<span class="cmFallback">🏆</span>')+'</span><b>'+E(g.nome)+'</b><small class="cmGroupCount">'+(g.subcategorias||[]).length+' categoria(s)</small><span class="cmArrow">›</span>';
    b.onclick=()=>openGroup(g)
  });
- car.querySelectorAll('.cmCat[data-group-principal="1"]').forEach(b=>{if(!groups.some(g=>String(g.id)===b.dataset.groupId))b.remove()})
+ car.querySelectorAll('.cmCat[data-group-principal="1"]').forEach(b=>{if(!groups.some(g=>String(g.id)===b.dataset.groupId))b.remove()});
+ const normalOrder=new Map((d.own||[]).filter(x=>!x.categoria_principal_id).map(x=>[K(x.nome),Number(x.ordem||999)]));
+ const groupOrder=new Map(groups.map(g=>[String(g.id),Number(g.ordem||999)]));
+ const top=[...car.querySelectorAll('.cmCat')].filter(b=>b.dataset.groupPrincipal==='1'||(!b.hidden&&!childNames.has(K(b.dataset.cat))));
+ top.sort((x,y)=>{
+   const ox=x.dataset.groupPrincipal==='1'?(groupOrder.get(String(x.dataset.groupId))??999):(normalOrder.get(K(x.dataset.cat))??999);
+   const oy=y.dataset.groupPrincipal==='1'?(groupOrder.get(String(y.dataset.groupId))??999):(normalOrder.get(K(y.dataset.cat))??999);
+   return ox-oy
+ });
+ top.forEach(b=>car.appendChild(b))
 }
-let sig='';setInterval(()=>{const d=D();const s=d?JSON.stringify([d.incentivo_grupos,(d.own||[]).map(x=>[x.nome,x.realizado,x.meta,x.imagem_card_url])]):'';if(s&&s!==sig){sig=s;setTimeout(apply,60)}else if(d?.incentivo_grupos?.length)apply()},700);
+let sig='';setInterval(()=>{const d=D();const s=d?JSON.stringify([d.incentivo_grupos,(d.own||[]).map(x=>[x.nome,x.realizado,x.meta,x.imagem_card_url,x.ordem,x.categoria_principal_id])]):'';if(s&&s!==sig){sig=s;setTimeout(apply,60)}else if(d?.incentivo_grupos?.length)apply()},700);
 window.addEventListener('pageshow',()=>setTimeout(apply,600));
 })();
