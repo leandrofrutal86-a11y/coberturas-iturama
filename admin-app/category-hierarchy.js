@@ -17,7 +17,7 @@ function renderChildren(){
 }
 function sync(){
  const principal=q('cmKind')?.value==='principal';
- ['cmRuleArea','cmPlacementArea','cmExcludeArea','cmB2BPrevWrap'].forEach(id=>{const el=q(id);if(el)el.style.display=principal?'none':''});
+ ['cmRuleArea','cmPlacementArea','cmExcludeArea','cmB2BPrevWrap'].forEach(id=>{const el=q(id);if(el)el.style.display=principal?'none':''}); const metaBox=q('cmMetaBox');if(metaBox)metaBox.style.display=principal?'none':'';
  const h=q('cmHierarchyBox');if(h)h.style.display=principal?'block':'none';
  if(principal)renderChildren();
 }
@@ -41,6 +41,7 @@ function installUi(){
  h.innerHTML='<h3 style="margin:0 0 8px">Categorias dentro da principal</h3><p class="small">Marque as categorias que fazem parte deste incentivo. Elas deixarão de aparecer soltas em Coberturas dos Incentivos e aparecerão somente dentro desta principal.</p><div id="cmHierarchyChildren" style="display:grid;gap:7px;max-height:320px;overflow:auto"></div>';
  if(visual)visual.parentElement.insertBefore(h,visual);
  else q('cmStatus')?.parentElement?.insertBefore(h,q('cmStatus'));
+ const metaSel=q('metaCat');if(metaSel){const box=metaSel.closest('.box');if(box)box.id='cmMetaBox';}
 
  window.cmHierarchySync=sync;
  return true;
