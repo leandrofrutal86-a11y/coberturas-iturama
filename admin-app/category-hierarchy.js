@@ -3,20 +3,25 @@
 const CFGAPI='https://harlrfhukjvhpufwhtep.supabase.co/functions/v1/admin-config-api';
 const E=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const q=id=>document.getElementById(id);
+let cmHierarchyDraft=new Set(),cmHierarchyLoadedId=null,cmHierarchyLastKind='categoria';
 async function post(x){
  const r=await fetch(CFGAPI,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(x)});
  const j=await r.json();if(!r.ok||j.error)throw Error(j.error||'Erro');return j
 }
 function currentCat(){const id=Number(q('cmId')?.value||0);return config?.categorias?.find(x=>Number(x.id)===id)||null}
-function selectedChildren(){return [...document.querySelectorAll('#cmHierarchyChildren input[type=checkbox]:checked')].map(x=>Number(x.value)).filter(Boolean)}
+function selectedChildren(){return [...cmHierarchyDraft].filter(Boolean)}
 function renderChildren(){
  const box=q('cmHierarchyChildren');if(!box)return;
  const id=Number(q('cmId')?.value||0),cats=(config?.categorias||[]).filter(c=>Number(c.id)!==id&&!c.is_principal);
- const chosen=new Set((config?.categorias||[]).filter(c=>Number(c.categoria_principal_id)===id).map(c=>Number(c.id)));
- box.innerHTML=cats.length?cats.map(c=>'<label style="display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid #e2e8f0;border-radius:10px;background:#fff"><input type="checkbox" value="'+c.id+'" '+(chosen.has(Number(c.id))?'checked':'')+'> <span>'+E(c.nome)+'</span></label>').join(''):'<p class="small">Nenhuma categoria normal disponível.</p>';
+ box.innerHTML=cats.length?cats.map(c=>'<label style="display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid #e2e8f0;border-radius:10px;background:#fff"><input type="checkbox" value="'+c.id+'" '+(cmHierarchyDraft.has(Number(c.id))?'checked':'')+'> <span>'+E(c.nome)+'</span></label>').join(''):'<p class="small">Nenhuma categoria normal disponível.</p>';
+ box.querySelectorAll('input[type=checkbox]').forEach(ch=>ch.addEventListener('change',()=>{const id=Number(ch.value);if(ch.checked)cmHierarchyDraft.add(id);else cmHierarchyDraft.delete(id)}));
 }
-function sync(){
- const principal=q('cmKind')?.value==='principal';
+function sync(fromUser=false){
+ const kind=q('cmKind')?.value||'categoria',principal=kind==='principal',id=Number(q('cmId')?.value||0);
+ if(fromUser&&principal&&cmHierarchyLastKind!=='principal'){
+   cmHierarchyDraft=new Set();cmHierarchyLoadedId=id||null;
+ }
+ cmHierarchyLastKind=kind;
  ['cmRuleArea','cmPlacementArea','cmExcludeArea','cmB2BPrevWrap'].forEach(id=>{const el=q(id);if(el)el.style.display=principal?'none':''}); const metaBox=q('cmMetaBox');if(metaBox)metaBox.style.display=principal?'none':'';
  const h=q('cmHierarchyBox');if(h)h.style.display=principal?'block':'none';
  if(principal)renderChildren();
@@ -26,7 +31,7 @@ function installUi(){
  const nameWrap=q('cmName').closest('.form2')||q('cmName').parentElement;
  const kind=document.createElement('div');
  kind.style.marginTop='12px';
- kind.innerHTML='<label>Tipo da categoria</label><select id="cmKind" onchange="cmHierarchySync()"><option value="categoria">Categoria normal</option><option value="principal">Categoria principal</option></select><p class="small">Principal: funciona como um grupo de incentivo e mostra dentro dela as categorias escolhidas.</p>';
+ kind.innerHTML='<label>Tipo da categoria</label><select id="cmKind" onchange="cmHierarchySync(true)"><option value="categoria">Categoria normal</option><option value="principal">Categoria principal</option></select><p class="small">Principal: funciona como um grupo de incentivo e mostra dentro dela as categorias escolhidas.</p>';
  nameWrap.parentElement.insertBefore(kind,nameWrap.nextSibling);
 
  const mode=q('cmMode'); if(mode){
@@ -49,8 +54,8 @@ function installUi(){
 function install(){
  if(!installUi())return;
  const oldNew=window.cmNewCategory,oldEdit=window.cmEditCategory,oldSave=window.cmSaveCategory;
- window.cmNewCategory=function(){oldNew?.();if(q('cmKind'))q('cmKind').value='categoria';sync()};
- window.cmEditCategory=async function(id){await oldEdit?.(id);const c=config?.categorias?.find(x=>Number(x.id)===Number(id));if(q('cmKind'))q('cmKind').value=c?.is_principal?'principal':'categoria';sync()};
+ window.cmNewCategory=function(){oldNew?.();cmHierarchyDraft=new Set();cmHierarchyLoadedId=null;cmHierarchyLastKind='categoria';if(q('cmKind'))q('cmKind').value='categoria';sync(false)};
+ window.cmEditCategory=async function(id){await oldEdit?.(id);const c=config?.categorias?.find(x=>Number(x.id)===Number(id));cmHierarchyLoadedId=Number(id);cmHierarchyDraft=new Set(c?.is_principal?(config?.categorias||[]).filter(x=>Number(x.categoria_principal_id)===Number(id)).map(x=>Number(x.id)):[]);cmHierarchyLastKind=c?.is_principal?'principal':'categoria';if(q('cmKind'))q('cmKind').value=cmHierarchyLastKind;sync(false)};
  window.cmSaveCategory=async function(){
    if(q('cmKind')?.value!=='principal')return oldSave?.();
    const id=Number(q('cmId')?.value||0)||null,nome=String(q('cmName')?.value||'').trim();
@@ -64,7 +69,7 @@ function install(){
    }catch(e){st.className='bad';st.textContent=e.message}
  };
  const origRenderBase=window.renderBase;
- if(typeof origRenderBase==='function')window.renderBase=function(){origRenderBase();setTimeout(()=>{if(q('cmKind')){const c=currentCat();q('cmKind').value=c?.is_principal?'principal':'categoria';sync()}},30)};
+ if(typeof origRenderBase==='function')window.renderBase=function(){origRenderBase();setTimeout(()=>{if(q('cmKind'))sync(false)},30)};
  window.cmNewCategory();
 }
 let tries=0;const timer=setInterval(()=>{tries++;if(typeof window.cmEditCategory==='function'&&typeof window.cmSaveCategory==='function'&&q('cmName')){clearInterval(timer);install()}else if(tries>80)clearInterval(timer)},100);
