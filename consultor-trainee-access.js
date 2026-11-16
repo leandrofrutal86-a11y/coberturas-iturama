@@ -48,7 +48,7 @@ function sync(){
  ensureTeamSearchCss();
  const m=mode(),r=route(),x=data();
  try{sessionStorage.setItem('iturama_context',m==='route'?r:'TEAM')}catch{}
- const hello=d.querySelector('#consultorModernHome .cmHello strong');if(hello)hello.textContent='Olá, '+label();
+ const hello=d.querySelector('#consultorModernHome .cmHello strong');if(hello)hello.textContent='Olá, '+label()+(m==='route'&&r?' | Rota '+r:'');
  const name=d.getElementById('name');if(name)name.textContent=label();
  const routeEl=d.getElementById('route');if(routeEl)routeEl.textContent=m==='route'?r:'Visão da Equipe';
 
@@ -74,8 +74,18 @@ function sync(){
    const panelTitle=d.querySelector('#dash .panel h2,#dash .panel h1');if(panelTitle)panelTitle.textContent='Resultado da Equipe por incentivo';
    const panelHint=d.querySelector('#dash .panel p');if(panelHint)panelHint.textContent='Resultados completos de toda a equipe.';
  }else{
-   const tabs=d.querySelector('#dash .tabs');if(tabs)tabs.style.display='none';
-   try{TAB='meu';if(typeof render==='function')render();if(typeof summary==='function')summary()}catch{}
+   const tabs=d.querySelector('#dash .tabs');if(tabs)tabs.style.display='';
+   const myTab=d.querySelector('#dash .tab[data-t="meu"],.tabs .tab[data-t="meu"]');
+   const teamTab=d.querySelector('#dash .tab[data-t="equipe"],.tabs .tab[data-t="equipe"]');
+   if(myTab)myTab.textContent='Rota '+r;
+   if(teamTab)teamTab.textContent='Resultado da Equipe';
+   try{
+     if(!['meu','equipe'].includes(String(TAB||'')))TAB='meu';
+     d.querySelectorAll('#dash .tab,.tabs .tab').forEach(btn=>btn.classList.toggle('active',btn.dataset.t===TAB));
+     if(typeof render==='function')render();
+     if(typeof summary==='function')summary()
+   }catch{}
+   const panelHint=d.querySelector('#dash .panel p');if(panelHint)panelHint.textContent='Veja o resultado da rota '+r+' ou compare com o resultado da equipe.';
  }
 
  d.querySelectorAll('.acessoHeaderSelect,.acessoOverlaySelect,.rogerioUiSelect,#acessoHeaderSelect').forEach(s=>{
