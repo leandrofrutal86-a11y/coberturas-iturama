@@ -635,5 +635,6 @@ setInterval(()=>{
    renderView();
  }
 },700);
+w.addEventListener('iturama:quick-incentives-changed',()=>{acvQuickCache=null;const v=d.getElementById('admConsultorView');if(v&&!v.hidden)loadQuickResults(d.getElementById('acvRoute')?.value||'TEAM',true)});
 w.addEventListener('pageshow',()=>setTimeout(sweep,250));
 })();
