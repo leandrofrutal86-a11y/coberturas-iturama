@@ -1,23 +1,19 @@
 (()=>{
 'use strict';
 const E=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-let busy=false,last='';
+let busy=false,last='',lastData=null;
 function css(){if(document.getElementById('qicStyle'))return;const s=document.createElement('style');s.id='qicStyle';s.textContent=`
 #quickIncentiveConsultor{width:min(1180px,calc(100% - 18px));margin:14px auto 20px;background:#fff;border-radius:18px;padding:15px;box-shadow:0 5px 16px #172b400e}
 .qicHead{display:flex;justify-content:space-between;gap:10px;align-items:end}.qicHead h2{margin:0}.qicPeriod{font-size:11px;font-weight:800;color:#667585}
 .qicBlock{margin-top:12px;border:1px solid #dce3e9;border-radius:14px;overflow:hidden}.qicTitle{background:linear-gradient(135deg,#e30613,#8c0007);color:#fff;padding:12px 14px}.qicTitle b{font-size:17px}.qicTitle small{display:block;margin-top:3px}
-.qicWrap{overflow:visible}.qicRows{display:grid}.qicRow{padding:12px;border-bottom:1px solid #e8edf1}.qicRow:last-child{border-bottom:0}.qicRowTop{display:flex;justify-content:space-between;gap:10px;align-items:center}.qicRowTop b{font-size:15px;color:#16283b}.qicMetrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-top:10px}.qicMetric{background:#f4f7f9;border-radius:10px;padding:8px;text-align:center}.qicMetric small{display:block;color:#64748b;font-size:10px;font-weight:800}.qicMetric strong{display:block;margin-top:2px;font-size:18px}.qicReal strong{color:#0b6b9a}.qicGood{color:#087249;font-weight:900}.qicBad{color:#c8151d;font-weight:900}.qicListBtn{padding:6px 9px;border:0;border-radius:8px;background:#111827;color:#fff;font-size:11px;font-weight:900}.qicOverlay{position:fixed;inset:0;z-index:250;background:#0009;display:none;align-items:center;justify-content:center;padding:12px}.qicOverlay.open{display:flex}.qicSheet{width:min(760px,100%);max-height:calc(100dvh - 24px);overflow:auto;background:#fff;border-radius:16px}.qicTop{position:sticky;top:0;background:#fff;display:flex;justify-content:space-between;gap:8px;align-items:center;padding:12px;border-bottom:1px solid #e5e7eb}.qicBody{padding:10px}.qicClient{border:1px solid #e2e8f0;border-radius:10px;padding:10px;margin-bottom:8px}.qicClient b{display:block}.qicClient small{display:block;color:#64748b;margin-top:3px}
-@media(max-width:600px){#quickIncentiveConsultor{width:calc(100% - 10px);padding:10px}.qicHead{display:block}.qicRow{padding:11px}.qicRowTop{align-items:flex-start}.qicRowTop b{font-size:14px}.qicMetrics{grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}.qicMetric{padding:7px 4px}.qicMetric strong{font-size:16px}.qicMetric small{font-size:9px}.qicListBtn{padding:6px 8px;font-size:10px}}
+.qicWrap{overflow:visible}.qicRows{display:grid}.qicRow{padding:12px;border-bottom:1px solid #e8edf1}.qicRow:last-child{border-bottom:0}.qicRowTop{display:flex;justify-content:space-between;gap:10px;align-items:center}.qicRowTop b{font-size:15px;color:#16283b}.qicMetrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:10px}.qicMetric{background:#f4f7f9;border-radius:10px;padding:8px;text-align:center}.qicMetric small{display:block;color:#64748b;font-size:10px;font-weight:800}.qicMetric strong{display:block;margin-top:2px;font-size:18px}.qicReal{background:#eef8ff}.qicReal strong{color:#0b6b9a;font-size:24px}.qicOnlyReal{margin-top:10px;background:#eef8ff;border-radius:12px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center}.qicOnlyReal span{font-size:12px;font-weight:900;color:#64748b}.qicOnlyReal strong{font-size:28px;color:#0b6b9a}.qicGood{color:#087249;font-weight:900}.qicBad{color:#c8151d;font-weight:900}.qicListBtn{padding:6px 9px;border:0;border-radius:8px;background:#111827;color:#fff;font-size:11px;font-weight:900}.qicOverlay{position:fixed;inset:0;z-index:250;background:#0009;display:none;align-items:center;justify-content:center;padding:12px}.qicOverlay.open{display:flex}.qicSheet{width:min(760px,100%);max-height:calc(100dvh - 24px);overflow:auto;background:#fff;border-radius:16px}.qicTop{position:sticky;top:0;background:#fff;display:flex;justify-content:space-between;gap:8px;align-items:center;padding:12px;border-bottom:1px solid #e5e7eb}.qicBody{padding:10px}.qicClient{border:1px solid #e2e8f0;border-radius:10px;padding:10px;margin-bottom:8px}.qicClient b{display:block}.qicClient small{display:block;color:#64748b;margin-top:3px}
+@media(max-width:600px){#quickIncentiveConsultor{width:calc(100% - 10px);padding:10px}.qicHead{display:block}.qicRow{padding:11px}.qicRowTop{align-items:flex-start}.qicRowTop b{font-size:14px}.qicMetrics{grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}.qicMetric{padding:7px 4px}.qicMetric strong{font-size:16px}.qicMetric small{font-size:9px}.qicListBtn{padding:6px 8px;font-size:10px}}
 `;document.head.appendChild(s)}
 function host(){
- let h=document.getElementById('quickIncentiveConsultor'),home=document.getElementById('consultorModernHome');
- if(!home)return null;
- if(h&&h.parentElement!==home){h.remove();h=null}
- if(!h){
-   h=document.createElement('section');h.id='quickIncentiveConsultor';h.hidden=true;
-   const anchor=home.querySelector('.cmActions')?.parentElement||home.lastElementChild;
-   if(anchor&&anchor.parentElement===home)home.insertBefore(h,anchor.nextSibling);else home.appendChild(h)
- }
+ const slot=document.getElementById('quickIncentiveSlot');if(!slot)return null;
+ let h=document.getElementById('quickIncentiveConsultor');
+ if(h&&h.parentElement!==slot){h.remove();h=null}
+ if(!h){h=document.createElement('section');h.id='quickIncentiveConsultor';h.hidden=true;slot.appendChild(h)}
  return h
 }
 function openClients(title,clientes){
@@ -34,12 +30,26 @@ function openClients(title,clientes){
  }).join(''):'<div class="qicClient">Nenhum cliente realizado.</div>';
  ov.classList.add('open')
 }
-function render(j){css();const h=host();if(!h)return;const items=j?.items||[];if(!items.length){h.hidden=true;return}h.hidden=false;h.innerHTML='<div class="qicHead"><div><h2>⚡ Acompanhamento Rápido</h2><div class="qicPeriod">Seu acompanhamento • somente sua rota</div></div><b>Rota '+E(j.rota||'')+'</b></div>'+items.map(inc=>'<div class="qicBlock"><div class="qicTitle"><b>'+E(inc.nome)+'</b><small>Período considerado: '+E(inc.data_inicio)+' até '+E(inc.data_fim)+'</small></div><div class="qicRows">'+(inc.categorias||[]).map(r=>{const ok=Number(r.meta)>0&&Number(r.realizado)>=Number(r.meta);return '<div class="qicRow"><div class="qicRowTop"><b>'+E(r.nome)+'</b><button type="button" class="qicListBtn" data-inc="'+E(inc.id)+'" data-item="'+E(r.item_id)+'">Listar clientes</button></div><div class="qicMetrics"><div class="qicMetric"><small>Meta</small><strong>'+Number(r.meta||0)+'</strong></div><div class="qicMetric qicReal"><small>Real</small><strong>'+Number(r.realizado||0)+'</strong></div><div class="qicMetric"><small>Falta</small><strong class="'+(ok?'qicGood':'qicBad')+'">'+Number(r.falta||0)+'</strong></div><div class="qicMetric"><small>%</small><strong class="'+(ok?'qicGood':'qicBad')+'">'+Number(r.percentual||0)+'%</strong></div></div></div>'}).join('')+'</div></div>').join('');h.querySelectorAll('.qicListBtn').forEach(b=>b.onclick=()=>{const inc=items.find(x=>String(x.id)===String(b.dataset.inc)),row=inc?.categorias?.find(x=>String(x.item_id)===String(b.dataset.item));openClients((inc?.nome||'Incentivo')+' • '+(row?.nome||''),row?.clientes||[])})}
+function render(j){
+ css();lastData=j;const h=host();if(!h)return;const items=j?.items||[];if(!items.length){h.hidden=true;return}
+ h.hidden=false;
+ h.innerHTML='<div class="qicHead"><div><h2>⚡ Acompanhamento Rápido</h2><div class="qicPeriod">Seu acompanhamento • somente sua rota</div></div><b>Rota '+E(j.rota||'')+'</b></div>'+
+ items.map(inc=>'<div class="qicBlock"><div class="qicTitle"><b>'+E(inc.nome)+'</b><small>Período considerado: '+E(inc.data_inicio)+' até '+E(inc.data_fim)+'</small></div><div class="qicRows">'+
+ (inc.categorias||[]).map(r=>{
+   const useMeta=inc.usar_meta===true,ok=Number(r.meta)>0&&Number(r.realizado)>=Number(r.meta);
+   const metrics=useMeta
+    ?'<div class="qicMetrics"><div class="qicMetric"><small>Meta</small><strong>'+Number(r.meta||0)+'</strong></div><div class="qicMetric qicReal"><small>Realizado</small><strong>'+Number(r.realizado||0)+'</strong></div><div class="qicMetric"><small>Falta</small><strong class="'+(ok?'qicGood':'qicBad')+'">'+Number(r.falta||0)+'</strong></div></div>'
+    :'<div class="qicOnlyReal"><span>REALIZADO NO PERÍODO</span><strong>'+Number(r.realizado||0)+'</strong></div>';
+   return '<div class="qicRow"><div class="qicRowTop"><b>'+E(r.nome)+'</b><button type="button" class="qicListBtn" data-inc="'+E(inc.id)+'" data-item="'+E(r.item_id)+'">Listar clientes</button></div>'+metrics+'</div>'
+ }).join('')+'</div></div>').join('');
+ h.querySelectorAll('.qicListBtn').forEach(b=>b.onclick=()=>{const inc=items.find(x=>String(x.id)===String(b.dataset.inc)),row=inc?.categorias?.find(x=>String(x.item_id)===String(b.dataset.item));openClients((inc?.nome||'Incentivo')+' • '+(row?.nome||''),row?.clientes||[])})
+}
+window.__renderQuickIncentive=()=>{if(lastData)render(lastData);else load(true)};
 async function load(force=false){
  if(busy||typeof api!=='function')return;busy=true;
  try{
-   const j=await api('quick_incentives'),sig=JSON.stringify(j);
-   if(force||sig!==last){last=sig;render(j)}
+   const j=await api('quick_incentives'),sig=JSON.stringify(j);lastData=j;
+   if(force||sig!==last||!document.getElementById('quickIncentiveConsultor')){last=sig;render(j)}
  }catch(e){
    const h=host();
    if(h){css();h.hidden=false;h.innerHTML='<div class="qicHead"><div><h2>⚡ Acompanhamento Rápido</h2><div class="qicPeriod">Não foi possível carregar agora.</div></div></div><div class="qicBlock" style="padding:12px">'+E(e?.message||'Erro ao carregar incentivo rápido')+'</div>'}
@@ -47,6 +57,6 @@ async function load(force=false){
 }
 window.addEventListener('iturama:dashboard-ready',()=>setTimeout(()=>load(true),150));
 window.addEventListener('pageshow',()=>setTimeout(()=>load(true),500));
-let moTimer=null;const mo=new MutationObserver(()=>{if(!document.getElementById('consultorModernHome')||document.getElementById('quickIncentiveConsultor')||!TOKEN||busy)return;clearTimeout(moTimer);moTimer=setTimeout(()=>load(true),120)});mo.observe(document.documentElement,{childList:true,subtree:true});
+setTimeout(()=>{try{window.__renderQuickIncentive?.()}catch{}},300);
 setInterval(()=>{try{if(typeof TOKEN!=='undefined'&&TOKEN)load(false)}catch{}},10000);
 })();
