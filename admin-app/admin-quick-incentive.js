@@ -16,7 +16,7 @@ function css(){
 #quickIncentiveAdmin{background:#fff;border-radius:18px;padding:16px;margin-top:12px}
 .qiaGrid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px}.qiaGrid input{width:100%}
 .qiaCatCard{border:1px solid #dce3e9;border-radius:14px;padding:12px;margin-top:10px;background:#fafcfd}
-.qiaCatTop{display:grid;grid-template-columns:1.5fr .8fr 1.6fr auto;gap:8px;align-items:end}.qiaCatTop input,.qiaCatTop select{width:100%}
+.qiaCatTop{display:grid;grid-template-columns:1.5fr .8fr 1.8fr auto;gap:8px;align-items:end}.qiaCatTop input,.qiaCatTop select{width:100%}.qiaValueRow{display:grid;grid-template-columns:1fr auto;gap:7px}.qiaInclude{background:#111827!important;color:#fff!important;font-weight:900;white-space:nowrap}.qiaTags{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}.qiaTag{display:inline-flex;align-items:center;gap:7px;background:#eaf3ff;border:1px solid #bfd7f5;color:#174f8a;border-radius:999px;padding:6px 9px;font-size:12px;font-weight:900}.qiaTag button{border:0;background:transparent;color:#b00000;padding:0;font-size:15px;line-height:1}.qiaAddMore{width:100%;margin-top:12px;border:2px dashed #b9c7d6!important;background:#f8fbfd!important;color:#17324d!important;font-weight:900}
 .qiaTableWrap{overflow:auto;border:1px solid #dce3e9;border-radius:12px;margin-top:10px}.qiaTable{width:100%;border-collapse:collapse;min-width:720px}.qiaTable th,.qiaTable td{padding:9px;border-bottom:1px solid #e9edf1;text-align:center}.qiaTable th:first-child,.qiaTable td:first-child{text-align:left}.qiaTable input{width:78px;text-align:center}
 .qiaList{display:grid;gap:8px;margin-top:12px}.qiaItem{border:1px solid #dce3e9;border-radius:12px;padding:10px;display:flex;justify-content:space-between;gap:10px;align-items:center;background:#fafcfd}.qiaBadge{font-size:10px;font-weight:900;border-radius:999px;padding:4px 7px;background:#eaf4fb}
 .qiaRemove{background:#fff0f0!important;color:#b40000!important}
@@ -26,31 +26,43 @@ function css(){
 function newCat(src=null){
  return src?{
   nome:src.nome||'',tipo:src.tipo||'codigo',
-  valores:Array.isArray(src.valores)?src.valores.join(', '):'',
+  valores:Array.isArray(src.valores)?[...src.valores]:[],
   metas:Object.fromEntries((src.metas||[]).map(m=>[String(m.rota),Number(m.meta||0)]))
- }:{nome:'',tipo:'codigo',valores:'',metas:{}}
+ }:{nome:'',tipo:'codigo',valores:[],metas:{}}
 }
 function renderCats(){
  const host=$('qiaCats');if(!host)return;
- if(!draftCats.length){host.innerHTML='<div class="small">Nenhuma categoria criada ainda.</div>';return}
+ if(!draftCats.length){host.innerHTML='<div class="small">Nenhuma categoria criada ainda.</div><button type="button" class="qiaAddMore" id="qiaAddFirst">+ ADICIONAR CATEGORIA</button>';$('qiaAddFirst').onclick=()=>{draftCats.push(newCat());renderCats()};return}
  host.innerHTML=draftCats.map((c,i)=>`
  <div class="qiaCatCard" data-qcat="${i}">
   <div class="qiaCatTop">
    <div><label>Nome da categoria</label><input data-field="nome" value="${E(c.nome)}" placeholder="Ex.: RGB"></div>
    <div><label>Criar por</label><select data-field="tipo"><option value="codigo" ${c.tipo==='codigo'?'selected':''}>Código</option><option value="marca" ${c.tipo==='marca'?'selected':''}>Marca</option></select></div>
-   <div><label>Código(s) ou marca(s)</label><input data-field="valores" value="${E(c.valores)}" placeholder="Separe vários por vírgula"></div>
+   <div>
+    <label>${c.tipo==='marca'?'Marca':'Código'} para incluir</label>
+    <div class="qiaValueRow"><input data-value-input placeholder="${c.tipo==='marca'?'Digite a marca':'Digite o código'}"><button type="button" class="qiaInclude" data-include>INCLUIR</button></div>
+    <div class="qiaTags">${(c.valores||[]).map((v,j)=>'<span class="qiaTag">'+E(v)+'<button type="button" data-remove-value="'+j+'" aria-label="Remover">×</button></span>').join('')}</div>
+   </div>
    <button type="button" class="qiaRemove" data-remove="${i}">EXCLUIR CATEGORIA</button>
   </div>
   <div class="qiaTableWrap"><table class="qiaTable"><thead><tr><th>Consultor / Rota</th><th>Meta</th></tr></thead><tbody>
    ${state.consultores.map(x=>'<tr><td><b>'+E(x.rota)+'</b> - '+E(x.nome)+'</td><td><input type="number" min="0" step="1" data-meta-rota="'+E(x.rota)+'" value="'+Number(c.metas?.[x.rota]||0)+'"></td></tr>').join('')}
   </tbody></table></div>
- </div>`).join('');
+ </div>`).join('')+'<button type="button" class="qiaAddMore" id="qiaAddMore">+ ADICIONAR OUTRA CATEGORIA</button>';
  host.querySelectorAll('[data-qcat]').forEach(card=>{
-  const i=Number(card.dataset.qcat);
-  card.querySelectorAll('[data-field]').forEach(inp=>inp.oninput=()=>{draftCats[i][inp.dataset.field]=inp.value});
-  card.querySelectorAll('[data-meta-rota]').forEach(inp=>inp.oninput=()=>{draftCats[i].metas[inp.dataset.metaRota]=Number(inp.value||0)});
+  const i=Number(card.dataset.qcat),cat=draftCats[i];
+  card.querySelectorAll('[data-field]').forEach(inp=>{
+   inp.oninput=()=>{cat[inp.dataset.field]=inp.value;if(inp.dataset.field==='tipo')renderCats()}
+  });
+  card.querySelectorAll('[data-meta-rota]').forEach(inp=>inp.oninput=()=>{cat.metas[inp.dataset.metaRota]=Number(inp.value||0)});
+  const valueInput=card.querySelector('[data-value-input]'),includeBtn=card.querySelector('[data-include]');
+  const include=()=>{const v=String(valueInput?.value||'').trim();if(!v)return;if(!(cat.valores||[]).some(x=>String(x).toLowerCase()===v.toLowerCase()))cat.valores.push(v);renderCats()};
+  if(includeBtn)includeBtn.onclick=include;
+  if(valueInput)valueInput.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();include()}};
+  card.querySelectorAll('[data-remove-value]').forEach(b=>b.onclick=()=>{cat.valores.splice(Number(b.dataset.removeValue),1);renderCats()});
  });
- host.querySelectorAll('[data-remove]').forEach(b=>b.onclick=()=>{draftCats.splice(Number(b.dataset.remove),1);renderCats()})
+ host.querySelectorAll('[data-remove]').forEach(b=>b.onclick=()=>{draftCats.splice(Number(b.dataset.remove),1);renderCats()});
+ const more=$('qiaAddMore');if(more)more.onclick=()=>{draftCats.push(newCat());renderCats();setTimeout(()=>document.querySelector('[data-qcat="'+(draftCats.length-1)+'"]')?.scrollIntoView({behavior:'smooth',block:'start'}),20)}
 }
 function clearForm(){
  editing=null;draftCats=[];$('qiaId').value='';$('qiaNome').value='';$('qiaIni').value='';$('qiaFim').value='';$('qiaAtivo').checked=true;renderCats();$('qiaStatus').textContent=''
@@ -74,7 +86,7 @@ async function save(){
   const categorias=draftCats.map(c=>({
    nome:String(c.nome||'').trim(),
    tipo:c.tipo==='marca'?'marca':'codigo',
-   valores:String(c.valores||'').split(',').map(x=>x.trim()).filter(Boolean),
+   valores:Array.isArray(c.valores)?c.valores.map(x=>String(x).trim()).filter(Boolean):[],
    metas:state.consultores.map(x=>({rota:x.rota,meta:Number(c.metas?.[x.rota]||0)}))
   }));
   await post('quick_incentive_save',{item:{id:$('qiaId').value?Number($('qiaId').value):null,nome:$('qiaNome').value.trim(),data_inicio:$('qiaIni').value,data_fim:$('qiaFim').value,ativo:$('qiaAtivo').checked,categorias}});
@@ -105,7 +117,7 @@ function ensure(){
   <input id="qiaId" type="hidden">
   <div class="qiaGrid"><div><label>Nome do incentivo</label><input id="qiaNome" placeholder="Ex.: Desafio Estrella"></div><div><label>Data inicial</label><input id="qiaIni" type="date"></div><div><label>Data final</label><input id="qiaFim" type="date"></div></div>
   <label style="display:flex;gap:8px;align-items:center;margin-top:10px;font-weight:800"><input id="qiaAtivo" type="checkbox" checked style="width:auto"> Exibir para os consultores e Visão da Equipe</label>
-  <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:15px"><h3 style="margin:0">Categorias do incentivo rápido</h3><button id="qiaAddCat" type="button">+ CRIAR CATEGORIA</button></div>
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:15px"><h3 style="margin:0">Categorias do incentivo rápido</h3><button id="qiaAddCat" type="button">+ ADICIONAR CATEGORIA</button></div>
   <div id="qiaCats"></div>
   <div class="action" style="margin-top:12px"><button id="qiaSave" class="red" type="button">SALVAR INCENTIVO</button><button id="qiaNew" type="button">NOVO</button></div><div id="qiaStatus" class="small" style="margin-top:8px"></div>
   <hr style="margin:18px 0;border:0;border-top:1px solid #e1e7ec"><h3>Incentivos rápidos criados</h3><div id="qiaList" class="qiaList"></div>
