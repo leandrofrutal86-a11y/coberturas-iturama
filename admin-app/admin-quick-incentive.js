@@ -47,9 +47,9 @@ function renderCats(){
    </div>
    <button type="button" class="qiaRemove" data-remove="${i}">EXCLUIR CATEGORIA</button>
   </div>
-  <div class="qiaTableWrap"><table class="qiaTable"><thead><tr><th>Consultor / Rota</th><th>Meta</th></tr></thead><tbody>
+  ${$('qiaUsarMeta')?.checked?'<div class="qiaTableWrap"><table class="qiaTable"><thead><tr><th>Consultor / Rota</th><th>Meta</th></tr></thead><tbody>':''}
    ${state.consultores.map(x=>'<tr><td><b>'+E(x.rota)+'</b> - '+E(x.nome)+'</td><td><input type="number" min="0" step="1" data-meta-rota="'+E(x.rota)+'" value="'+Number(c.metas?.[x.rota]||0)+'"></td></tr>').join('')}
-  </tbody></table></div>
+  ${$('qiaUsarMeta')?.checked?'</tbody></table></div>':''}
  </div>`).join('')+'<button type="button" class="qiaAddMore" id="qiaAddMore">+ ADICIONAR OUTRA CATEGORIA</button>';
  host.querySelectorAll('[data-qcat]').forEach(card=>{
   const i=Number(card.dataset.qcat),cat=draftCats[i];
@@ -67,12 +67,12 @@ function renderCats(){
  const more=$('qiaAddMore');if(more)more.onclick=()=>{draftCats.push(newCat());renderCats();setTimeout(()=>document.querySelector('[data-qcat="'+(draftCats.length-1)+'"]')?.scrollIntoView({behavior:'smooth',block:'start'}),20)}
 }
 function clearForm(){
- editing=null;draftCats=[];$('qiaId').value='';$('qiaNome').value='';$('qiaIni').value='';$('qiaFim').value='';$('qiaAtivo').checked=true;renderCats();$('qiaStatus').textContent=''
+ editing=null;draftCats=[];$('qiaId').value='';$('qiaNome').value='';$('qiaIni').value='';$('qiaFim').value='';$('qiaAtivo').checked=true;$('qiaUsarMeta').checked=false;renderCats();$('qiaStatus').textContent=''
 }
 function edit(id){
  editing=state.items.find(x=>Number(x.id)===Number(id))||null;if(!editing)return;
  draftCats=(editing.categorias||[]).map(newCat);
- $('qiaId').value=editing.id;$('qiaNome').value=editing.nome||'';$('qiaIni').value=String(editing.data_inicio||'').slice(0,10);$('qiaFim').value=String(editing.data_fim||'').slice(0,10);$('qiaAtivo').checked=editing.ativo!==false;renderCats();$('qiaStatus').textContent='Editando '+editing.nome;window.scrollTo({top:0,behavior:'smooth'})
+ $('qiaId').value=editing.id;$('qiaNome').value=editing.nome||'';$('qiaIni').value=String(editing.data_inicio||'').slice(0,10);$('qiaFim').value=String(editing.data_fim||'').slice(0,10);$('qiaAtivo').checked=editing.ativo!==false;$('qiaUsarMeta').checked=editing.usar_meta===true;renderCats();$('qiaStatus').textContent='Editando '+editing.nome;window.scrollTo({top:0,behavior:'smooth'})
 }
 function editCategory(incentivoId,catIndex){
  edit(incentivoId);
@@ -95,7 +95,7 @@ async function save(){
    valores:Array.isArray(c.valores)?c.valores.map(x=>String(x).trim()).filter(Boolean):[],
    metas:state.consultores.map(x=>({rota:x.rota,meta:Number(c.metas?.[x.rota]||0)}))
   }));
-  await post('quick_incentive_save',{item:{id:$('qiaId').value?Number($('qiaId').value):null,nome:$('qiaNome').value.trim(),data_inicio:$('qiaIni').value,data_fim:$('qiaFim').value,ativo:$('qiaAtivo').checked,categorias}});
+  await post('quick_incentive_save',{item:{id:$('qiaId').value?Number($('qiaId').value):null,nome:$('qiaNome').value.trim(),data_inicio:$('qiaIni').value,data_fim:$('qiaFim').value,ativo:$('qiaAtivo').checked,usar_meta:$('qiaUsarMeta').checked,categorias}});
   st.className='ok';st.textContent='Incentivo rápido salvo.';editing=null;await load();clearForm();window.dispatchEvent(new CustomEvent('iturama:quick-incentives-changed'))
  }catch(e){st.className='bad';st.textContent=e.message}
 }
@@ -122,12 +122,12 @@ function ensure(){
   <p class="small">Crie categorias próprias deste incentivo, por código ou marca. Não utiliza as categorias mensais prontas do ADM.</p>
   <input id="qiaId" type="hidden">
   <div class="qiaGrid"><div><label>Nome do incentivo</label><input id="qiaNome" placeholder="Ex.: Desafio Estrella"></div><div><label>Data inicial</label><input id="qiaIni" type="date"></div><div><label>Data final</label><input id="qiaFim" type="date"></div></div>
-  <label style="display:flex;gap:8px;align-items:center;margin-top:10px;font-weight:800"><input id="qiaAtivo" type="checkbox" checked style="width:auto"> Exibir para os consultores e Visão da Equipe</label>
+  <label style="display:flex;gap:8px;align-items:center;margin-top:10px;font-weight:800"><input id="qiaAtivo" type="checkbox" checked style="width:auto"> Exibir para os consultores e Visão da Equipe</label><label style="display:flex;gap:8px;align-items:center;margin-top:8px;font-weight:800"><input id="qiaUsarMeta" type="checkbox" style="width:auto"> Usar meta neste incentivo</label>
   <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:15px"><h3 style="margin:0">Categorias do incentivo rápido</h3><button id="qiaAddCat" type="button">+ ADICIONAR CATEGORIA</button></div>
   <div id="qiaCats"></div>
   <div class="action" style="margin-top:12px"><button id="qiaSave" class="red" type="button">SALVAR INCENTIVO</button><button id="qiaNew" type="button">NOVO</button></div><div id="qiaStatus" class="small" style="margin-top:8px"></div>
   <hr style="margin:18px 0;border:0;border-top:1px solid #e1e7ec"><h3>Incentivos rápidos criados</h3><div id="qiaList" class="qiaList"></div>
- </div>`;wrap.appendChild(sec);$('qiaSave').onclick=save;$('qiaNew').onclick=clearForm;$('qiaAddCat').onclick=()=>{draftCats.push(newCat());renderCats()};
+ </div>`;wrap.appendChild(sec);$('qiaSave').onclick=save;$('qiaNew').onclick=clearForm;$('qiaAddCat').onclick=()=>{draftCats.push(newCat());renderCats()};$('qiaUsarMeta').onchange=renderCats;
  const old=window.aba;if(typeof old==='function'&&!old.__quick){window.aba=function(){sec.classList.add('hide');return old.apply(this,arguments)};window.aba.__quick=true}
  const oldShow=window.show;if(typeof oldShow==='function'&&!oldShow.__quick){window.show=function(){sec.classList.add('hide');return oldShow.apply(this,arguments)};window.show.__quick=true}
  load().catch(()=>{});return true
