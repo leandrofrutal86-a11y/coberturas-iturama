@@ -502,7 +502,7 @@ function render(){
  '<button class="cmAct blue" data-act="contatos"><span class="ic">📞</span>Contato dos Clientes</button>'+
  '<button class="cmAct purple" data-act="coberturas-dia"><span class="ic">📈</span>Coberturas por Dia</button>'+
  '</div></div>'+
- '<div><div class="cmSectionTitle"><h3>Coberturas dos Incentivos</h3><small>↔ arraste para o lado</small></div><div class="cmCarouselShell"><button type="button" class="cmCarouselNav cmCarouselPrev" aria-label="Voltar incentivos">‹</button><div class="cmCarouselViewport"><div class="cmCarousel">'+cards+'</div></div><button type="button" class="cmCarouselNav cmCarouselNext" aria-label="Avançar incentivos">›</button></div></div>'+
+ '<div id="quickIncentiveSlot"></div>'+ '<div><div class="cmSectionTitle"><h3>Coberturas dos Incentivos</h3><small>↔ arraste para o lado</small></div><div class="cmCarouselShell"><button type="button" class="cmCarouselNav cmCarouselPrev" aria-label="Voltar incentivos">‹</button><div class="cmCarouselViewport"><div class="cmCarousel">'+cards+'</div></div><button type="button" class="cmCarouselNav cmCarouselNext" aria-label="Avançar incentivos">›</button></div></div>'+
  '<div class="cmOppSection"><button type="button" id="cmOppHomeBtn" class="cmOppBtn"><span class="ico">💡</span><span><b>Oportunidades</b><small>Clientes do dia ou toda a carteira que ainda faltam por categoria</small></span></button></div>';
  document.getElementById('cmPvInput').onkeydown=e=>{if(e.key==='Enter')searchPvHome()};
  const savedDay=(sessionStorage.getItem('pv_dia_visita')||'SEG').toUpperCase();
@@ -519,6 +519,7 @@ function render(){
  hideOldPriority();
  renderSalesPeriodHeader(d);
  try{window.__renderPvHomePanel?.()}catch{}
+ try{window.__renderQuickIncentive?.()}catch{}
 }
 let sig='';setInterval(()=>{const d=D();const s=d?JSON.stringify([(d.own||[]).map(x=>[x.nome,x.realizado,x.meta,x.imagem_card_url,x.cor_card]),d.consultor?.nome,d.sales_period]):'';if(s&&s!==sig){sig=s;render()}},700);
 window.addEventListener('pageshow',()=>setTimeout(render,350));
