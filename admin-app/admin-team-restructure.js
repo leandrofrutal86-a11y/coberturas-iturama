@@ -587,14 +587,27 @@ async function loadQuickResults(route,force=false){
     if(!acvQuickLoading)acvQuickLoading=w.post({action:'quick_incentive_results',token:sessionStorage.getItem('admToken')||''}).finally(()=>{acvQuickLoading=null});
     acvQuickCache=await acvQuickLoading;
   }
-  const items=acvQuickCache?.items||[];if(!items.length){sec.hidden=true;body.innerHTML='';return}const scope=d.getElementById('acvQuickScope');if(scope)scope.textContent=route==='TEAM'?'Toda a equipe • consolidado de todas as rotas':'Somente '+route+' • visão individual da rota';
+  const items=acvQuickCache?.items||[];if(!items.length){sec.hidden=true;body.innerHTML='';return}
+  const scope=d.getElementById('acvQuickScope');if(scope)scope.textContent=route==='TEAM'?'Toda a equipe • total + resultado de cada consultor':'Somente '+route+' • visão individual da rota';
   sec.hidden=false;
+  const tableHtml=(rows,inc,ctxKey)=>'<div class="acvTableWrap" style="margin:0;border:0;border-radius:0"><table class="acvTable"><thead><tr><th>Categoria</th><th>Meta</th><th>Real</th><th>Falta</th><th>%</th></tr></thead><tbody>'+rows.map(x=>{const ok=n(x.meta)>0&&n(x.realizado)>=n(x.meta),cls=ok?'good':'bad';return '<tr><td><b>'+E(x.nome)+'</b><br><small>'+E(String(x.tipo||'').toUpperCase())+': '+E((x.valores||[]).join(', '))+'</small><div style="margin-top:6px"><button type="button" data-qclients="'+E(inc.id)+':'+E(x.item_id)+':'+E(ctxKey)+'">Listar clientes</button></div></td><td>'+n(x.meta)+'</td><td class="'+cls+'">'+n(x.realizado)+'</td><td class="'+cls+'">'+n(x.falta)+'</td><td class="'+cls+'">'+n(x.percentual)+'%</td></tr>'}).join('')+'</tbody></table></div>';
   body.innerHTML=items.map(inc=>{
-   let rows=[];
-   if(route==='TEAM')rows=inc.team||[];
-   else rows=(inc.individual||[]).find(x=>String(x.rota)===String(route))?.categorias||[];
-   return '<div style="margin-top:12px;border:1px solid #dce3e9;border-radius:14px;overflow:hidden"><div style="background:linear-gradient(135deg,#e30613,#8c0007);color:#fff;padding:12px 14px"><b style="font-size:17px">'+E(inc.nome)+'</b><small style="display:block;margin-top:3px">Período considerado: '+E(inc.data_inicio)+' até '+E(inc.data_fim)+'</small></div><div class="acvTableWrap" style="margin:0;border:0;border-radius:0"><table class="acvTable"><thead><tr><th>Categoria</th><th>Meta</th><th>Real</th><th>Falta</th><th>%</th></tr></thead><tbody>'+rows.map(x=>{const ok=n(x.meta)>0&&n(x.realizado)>=n(x.meta),cls=ok?'good':'bad';return '<tr><td><b>'+E(x.nome)+'</b><br><small>'+E(String(x.tipo||'').toUpperCase())+': '+E((x.valores||[]).join(', '))+'</small><div style="margin-top:6px"><button type="button" data-qclients="'+E(inc.id)+':'+E(x.item_id)+'">Listar clientes</button></div></td><td>'+n(x.meta)+'</td><td class="'+cls+'">'+n(x.realizado)+'</td><td class="'+cls+'">'+n(x.falta)+'</td><td class="'+cls+'">'+n(x.percentual)+'%</td></tr>'}).join('')+'</tbody></table></div></div>'
-  }).join('');body.querySelectorAll('[data-qclients]').forEach(b=>b.onclick=()=>{const [iid,itemid]=b.dataset.qclients.split(':'),inc=items.find(x=>String(x.id)===String(iid));let row=null;if(route==='TEAM')row=(inc?.team||[]).find(x=>String(x.item_id)===String(itemid));else row=(inc?.individual||[]).find(x=>String(x.rota)===String(route))?.categorias?.find(x=>String(x.item_id)===String(itemid));openAdminQuickClients((inc?.nome||'Incentivo')+' • '+(row?.nome||''),row?.clientes||[])})
+   const head='<div style="background:linear-gradient(135deg,#e30613,#8c0007);color:#fff;padding:12px 14px"><b style="font-size:17px">'+E(inc.nome)+'</b><small style="display:block;margin-top:3px">Período considerado: '+E(inc.data_inicio)+' até '+E(inc.data_fim)+'</small></div>';
+   if(route!=='TEAM'){
+     const person=(inc.individual||[]).find(x=>String(x.rota)===String(route));
+     return '<div style="margin-top:12px;border:1px solid #dce3e9;border-radius:14px;overflow:hidden">'+head+'<div style="padding:10px 12px;background:#f7f9fb;border-bottom:1px solid #e2e8f0"><b>'+E(person?.nome||route)+'</b> <small>• '+E(route)+'</small></div>'+tableHtml(person?.categorias||[],inc,route)+'</div>'
+   }
+   const total='<div style="padding:10px 12px;background:#fff3f3;border-bottom:1px solid #f2cccc"><b>Total da Equipe</b></div>'+tableHtml(inc.team||[],inc,'TEAM');
+   const people=(inc.individual||[]).map(p=>'<div style="border-top:8px solid #eef2f6"><div style="padding:10px 12px;background:#f7f9fb;border-bottom:1px solid #e2e8f0"><b>'+E(p.nome||'Consultor')+'</b> <small>• '+E(p.rota||'')+'</small></div>'+tableHtml(p.categorias||[],inc,String(p.rota||''))+'</div>').join('');
+   return '<div style="margin-top:12px;border:1px solid #dce3e9;border-radius:14px;overflow:hidden">'+head+total+people+'</div>'
+  }).join('');
+  body.querySelectorAll('[data-qclients]').forEach(b=>b.onclick=()=>{
+    const [iid,itemid,ctx]=b.dataset.qclients.split(':'),inc=items.find(x=>String(x.id)===String(iid));let row=null;
+    if(ctx==='TEAM')row=(inc?.team||[]).find(x=>String(x.item_id)===String(itemid));
+    else row=(inc?.individual||[]).find(x=>String(x.rota)===String(ctx))?.categorias?.find(x=>String(x.item_id)===String(itemid));
+    const who=ctx==='TEAM'?'Toda a Equipe':((inc?.individual||[]).find(x=>String(x.rota)===String(ctx))?.nome||ctx);
+    openAdminQuickClients((inc?.nome||'Incentivo')+' • '+who+' • '+(row?.nome||''),row?.clientes||[])
+  })
  }catch(e){sec.hidden=false;body.innerHTML='<div class="acvDetailEmpty">Não foi possível carregar os incentivos rápidos: '+E(e?.message||'Erro')+'</div>'}
 }
 function renderView(cat){
