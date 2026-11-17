@@ -78,12 +78,12 @@ async function save(){
    metas:state.consultores.map(x=>({rota:x.rota,meta:Number(c.metas?.[x.rota]||0)}))
   }));
   await post('quick_incentive_save',{item:{id:$('qiaId').value?Number($('qiaId').value):null,nome:$('qiaNome').value.trim(),data_inicio:$('qiaIni').value,data_fim:$('qiaFim').value,ativo:$('qiaAtivo').checked,categorias}});
-  st.className='ok';st.textContent='Incentivo rápido salvo.';editing=null;await load();clearForm()
+  st.className='ok';st.textContent='Incentivo rápido salvo.';editing=null;await load();clearForm();window.dispatchEvent(new CustomEvent('iturama:quick-incentives-changed'))
  }catch(e){st.className='bad';st.textContent=e.message}
 }
 async function del(id){
  if(!confirm('Excluir este incentivo rápido? Ele deixará de aparecer para todos os consultores e na visão da equipe.'))return;
- try{await post('quick_incentive_delete',{id:Number(id)});if(Number(editing?.id)===Number(id))editing=null;await load();clearForm()}catch(e){$('qiaStatus').className='bad';$('qiaStatus').textContent=e.message}
+ try{await post('quick_incentive_delete',{id:Number(id)});if(Number(editing?.id)===Number(id))editing=null;await load();clearForm();window.dispatchEvent(new CustomEvent('iturama:quick-incentives-changed'))}catch(e){$('qiaStatus').className='bad';$('qiaStatus').textContent=e.message}
 }
 function open(btn){
  document.querySelectorAll('#app .wrap>section').forEach(x=>x.classList.add('hide'));
