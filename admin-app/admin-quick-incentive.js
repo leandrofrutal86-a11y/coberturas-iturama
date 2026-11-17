@@ -64,9 +64,14 @@ function open(btn){
  const sec=$('quickIncentiveAdmin');sec.classList.remove('hide');
  document.querySelectorAll('.tabs button').forEach(x=>x.classList.remove('on'));btn?.classList.add('on');load().catch(e=>{$('qiaStatus').className='bad';$('qiaStatus').textContent=e.message})
 }
+window.openQuickIncentiveAdmin=open;
 function ensure(){
  css();if($('quickIncentiveAdmin'))return true;const tabs=document.querySelector('.tabs'),wrap=document.querySelector('#app>.wrap');if(!tabs||!wrap)return false;
  const b=document.createElement('button');b.type='button';b.textContent='⚡ Incentivo Rápido';b.onclick=()=>open(b);tabs.appendChild(b);
+ const metasGrid=document.querySelector('#cokeHome .topicMetas .menuGrid');
+ if(metasGrid&&!document.getElementById('qiaHomeCard')){
+   const card=document.createElement('button');card.id='qiaHomeCard';card.type='button';card.className='menuCard';card.innerHTML='<span class="mi" style="background:#ff8a00">⚡</span><span><b>Incentivo Rápido</b><small>Criar acompanhamento por período, categoria e meta</small></span>';card.onclick=()=>open(b);metasGrid.appendChild(card)
+ }
  const sec=document.createElement('section');sec.id='quickIncentiveAdmin';sec.className='hide';sec.innerHTML=`
  <div class="box">
   <h2>⚡ Acompanhamento Rápido de Incentivo</h2>
@@ -80,6 +85,7 @@ function ensure(){
   <hr style="margin:18px 0;border:0;border-top:1px solid #e1e7ec"><h3>Incentivos rápidos criados</h3><div id="qiaList" class="qiaList"></div>
  </div>`;wrap.appendChild(sec);$('qiaSave').onclick=save;$('qiaNew').onclick=clearForm;
  const old=window.aba;if(typeof old==='function'&&!old.__quick){window.aba=function(){sec.classList.add('hide');return old.apply(this,arguments)};window.aba.__quick=true}
+ const oldShow=window.show;if(typeof oldShow==='function'&&!oldShow.__quick){window.show=function(){sec.classList.add('hide');return oldShow.apply(this,arguments)};window.show.__quick=true}
  load().catch(()=>{});return true
 }
 let n=0;const t=setInterval(()=>{if(ensure()||++n>60)clearInterval(t)},200);
