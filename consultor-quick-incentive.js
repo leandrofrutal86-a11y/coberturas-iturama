@@ -16,5 +16,5 @@ async function load(force=false){
 }
 window.addEventListener('iturama:dashboard-ready',()=>setTimeout(()=>load(true),150));
 window.addEventListener('pageshow',()=>setTimeout(()=>load(true),500));
-setInterval(()=>{try{if(typeof TOKEN!=='undefined'&&TOKEN)load(false)}catch{}},30000);
+setInterval(()=>{try{if(typeof TOKEN!=='undefined'&&TOKEN)load(false)}catch{}},10000);
 })();
