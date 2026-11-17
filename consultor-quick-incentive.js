@@ -47,6 +47,6 @@ async function load(force=false){
 }
 window.addEventListener('iturama:dashboard-ready',()=>setTimeout(()=>load(true),150));
 window.addEventListener('pageshow',()=>setTimeout(()=>load(true),500));
-const mo=new MutationObserver(()=>{if(document.getElementById('consultorModernHome')&&TOKEN&&!busy)setTimeout(()=>load(true),120)});mo.observe(document.documentElement,{childList:true,subtree:true});
+let moTimer=null;const mo=new MutationObserver(()=>{if(!document.getElementById('consultorModernHome')||document.getElementById('quickIncentiveConsultor')||!TOKEN||busy)return;clearTimeout(moTimer);moTimer=setTimeout(()=>load(true),120)});mo.observe(document.documentElement,{childList:true,subtree:true});
 setInterval(()=>{try{if(typeof TOKEN!=='undefined'&&TOKEN)load(false)}catch{}},10000);
 })();
