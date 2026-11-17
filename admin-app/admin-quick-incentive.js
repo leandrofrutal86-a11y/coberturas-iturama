@@ -47,9 +47,7 @@ function renderCats(){
    </div>
    <button type="button" class="qiaRemove" data-remove="${i}">EXCLUIR CATEGORIA</button>
   </div>
-  ${$('qiaUsarMeta')?.checked?'<div class="qiaTableWrap"><table class="qiaTable"><thead><tr><th>Consultor / Rota</th><th>Meta</th></tr></thead><tbody>':''}
-   ${state.consultores.map(x=>'<tr><td><b>'+E(x.rota)+'</b> - '+E(x.nome)+'</td><td><input type="number" min="0" step="1" data-meta-rota="'+E(x.rota)+'" value="'+Number(c.metas?.[x.rota]||0)+'"></td></tr>').join('')}
-  ${$('qiaUsarMeta')?.checked?'</tbody></table></div>':''}
+  ${$('qiaUsarMeta')?.checked?'<div class="qiaTableWrap"><table class="qiaTable"><thead><tr><th>Consultor / Rota</th><th>Meta</th></tr></thead><tbody>'+state.consultores.map(x=>'<tr><td><b>'+E(x.rota)+'</b> - '+E(x.nome)+'</td><td><input type="number" min="0" step="1" data-meta-rota="'+E(x.rota)+'" value="'+Number(c.metas?.[x.rota]||0)+'"></td></tr>').join('')+'</tbody></table></div>':'<div class="small" style="margin-top:10px">Sem meta: será exibido somente o realizado no período.</div>'}
  </div>`).join('')+'<button type="button" class="qiaAddMore" id="qiaAddMore">+ ADICIONAR OUTRA CATEGORIA</button>';
  host.querySelectorAll('[data-qcat]').forEach(card=>{
   const i=Number(card.dataset.qcat),cat=draftCats[i];
