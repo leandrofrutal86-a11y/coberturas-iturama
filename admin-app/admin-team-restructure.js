@@ -588,26 +588,15 @@ async function loadQuickResults(route,force=false){
     acvQuickCache=await acvQuickLoading;
   }
   const items=acvQuickCache?.items||[];if(!items.length){sec.hidden=true;body.innerHTML='';return}
-  const scope=d.getElementById('acvQuickScope');if(scope)scope.textContent=route==='TEAM'?'Toda a equipe • total + resultado de cada consultor':'Somente '+route+' • visão individual da rota';
+  const scope=d.getElementById('acvQuickScope');if(scope)scope.textContent=route==='TEAM'?'Toda a equipe • realizado por consultor e categoria':'Somente '+route+' • realizado da rota';
   sec.hidden=false;
-  const tableHtml=(rows,inc,ctxKey)=>'<div class="acvTableWrap" style="margin:0;border:0;border-radius:0"><table class="acvTable"><thead><tr><th>Categoria</th><th>Meta</th><th>Real</th><th>Falta</th><th>%</th></tr></thead><tbody>'+rows.map(x=>{const ok=n(x.meta)>0&&n(x.realizado)>=n(x.meta),cls=ok?'good':'bad';return '<tr><td><b>'+E(x.nome)+'</b><br><small>'+E(String(x.tipo||'').toUpperCase())+': '+E((x.valores||[]).join(', '))+'</small><div style="margin-top:6px"><button type="button" data-qclients="'+E(inc.id)+':'+E(x.item_id)+':'+E(ctxKey)+'">Listar clientes</button></div></td><td>'+n(x.meta)+'</td><td class="'+cls+'">'+n(x.realizado)+'</td><td class="'+cls+'">'+n(x.falta)+'</td><td class="'+cls+'">'+n(x.percentual)+'%</td></tr>'}).join('')+'</tbody></table></div>';
   body.innerHTML=items.map(inc=>{
-   const head='<div style="background:linear-gradient(135deg,#e30613,#8c0007);color:#fff;padding:12px 14px"><b style="font-size:17px">'+E(inc.nome)+'</b><small style="display:block;margin-top:3px">Período considerado: '+E(inc.data_inicio)+' até '+E(inc.data_fim)+'</small></div>';
-   if(route!=='TEAM'){
-     const person=(inc.individual||[]).find(x=>String(x.rota)===String(route));
-     return '<div style="margin-top:12px;border:1px solid #dce3e9;border-radius:14px;overflow:hidden">'+head+'<div style="padding:10px 12px;background:#f7f9fb;border-bottom:1px solid #e2e8f0"><b>'+E(person?.nome||route)+'</b> <small>• '+E(route)+'</small></div>'+tableHtml(person?.categorias||[],inc,route)+'</div>'
-   }
-   const total='<div style="padding:10px 12px;background:#fff3f3;border-bottom:1px solid #f2cccc"><b>Total da Equipe</b></div>'+tableHtml(inc.team||[],inc,'TEAM');
-   const people=(inc.individual||[]).map(p=>'<div style="border-top:8px solid #eef2f6"><div style="padding:10px 12px;background:#f7f9fb;border-bottom:1px solid #e2e8f0"><b>'+E(p.nome||'Consultor')+'</b> <small>• '+E(p.rota||'')+'</small></div>'+tableHtml(p.categorias||[],inc,String(p.rota||''))+'</div>').join('');
-   return '<div style="margin-top:12px;border:1px solid #dce3e9;border-radius:14px;overflow:hidden">'+head+total+people+'</div>'
-  }).join('');
-  body.querySelectorAll('[data-qclients]').forEach(b=>b.onclick=()=>{
-    const [iid,itemid,ctx]=b.dataset.qclients.split(':'),inc=items.find(x=>String(x.id)===String(iid));let row=null;
-    if(ctx==='TEAM')row=(inc?.team||[]).find(x=>String(x.item_id)===String(itemid));
-    else row=(inc?.individual||[]).find(x=>String(x.rota)===String(ctx))?.categorias?.find(x=>String(x.item_id)===String(itemid));
-    const who=ctx==='TEAM'?'Toda a Equipe':((inc?.individual||[]).find(x=>String(x.rota)===String(ctx))?.nome||ctx);
-    openAdminQuickClients((inc?.nome||'Incentivo')+' • '+who+' • '+(row?.nome||''),row?.clientes||[])
-  })
+    const cats=(inc.team||[]).map(x=>({item_id:x.item_id,nome:x.nome}));
+    const people=route==='TEAM'?(inc.individual||[]):(inc.individual||[]).filter(x=>String(x.rota)===String(route));
+    const rows=people.map(p=>'<tr><td><b>'+E(p.nome||'Consultor')+'</b><br><small>'+E(p.rota||'')+'</small></td>'+cats.map(c=>{const r=(p.categorias||[]).find(x=>String(x.item_id)===String(c.item_id));return '<td style="text-align:center;font-weight:900;color:#17324d">'+n(r?.realizado)+'</td>'}).join('')+'</tr>').join('');
+    const total=route==='TEAM'?'<tr style="background:#fff3f3"><td><b>TOTAL DA EQUIPE</b></td>'+cats.map(c=>{const r=(inc.team||[]).find(x=>String(x.item_id)===String(c.item_id));return '<td style="text-align:center;font-weight:950;color:#b40000">'+n(r?.realizado)+'</td>'}).join('')+'</tr>':'';
+    return '<div style="margin-top:12px;border:1px solid #dce3e9;border-radius:14px;overflow:hidden"><div style="background:linear-gradient(135deg,#e30613,#8c0007);color:#fff;padding:12px 14px"><b style="font-size:17px">'+E(inc.nome)+'</b><small style="display:block;margin-top:3px">Período considerado: '+E(inc.data_inicio)+' até '+E(inc.data_fim)+'</small></div><div class="acvTableWrap" style="margin:0;border:0;border-radius:0;overflow:auto"><table class="acvTable" style="min-width:'+(Math.max(560,220+cats.length*120))+'px"><thead><tr><th>Consultor / Rota</th>'+cats.map(c=>'<th style="text-align:center">'+E(c.nome)+'</th>').join('')+'</tr></thead><tbody>'+rows+total+'</tbody></table></div></div>'
+  }).join('')
  }catch(e){sec.hidden=false;body.innerHTML='<div class="acvDetailEmpty">Não foi possível carregar os incentivos rápidos: '+E(e?.message||'Erro')+'</div>'}
 }
 function renderView(cat){
