@@ -92,6 +92,8 @@ function build(){if($('cokeHome')){syncSalesPeriod();return;}const tabs=document
   <button class="menuCard" onclick="window.cokeNav('Atualizar Vendas')"><span class="mi" style="background:#2563eb">📊</span><span><b>Atualizar Vendas</b><small>Anexar planilha Excel e atualizar a base de vendas</small></span></button>
   <button class="menuCard" id="admUpdateClientBaseCard" onclick="window.cokeNav('Atualizar Base de Clientes')"><span class="mi" style="background:#0b63ce">👥</span><span><b>Atualizar Base de Clientes</b><small>Anexar planilha Excel e atualizar clientes, rotas e dias de visita</small></span></button>
   <button class="menuCard" id="admCoverageDayCard" onclick="window.cokeNav('Coberturas por Dia')"><span class="mi" style="background:#e30613">📈</span><span><b>Coberturas por Dia</b><small>Acompanhe quanto cada consultor fez em cada data</small></span></button>
+  <button class="menuCard" id="salesPeriodReportCard" onclick="window.openSalesPeriodReport?.()"><span class="mi" style="background:#1d4ed8">📅</span><span><b>Relatório com Período</b><small>Escolha o período e as categorias para ver o realizado diário</small></span></button>
+  <button class="menuCard" id="quickDailySalesReportCard" onclick="window.openQuickDailySalesReport?.()"><span class="mi" style="background:#f97316">⚡</span><span><b>Vendas Diárias — Incentivo Rápido</b><small>Veja o realizado por dia e consultor no incentivo escolhido</small></span></button>
  </div>
 </div>
 
