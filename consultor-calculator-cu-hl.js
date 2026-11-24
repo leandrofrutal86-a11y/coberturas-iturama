@@ -18,6 +18,8 @@ function ensure(){css();let p=$('calcCuHl');if(p)return p;p=document.createEleme
 <div class="cchBox"><div id="cchResult" class="cchResult"><small>RESULTADO</small><strong>0</strong><div class="cchFormula">Escolha a embalagem e informe a quantidade.</div></div></div></div>`;document.body.appendChild(p);
 $('cchClose').onclick=()=>p.classList.remove('show');$('cchType').onchange=renderPacks;$('cchCalc').onclick=calc;$('cchClear').onclick=()=>{$('cchQty').value='';$('cchResult').innerHTML='<small>RESULTADO</small><strong>0</strong><div class="cchFormula">Escolha a embalagem e informe a quantidade.</div>'};return p}
 async function loadPacks(){if(PACKS)return PACKS;const j=await api('calculator_packages');PACKS=j.packages||[];return PACKS}
+function trunc2(n){return Math.trunc(Number(n||0)*100)/100}
+function fmt2(n){return trunc2(n).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}
 function fmtMl(ml){return ml>=1000&&ml%1000===0?(ml/1000)+' L':ml+' ml'}
 function renderPacks(){
  const type=$('cchType').value,size=$('cchSize'),units=$('cchUnits');
@@ -39,21 +41,21 @@ function calc(){
    label='CU';
    steps='<div class="cchSteps"><b>Como foi feita a conta:</b>'+
     '<div class="cchStep">1. Volume da caixa: <strong>'+ml.toLocaleString('pt-BR')+' ml × '+units+' = '+volumeMl.toLocaleString('pt-BR')+' ml</strong></div>'+
-    '<div class="cchStep">2. Convertendo para litros: <strong>'+volumeMl.toLocaleString('pt-BR')+' ml ÷ 1.000 = '+volumeL.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:3})+' L</strong></div>'+
-    '<div class="cchStep">3. Valor de 1 caixa/pacote em CU: <strong>'+volumeL.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:3})+' L ÷ 5,69 L = '+unitValue.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+' CU</strong></div>'+
-    '<div class="cchStep">4. Quantidade informada: <strong>'+unitValue.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+' CU × '+qty.toLocaleString('pt-BR')+' = '+total.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+' CU</strong></div></div>';
+    '<div class="cchStep">2. Convertendo para litros: <strong>'+volumeMl.toLocaleString('pt-BR')+' ml ÷ 1.000 = '+fmt2(volumeL)+' L</strong></div>'+
+    '<div class="cchStep">3. Valor de 1 caixa/pacote em CU: <strong>'+fmt2(volumeL)+' L ÷ 5,69 L = '+fmt2(unitValue)+' CU</strong></div>'+
+    '<div class="cchStep">4. Quantidade informada: <strong>'+fmt2(unitValue)+' CU × '+qty.toLocaleString('pt-BR')+' = '+fmt2(total)+' CU</strong></div></div>';
  }else{
    unitValue=volumeL/100;
    total=unitValue*qty;
    label='hL';
    steps='<div class="cchSteps"><b>Como foi feita a conta:</b>'+
     '<div class="cchStep">1. Volume da caixa: <strong>'+ml.toLocaleString('pt-BR')+' ml × '+units+' = '+volumeMl.toLocaleString('pt-BR')+' ml</strong></div>'+
-    '<div class="cchStep">2. Convertendo para litros: <strong>'+volumeMl.toLocaleString('pt-BR')+' ml ÷ 1.000 = '+volumeL.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:3})+' L</strong></div>'+
-    '<div class="cchStep">3. Convertendo para hectolitro: <strong>'+volumeL.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:3})+' L ÷ 100 = '+unitValue.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+' hL</strong></div>'+
-    '<div class="cchStep">4. Quantidade informada: <strong>'+unitValue.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+' hL × '+qty.toLocaleString('pt-BR')+' = '+total.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+' hL</strong></div></div>';
+    '<div class="cchStep">2. Convertendo para litros: <strong>'+volumeMl.toLocaleString('pt-BR')+' ml ÷ 1.000 = '+fmt2(volumeL)+' L</strong></div>'+
+    '<div class="cchStep">3. Convertendo para hectolitro: <strong>'+fmt2(volumeL)+' L ÷ 100 = '+fmt2(unitValue)+' hL</strong></div>'+
+    '<div class="cchStep">4. Quantidade informada: <strong>'+fmt2(unitValue)+' hL × '+qty.toLocaleString('pt-BR')+' = '+fmt2(total)+' hL</strong></div></div>';
  }
  const ref=$('cchRef').value==='FALTA'?'Falta equivalente a':'Venda equivalente a';
- $('cchResult').innerHTML='<small>'+ref.toUpperCase()+'</small><strong>'+total.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+' '+label+'</strong><div class="cchFormula">Volume total informado: '+totalVolumeL.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:3})+' litros</div>'+steps;
+ $('cchResult').innerHTML='<small>'+ref.toUpperCase()+'</small><strong>'+fmt2(total)+' '+label+'</strong><div class="cchFormula">Volume total informado: '+fmt2(totalVolumeL)+' litros</div>'+steps;
  $('cchStatus').textContent=''
 }
 async function open(){
