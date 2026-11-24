@@ -7,10 +7,10 @@ function css(){if($('calcCuHlStyle'))return;const s=document.createElement('styl
 @media(max-width:650px){.cchGrid{grid-template-columns:1fr}.cchActions button{flex:1 1 100%}.cchResult strong{font-size:32px}}
 `;document.head.appendChild(s)}
 function ensure(){css();let p=$('calcCuHl');if(p)return p;p=document.createElement('section');p.id='calcCuHl';p.innerHTML=`
-<div class="cchWrap"><div class="cchHead"><div><h2>🧮 Calculadora CU / hL</h2><small>Converta caixas e pacotes por tamanho da embalagem</small></div><button id="cchClose">✕ Fechar</button></div>
+<div class="cchWrap"><div class="cchHead"><div><h2>🧮 Calculadora CXU / HEC</h2><small>Converta caixas e pacotes por tamanho da embalagem</small></div><button id="cchClose">✕ Fechar</button></div>
 <div class="cchBox"><div class="cchGrid">
 <label>Referência<select id="cchRef"><option value="VENDEU">Quantidade vendida</option><option value="FALTA">Quantidade que falta</option></select></label>
-<label>Tipo de cálculo<select id="cchType"><option value="CU">Caixa Unitária</option><option value="HL">Hectolitro</option></select></label>
+<label>Tipo de cálculo<select id="cchType"><option value="CU">Caixa Unitária (CXU)</option><option value="HL">Hectolitros (HEC)</option></select></label>
 <label>Tamanho da embalagem<select id="cchSize"></select></label>
 <label>Quantidade que vem na caixa<select id="cchUnits"></select></label>
 <label id="cchQtyLabel">Quantidade vendida (caixas/pacotes)<input id="cchQty" type="number" min="0" step="0.01" inputmode="decimal" value="1"></label>
@@ -33,7 +33,7 @@ function renderPacks(){
 function updateMode(){
  const ref=$('cchRef').value,type=$('cchType').value,label=$('cchQtyLabel'),input=$('cchQty');
  if(ref==='FALTA'){
-   label.childNodes[0].nodeValue=type==='HL'?'Quanto falta em hectolitros (hL)':'Quanto falta em Caixa Unitária (CU)';
+   label.childNodes[0].nodeValue=type==='HL'?'Quanto falta em Hectolitros (HEC)':'Quanto falta em Caixa Unitária (CXU) (CU)';
    input.placeholder=type==='HL'?'Ex.: 5,00 hL':'Ex.: 20,00 CU';
  }else{
    label.childNodes[0].nodeValue='Quantidade vendida (caixas/pacotes)';
@@ -45,7 +45,7 @@ function calc(){
  if(!(ml>0&&units>0&&qty>=0)){$('cchStatus').textContent='Informe os dados do cálculo.';return}
  const volumeMl=ml*units,volumeL=volumeMl/1000;
  let unitValue,total,label,steps='';
- if(type==='CU'){unitValue=volumeL/5.69;label='CU'}else{unitValue=volumeL/100;label='hL'}
+ if(type==='CU'){unitValue=volumeL/5.69;label='CXU'}else{unitValue=volumeL/100;label='HEC'}
  if(ref==='VENDEU'){
    total=unitValue*qty;
    steps='<div class="cchSteps"><b>Como foi feita a conta:</b>'+
@@ -67,7 +67,7 @@ function calc(){
 }
 async function open(){
  const p=ensure();p.classList.add('show');renderPacks();updateMode();try{api('calculator_history_log',{evento:'ABRIU'}).catch(()=>{})}catch{};
- $('cchStatus').textContent='Escolha o tipo, o tamanho da embalagem, a quantidade que vem na caixa e informe a venda em caixas/pacotes ou a falta em CU/hL.'
+ $('cchStatus').textContent='Escolha o tipo, o tamanho da embalagem, a quantidade que vem na caixa e informe a venda em caixas/pacotes ou a falta em CXU/HEC.'
 }
 window.openCalculatorCuHl=open;
 })();
