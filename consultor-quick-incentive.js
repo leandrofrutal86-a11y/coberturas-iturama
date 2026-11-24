@@ -59,4 +59,25 @@ window.addEventListener('iturama:dashboard-ready',()=>setTimeout(()=>load(true),
 window.addEventListener('pageshow',()=>setTimeout(()=>load(true),500));
 setTimeout(()=>{try{window.__renderQuickIncentive?.()}catch{}},300);
 setInterval(()=>{try{if(typeof TOKEN!=='undefined'&&TOKEN)load(false)}catch{}},10000);
+let qicObsTimer=null;
+const qicObserver=new MutationObserver(()=>{
+ try{
+  const slot=document.getElementById('quickIncentiveSlot');
+  if(!slot||typeof TOKEN==='undefined'||!TOKEN)return;
+  if(!document.getElementById('quickIncentiveConsultor')){
+   clearTimeout(qicObsTimer);
+   qicObsTimer=setTimeout(()=>{if(lastData)render(lastData);else load(true)},120);
+  }
+ }catch{}
+});
+qicObserver.observe(document.documentElement,{childList:true,subtree:true});
+let qicBoot=0;
+const qicBootTimer=setInterval(()=>{
+ try{
+  if(typeof TOKEN!=='undefined'&&TOKEN&&document.getElementById('quickIncentiveSlot')){
+   if(lastData)render(lastData);else load(true);
+   if(++qicBoot>20)clearInterval(qicBootTimer)
+  }
+ }catch{}
+},500);
 })();
