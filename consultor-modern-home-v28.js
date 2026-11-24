@@ -112,7 +112,7 @@ html,body{max-width:100%!important;overflow-x:hidden!important}
 .cmCat.cmTheme-red{background:linear-gradient(160deg,#f52633,#9e0009)!important}.cmTheme-custom{background:var(--cm-custom,#e30613)!important}
 
 #dash .tabs{margin-top:13px!important}.cmGraph{background:#fff;border:1px solid #e0e7ed;border-radius:17px;padding:13px;margin:0 0 12px;box-shadow:0 5px 15px #172b400d}.cmGraphTop{display:flex;align-items:center;gap:12px}.cmDonut{--p:0;width:88px;height:88px;border-radius:50%;background:conic-gradient(#0b9b57 calc(var(--p)*1%),#edf1f4 0);display:grid;place-items:center;flex:0 0 auto}.cmDonut:after{content:attr(data-p);width:65px;height:65px;border-radius:50%;background:#fff;display:grid;place-items:center;font-size:18px;font-weight:950;color:#163046}.cmGraphText{min-width:0}.cmGraphText h3{font-size:16px;margin:0 0 7px;color:#172736;line-height:1.15}.cmGraphStats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:11px}.cmGraphStat{background:#f5f8fa;border-radius:10px;padding:8px;text-align:center}.cmGraphStat small{display:block;font-size:9px;color:#687987;font-weight:800}.cmGraphStat b{display:block;font-size:16px;margin-top:2px}
-.cvPrioritySection,.cvPriorityWrap,.cvHomePriorities,#cvPriorityBlock{display:none!important}
+
 @media(max-width:900px){
   #dash .top{padding-bottom:8px!important}
   #dash .cmSalesPeriod{
@@ -321,11 +321,11 @@ html,body{max-width:100%!important;overflow-x:hidden!important}
   #dash .top .brand>div:last-child:before{font-size:23px!important;line-height:1.08!important;white-space:nowrap!important}
   #dash .top .brand>div:last-child b{font-size:13px!important}
   #dash .wrap{max-width:1240px!important;padding:18px 28px 0!important;margin:0 auto 96px!important}
-  .cmHome{max-width:1180px!important;margin:0 auto!important;grid-template-columns:minmax(0,1.22fr) minmax(340px,.78fr)!important;gap:18px!important}
+  .cmHome{max-width:1180px!important;margin:0 auto!important;grid-template-columns:1fr!important;gap:18px!important}
   .cmHello{grid-column:1 / -1!important;padding:16px 20px!important}
   .cmAvatar{width:58px!important;height:58px!important;font-size:29px!important}
   .cmHello strong{font-size:25px!important}.cmHello small{font-size:14px!important}
-  .cmSearchHero{grid-column:1!important;padding:20px!important;border-radius:24px!important}
+  .cmSearchHero{grid-column:1 / -1!important;padding:20px!important;border-radius:24px!important}
   .cmSearchTitle b{font-size:30px!important}.cmSearchTitle small{font-size:13px!important}
   .cmSearchIcon{width:58px!important;height:58px!important;font-size:31px!important}
   .cmSearchRow input{padding:15px 16px!important;font-size:17px!important}
@@ -334,7 +334,7 @@ html,body{max-width:100%!important;overflow-x:hidden!important}
   .cmWeekDays{grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:8px!important}
   .cmWeekDay{height:44px!important;font-size:13px!important}
   .cmClientListBtn{padding:13px 14px!important;font-size:14px!important;margin-top:10px!important}
-  .cmHome>div:nth-of-type(3){grid-column:2!important;align-self:stretch!important}
+  .cmHome>div:nth-of-type(3){grid-column:1 / -1!important;align-self:stretch!important}
   .cmHome>div:nth-of-type(3) .cmActions{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:12px!important}
   .cmAct{min-height:118px!important;padding:16px!important;font-size:16px!important;border-radius:19px!important}
   .cmAct .ic{width:46px!important;height:46px!important;font-size:23px!important}
