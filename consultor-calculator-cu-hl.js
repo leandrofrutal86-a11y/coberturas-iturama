@@ -10,20 +10,26 @@ function ensure(){css();let p=$('calcCuHl');if(p)return p;p=document.createEleme
 <div class="cchWrap"><div class="cchHead"><div><h2>🧮 Calculadora CU / hL</h2><small>Converta caixas e pacotes por tamanho da embalagem</small></div><button id="cchClose">✕ Fechar</button></div>
 <div class="cchBox"><div class="cchGrid">
 <label>Tipo de cálculo<select id="cchType"><option value="CU">Caixa Unitária</option><option value="HL">Hectolitro</option></select></label>
-<label>Embalagem<select id="cchPack"></select></label>
-<label>Tamanho da embalagem (ml)<input id="cchMl" type="number" min="1" step="1" inputmode="numeric"></label>
-<label>Quantidade por caixa/pacote<input id="cchUnits" type="number" min="1" step="1" inputmode="numeric"></label>
+<label>Tamanho da embalagem<select id="cchSize"></select></label>
+<label>Quantidade que vem na caixa<select id="cchUnits"></select></label>
 <label>Quantidade de caixas/pacotes<input id="cchQty" type="number" min="0" step="0.01" inputmode="decimal" value="1"></label>
 <label>Referência<select id="cchRef"><option value="VENDEU">Quantidade vendida</option><option value="FALTA">Quantidade que falta</option></select></label>
 </div><div class="cchActions"><button id="cchCalc" class="cchPrimary">CALCULAR</button><button id="cchClear" class="cchDark">LIMPAR</button></div><div id="cchStatus" class="cchNote"></div></div>
 <div class="cchBox"><div id="cchResult" class="cchResult"><small>RESULTADO</small><strong>0</strong><div class="cchFormula">Escolha a embalagem e informe a quantidade.</div></div></div></div>`;document.body.appendChild(p);
-$('cchClose').onclick=()=>p.classList.remove('show');$('cchType').onchange=renderPacks;$('cchPack').onchange=syncPack;$('cchCalc').onclick=calc;$('cchClear').onclick=()=>{$('cchQty').value='';$('cchResult').innerHTML='<small>RESULTADO</small><strong>0</strong><div class="cchFormula">Escolha a embalagem e informe a quantidade.</div>'};return p}
+$('cchClose').onclick=()=>p.classList.remove('show');$('cchType').onchange=renderPacks;$('cchCalc').onclick=calc;$('cchClear').onclick=()=>{$('cchQty').value='';$('cchResult').innerHTML='<small>RESULTADO</small><strong>0</strong><div class="cchFormula">Escolha a embalagem e informe a quantidade.</div>'};return p}
 async function loadPacks(){if(PACKS)return PACKS;const j=await api('calculator_packages');PACKS=j.packages||[];return PACKS}
 function fmtMl(ml){return ml>=1000&&ml%1000===0?(ml/1000)+' L':ml+' ml'}
-function renderPacks(){const type=$('cchType').value,rows=(PACKS||[]).filter(x=>x.tipo===type),sel=$('cchPack');sel.innerHTML='<option value="">Escolha uma embalagem</option>'+rows.map((x,i)=>'<option value="'+x.ml+'|'+x.units+'">'+fmtMl(x.ml)+' × '+x.units+'</option>').join('')+'<option value="MANUAL">Digitar manualmente</option>';syncPack()}
-function syncPack(){const v=$('cchPack').value;if(!v||v==='MANUAL'){if(v==='MANUAL'){$('cchMl').value='';$('cchUnits').value=''}return}const [ml,u]=v.split('|');$('cchMl').value=ml;$('cchUnits').value=u}
+function renderPacks(){
+ const type=$('cchType').value,size=$('cchSize'),units=$('cchUnits');
+ const cuSizes=[200,220,290,310,350,600,1000,1500,2000,2500,3000];
+ const hlSizes=[330,350,355,473,600];
+ const sizes=type==='HL'?hlSizes:cuSizes;
+ size.innerHTML=sizes.map(v=>'<option value="'+v+'">'+fmtMl(v)+'</option>').join('');
+ const unitOptions=type==='HL'?[6,12,24]:[6,12,18,24,48];
+ units.innerHTML=unitOptions.map(v=>'<option value="'+v+'">'+v+' unidades</option>').join('');
+}
 function calc(){
- const type=$('cchType').value,ml=Number($('cchMl').value||0),units=Number($('cchUnits').value||0),qty=Number(String($('cchQty').value||0).replace(',','.'));
+ const type=$('cchType').value,ml=Number($('cchSize').value||0),units=Number($('cchUnits').value||0),qty=Number(String($('cchQty').value||0).replace(',','.'));
  if(!(ml>0&&units>0&&qty>=0)){$('cchStatus').textContent='Informe tamanho, quantidade por caixa e quantidade de caixas/pacotes.';return}
  const volumeMl=ml*units,volumeL=volumeMl/1000,totalVolumeL=volumeL*qty;
  let unitValue,total,label,steps='';
@@ -50,6 +56,9 @@ function calc(){
  $('cchResult').innerHTML='<small>'+ref.toUpperCase()+'</small><strong>'+total.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+' '+label+'</strong><div class="cchFormula">Volume total informado: '+totalVolumeL.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:3})+' litros</div>'+steps;
  $('cchStatus').textContent=''
 }
-async function open(){const p=ensure();p.classList.add('show');$('cchStatus').textContent='Carregando embalagens da base de vendas...';try{await loadPacks();renderPacks();$('cchStatus').textContent='As opções mostram somente tamanho e quantidade por caixa, sem marca ou produto.'}catch(e){$('cchStatus').textContent='Não foi possível carregar as embalagens: '+e.message}}
+async function open(){
+ const p=ensure();p.classList.add('show');renderPacks();
+ $('cchStatus').textContent='Escolha o tipo, o tamanho da embalagem, a quantidade que vem na caixa e informe quantas caixas vendeu ou faltam.'
+}
 window.openCalculatorCuHl=open;
 })();
