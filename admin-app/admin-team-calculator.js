@@ -11,10 +11,10 @@ function css(){if($('admCalcTeamStyle'))return;const s=d.createElement('style');
 @media(max-width:700px){.atcGrid{grid-template-columns:1fr}.atcHistFilters{grid-template-columns:1fr}.atcActions button{flex:1 1 100%}.atcResult>strong{font-size:31px}}
 `;d.head.appendChild(s)}
 function ensure(){css();let p=$('admTeamCalc');if(p)return p;p=d.createElement('section');p.id='admTeamCalc';p.innerHTML=`
-<div class="atcWrap"><div class="atcHead"><div><h2>🧮 Caixa Unitária / Hectolitros</h2><small>Calculadora da equipe e acompanhamento de uso</small></div><button id="atcClose">✕ Fechar</button></div>
+<div class="atcWrap"><div class="atcHead"><div><h2>🧮 Caixa Unitária (CXU) (CXU) / Hectolitros (HEC) (HEC)</h2><small>Calculadora da equipe e acompanhamento de uso</small></div><button id="atcClose">✕ Fechar</button></div>
 <div class="atcBox"><div class="atcGrid">
 <label>Referência<select id="atcRef"><option value="VENDEU">Quantidade vendida</option><option value="FALTA">Quantidade que falta</option></select></label>
-<label>Tipo de cálculo<select id="atcType"><option value="CU">Caixa Unitária</option><option value="HL">Hectolitros</option></select></label>
+<label>Tipo de cálculo<select id="atcType"><option value="CU">Caixa Unitária (CXU)</option><option value="HL">Hectolitros (HEC)</option></select></label>
 <label>Tamanho da embalagem<select id="atcSize"></select></label>
 <label>Quantidade que vem na caixa<select id="atcUnits"></select></label>
 <label id="atcQtyLabel">Quantidade vendida (caixas/pacotes)<input id="atcQty" type="number" min="0" step="0.01" value="1" inputmode="decimal"></label>
@@ -26,7 +26,7 @@ function renderOptions(){const type=$('atcType').value,sizes=type==='HL'?[330,35
 function updateMode(){
  const ref=$('atcRef').value,type=$('atcType').value,label=$('atcQtyLabel'),input=$('atcQty');
  if(ref==='FALTA'){
-   label.childNodes[0].nodeValue=type==='HL'?'Quanto falta em hectolitros (hL)':'Quanto falta em Caixa Unitária (CU)';
+   label.childNodes[0].nodeValue=type==='HL'?'Quanto falta em Hectolitros (HEC)':'Quanto falta em Caixa Unitária (CXU) (CU)';
    input.placeholder=type==='HL'?'Ex.: 5,00 hL':'Ex.: 20,00 CU';
  }else{
    label.childNodes[0].nodeValue='Quantidade vendida (caixas/pacotes)';
@@ -37,7 +37,7 @@ async function calc(){
  const ref=$('atcRef').value,type=$('atcType').value,ml=Number($('atcSize').value||0),units=Number($('atcUnits').value||0),qty=Number(String($('atcQty').value||0).replace(',','.'));
  if(!(ml>0&&units>0&&qty>=0)){$('atcStatus').textContent='Informe os dados do cálculo.';return}
  const volumeMl=ml*units,volumeL=volumeMl/1000;let unitValue,total,label;
- if(type==='CU'){unitValue=volumeL/5.69;label='CU'}else{unitValue=volumeL/100;label='hL'}
+ if(type==='CU'){unitValue=volumeL/5.69;label='CXU'}else{unitValue=volumeL/100;label='HEC'}
  if(ref==='VENDEU'){
    total=unitValue*qty;
    $('atcResult').innerHTML='<small>VENDA EQUIVALENTE A</small><strong>'+fmt2(total)+' '+label+'</strong><div class="atcSteps"><b>Como foi feita a conta:</b><div class="atcStep">1. '+ml+' ml × '+units+' = '+volumeMl.toLocaleString('pt-BR')+' ml</div><div class="atcStep">2. '+volumeMl.toLocaleString('pt-BR')+' ml ÷ 1.000 = '+fmt2(volumeL)+' L</div><div class="atcStep">3. Cada caixa/pacote vale '+fmt2(unitValue)+' '+label+'</div><div class="atcStep">4. '+fmt2(unitValue)+' '+label+' × '+qty.toLocaleString('pt-BR')+' = <strong>'+fmt2(total)+' '+label+'</strong></div></div>';
@@ -50,7 +50,7 @@ async function calc(){
 let HIST=[];
 async function toggleHistory(){const b=$('atcHistoryBox');b.hidden=!b.hidden;if(!b.hidden)await loadHistory()}
 async function loadHistory(){const body=$('atcHistBody');body.innerHTML='<div class="atcEmpty">Carregando histórico...</div>';try{const r=await post({action:'calculator_history_admin',token:token()});HIST=r.items||[];const users=new Map();HIST.forEach(x=>{const k=(x.matricula||'')+'|'+(x.nome||'')+'|'+(x.rota||'');if(!users.has(k))users.set(k,{key:k,label:(x.nome||x.perfil||'Usuário')+(x.rota&&x.rota!=='TODOS'?' • '+x.rota:'')+(x.matricula?' • '+x.matricula:'')})});$('atcHistUser').innerHTML='<option value="ALL">Todos os usuários</option>'+[...users.values()].map(x=>'<option value="'+E(x.key)+'">'+E(x.label)+'</option>').join('');renderHistory()}catch(e){body.innerHTML='<div class="atcEmpty">Erro ao carregar histórico: '+E(e.message)+'</div>'}}
-function renderHistory(){const user=$('atcHistUser').value,event=$('atcHistEvent').value;let rows=HIST.filter(x=>(event==='ALL'||x.evento===event));if(user!=='ALL')rows=rows.filter(x=>((x.matricula||'')+'|'+(x.nome||'')+'|'+(x.rota||''))===user);$('atcHistBody').innerHTML=rows.length?'<div class="atcTable"><table><thead><tr><th>Data/Hora</th><th>Usuário</th><th>Rota</th><th>Evento</th><th>Tipo</th><th>Embalagem</th><th>Caixa</th><th>Entrada</th><th>Referência</th><th>Resultado</th></tr></thead><tbody>'+rows.map(x=>'<tr><td>'+E(new Date(x.created_at).toLocaleString('pt-BR'))+'</td><td><b>'+E(x.nome||x.perfil||'')+'</b><br><small>'+E(x.matricula||'')+'</small></td><td>'+E(x.rota||'')+'</td><td><span class="atcBadge">'+E(x.evento)+'</span></td><td>'+E(x.tipo_calculo||'—')+'</td><td>'+(x.embalagem_ml?E(fmtMl(Number(x.embalagem_ml))):'—')+'</td><td>'+(x.unidades_caixa?E(x.unidades_caixa+' un.'):'—')+'</td><td>'+(x.quantidade!=null?E(x.referencia==='FALTA'?fmt2(x.quantidade)+(x.tipo_calculo==='HL'?' hL':' CU'):fmt2(x.quantidade)+' cx/pct'):'—')+'</td><td>'+E(x.referencia||'—')+'</td><td>'+(x.resultado!=null?E(fmt2(x.resultado)+(x.referencia==='FALTA'?' cx/pct':(x.tipo_calculo==='HL'?' hL':' CU'))):'—')+'</td></tr>').join('')+'</tbody></table></div>':'<div class="atcEmpty">Nenhum registro encontrado para este filtro.</div>'}
+function renderHistory(){const user=$('atcHistUser').value,event=$('atcHistEvent').value;let rows=HIST.filter(x=>(event==='ALL'||x.evento===event));if(user!=='ALL')rows=rows.filter(x=>((x.matricula||'')+'|'+(x.nome||'')+'|'+(x.rota||''))===user);$('atcHistBody').innerHTML=rows.length?'<div class="atcTable"><table><thead><tr><th>Data/Hora</th><th>Usuário</th><th>Rota</th><th>Evento</th><th>Tipo</th><th>Embalagem</th><th>Caixa</th><th>Entrada</th><th>Referência</th><th>Resultado</th></tr></thead><tbody>'+rows.map(x=>'<tr><td>'+E(new Date(x.created_at).toLocaleString('pt-BR'))+'</td><td><b>'+E(x.nome||x.perfil||'')+'</b><br><small>'+E(x.matricula||'')+'</small></td><td>'+E(x.rota||'')+'</td><td><span class="atcBadge">'+E(x.evento)+'</span></td><td>'+E(x.tipo_calculo||'—')+'</td><td>'+(x.embalagem_ml?E(fmtMl(Number(x.embalagem_ml))):'—')+'</td><td>'+(x.unidades_caixa?E(x.unidades_caixa+' un.'):'—')+'</td><td>'+(x.quantidade!=null?E(x.referencia==='FALTA'?fmt2(x.quantidade)+(x.tipo_calculo==='HL'?' HEC':' CXU'):fmt2(x.quantidade)+' cx/pct'):'—')+'</td><td>'+E(x.referencia||'—')+'</td><td>'+(x.resultado!=null?E(fmt2(x.resultado)+(x.referencia==='FALTA'?' cx/pct':(x.tipo_calculo==='HL'?' HEC':' CXU'))):'—')+'</td></tr>').join('')+'</tbody></table></div>':'<div class="atcEmpty">Nenhum registro encontrado para este filtro.</div>'}
 async function open(){const p=ensure();p.classList.add('show');renderOptions();updateMode();$('atcHistoryBox').hidden=true;$('atcStatus').textContent='Mesma calculadora disponível para os consultores.';try{await post({action:'calculator_history_log',token:token(),evento:'ABRIU'})}catch{}}
 w.openAdminTeamCalculator=open;
 })();
