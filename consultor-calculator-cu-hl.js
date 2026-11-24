@@ -56,10 +56,10 @@ function calc(){
  }
  const ref=$('cchRef').value==='FALTA'?'Falta equivalente a':'Venda equivalente a';
  $('cchResult').innerHTML='<small>'+ref.toUpperCase()+'</small><strong>'+fmt2(total)+' '+label+'</strong><div class="cchFormula">Volume total informado: '+fmt2(totalVolumeL)+' litros</div>'+steps;
- $('cchStatus').textContent=''
+ $('cchStatus').textContent='';try{api('calculator_history_log',{evento:'CALCULOU',tipo_calculo:type,embalagem_ml:ml,unidades_caixa:units,quantidade:qty,referencia:$('cchRef').value,resultado:trunc2(total)}).catch(()=>{})}catch{}
 }
 async function open(){
- const p=ensure();p.classList.add('show');renderPacks();
+ const p=ensure();p.classList.add('show');renderPacks();try{api('calculator_history_log',{evento:'ABRIU'}).catch(()=>{})}catch{};
  $('cchStatus').textContent='Escolha o tipo, o tamanho da embalagem, a quantidade que vem na caixa e informe quantas caixas vendeu ou faltam.'
 }
 window.openCalculatorCuHl=open;
