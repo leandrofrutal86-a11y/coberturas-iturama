@@ -10,7 +10,7 @@ function ensure(){css();let p=$('calcCuHl');if(p)return p;p=document.createEleme
 <div class="cchWrap"><div class="cchHead"><div><h2>🧮 Calculadora CXU / HEC</h2><small>Converta caixas e pacotes por tamanho da embalagem</small></div><button id="cchClose">✕ Fechar</button></div>
 <div class="cchBox"><div class="cchGrid">
 <label>Tipo de cálculo<select id="cchType"><option value="CU">Caixa Unitária (CXU)</option><option value="HL">Hectolitros (HEC)</option></select></label>
-<label>Referência<select id="cchRef"><option value="VENDEU">Quantidade vendida</option><option value="FALTA">Quantidade que falta</option></select></label>
+<label>Referência<select id="cchRef"><option value="VENDEU">Quantidade vendida (Caixa Física)</option><option value="FALTA">Quantidade que falta (Caixa Unitária)</option></select></label>
 <label>Tamanho da embalagem<select id="cchSize"></select></label>
 <label>Quantidade que vem na caixa<select id="cchUnits"></select></label>
 <label id="cchQtyLabel">Quantidade vendida (caixas/pacotes)<input id="cchQty" type="number" min="0" step="0.01" inputmode="decimal" value="1"></label>
