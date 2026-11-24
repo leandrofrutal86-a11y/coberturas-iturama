@@ -13,8 +13,8 @@ function css(){if($('admCalcTeamStyle'))return;const s=d.createElement('style');
 function ensure(){css();let p=$('admTeamCalc');if(p)return p;p=d.createElement('section');p.id='admTeamCalc';p.innerHTML=`
 <div class="atcWrap"><div class="atcHead"><div><h2>🧮 Caixa Unitária (CXU) (CXU) / Hectolitros (HEC) (HEC)</h2><small>Calculadora da equipe e acompanhamento de uso</small></div><button id="atcClose">✕ Fechar</button></div>
 <div class="atcBox"><div class="atcGrid">
-<label>Referência<select id="atcRef"><option value="VENDEU">Quantidade vendida</option><option value="FALTA">Quantidade que falta</option></select></label>
 <label>Tipo de cálculo<select id="atcType"><option value="CU">Caixa Unitária (CXU)</option><option value="HL">Hectolitros (HEC)</option></select></label>
+<label>Referência<select id="atcRef"><option value="VENDEU">Quantidade vendida</option><option value="FALTA">Quantidade que falta</option></select></label>
 <label>Tamanho da embalagem<select id="atcSize"></select></label>
 <label>Quantidade que vem na caixa<select id="atcUnits"></select></label>
 <label id="atcQtyLabel">Quantidade vendida (caixas/pacotes)<input id="atcQty" type="number" min="0" step="0.01" value="1" inputmode="decimal"></label>
