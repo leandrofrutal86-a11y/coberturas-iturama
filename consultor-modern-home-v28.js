@@ -82,7 +82,7 @@ html,body{max-width:100%!important;overflow-x:hidden!important}
 .cmClientListBtn{box-sizing:border-box!important;width:100%!important;max-width:100%!important;min-width:0!important;margin-top:7px!important;border:0!important;border-radius:10px!important;background:#fff!important;color:#25384a!important;padding:10px 11px!important;font-size:11px!important;font-weight:900!important;text-align:left!important}
 .cmSectionTitle{display:flex;align-items:center;justify-content:space-between;gap:7px;margin:4px 2px 6px;min-width:0}.cmSectionTitle h3{margin:0;color:#152638;font-size:18px}.cmSectionTitle small{font-size:10px;color:#748493;font-weight:750;white-space:nowrap}
 .cmActions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;width:100%}.cmAct{box-sizing:border-box;min-width:0;min-height:82px;background:#fff;border:1px solid #e0e7ed;border-radius:15px;padding:10px;text-align:left;box-shadow:0 4px 13px #172b400d;position:relative;font-size:13px;font-weight:900;color:#14263a}.cmAct .ic{width:35px;height:35px;border-radius:10px;display:grid;place-items:center;font-size:18px;background:#fff0f1;margin-bottom:6px}.cmAct:after{content:'›';position:absolute;right:10px;bottom:7px;font-size:22px;color:#d70b15}.cmAct.blue .ic{background:#eaf3ff}.cmAct.green .ic{background:#e9f8ef}.cmAct.purple .ic{background:#f2eafe}
-.cmCarouselViewport{box-sizing:border-box!important;width:100%!important;max-width:100%!important;min-width:0!important;overflow-x:scroll!important;overflow-y:hidden!important;-webkit-overflow-scrolling:touch!important;touch-action:none!important;overscroll-behavior-x:contain!important;scrollbar-width:none!important}
+.cmCarouselViewport{box-sizing:border-box!important;width:100%!important;max-width:100%!important;min-width:0!important;overflow-x:auto!important;overflow-y:hidden!important;-webkit-overflow-scrolling:touch!important;touch-action:none!important;overscroll-behavior-x:contain!important;scrollbar-width:none!important}
 .cmCarousel{box-sizing:border-box!important;display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;gap:9px!important;width:max-content!important;min-width:max-content!important;max-width:none!important;overflow:visible!important;padding:2px 24px 10px 1px!important;touch-action:none!important;cursor:grab}
 .cmCarouselViewport::-webkit-scrollbar{display:none!important}.cmCarousel:active{cursor:grabbing}
 .cmCat{box-sizing:border-box!important;flex:0 0 148px!important;width:148px!important;min-width:148px!important;max-width:148px!important;height:252px!important;border:0!important;border-radius:20px!important;padding:0 10px 12px!important;color:#fff!important;text-align:left!important;scroll-snap-align:start!important;position:relative!important;box-shadow:0 12px 24px rgba(18,31,45,.20)!important;overflow:hidden!important;touch-action:pan-x!important;display:flex!important;flex-direction:column!important;justify-content:flex-end!important;background:linear-gradient(165deg,#d50a18,#7a0007)!important}
@@ -167,6 +167,20 @@ html,body{max-width:100%!important;overflow-x:hidden!important}
 }
 
 @media(max-width:380px){#dash .wrap{padding-left:7px!important;padding-right:7px!important}.cmSearchRow{grid-template-columns:1fr!important}.cmSearchRow button{width:100%!important;font-size:11px!important}.cmCat{flex-basis:120px!important;width:120px!important;min-width:120px!important;max-width:120px!important}.cmAct{font-size:12px}}
+
+
+@media(min-width:901px){
+  #dash,#dash .wrap,#consultorModernHome{overflow-x:hidden!important}
+  #consultorModernHome .cmActions,
+  #consultorModernHome .cmSearchHero,
+  #consultorModernHome .cmOppSection,
+  #consultorModernHome #quickIncentiveSlot,
+  #consultorModernHome .cmCarouselShell{width:100%!important;max-width:100%!important;min-width:0!important;box-sizing:border-box!important}
+  #consultorModernHome .cmActions{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  #consultorModernHome .cmAct{min-width:0!important;width:100%!important}
+  #consultorModernHome .cmCarouselViewport{width:100%!important;max-width:100%!important;min-width:0!important;overflow-x:auto!important;overflow-y:hidden!important}
+  #consultorModernHome .cmCarousel{max-width:none!important}
+}
 
 /* FINAL PORTRAIT FIX */
 @media (orientation:portrait){
@@ -320,12 +334,13 @@ html,body{max-width:100%!important;overflow-x:hidden!important}
   #dash .top .brand{flex:1 1 auto!important;min-width:420px!important;overflow:visible!important}
   #dash .top .brand>div:last-child:before{font-size:23px!important;line-height:1.08!important;white-space:nowrap!important}
   #dash .top .brand>div:last-child b{font-size:13px!important}
-  #dash .wrap{max-width:1240px!important;padding:18px 28px 0!important;margin:0 auto 96px!important}
-  .cmHome{max-width:1180px!important;margin:0 auto!important;grid-template-columns:1fr!important;gap:18px!important}
+  #dash .wrap{box-sizing:border-box!important;width:100%!important;max-width:100vw!important;padding:18px 18px 0!important;margin:0 auto 96px!important;overflow-x:hidden!important}
+  .cmHome{box-sizing:border-box!important;width:100%!important;max-width:1180px!important;min-width:0!important;margin:0 auto!important;grid-template-columns:minmax(0,1fr)!important;gap:18px!important;overflow-x:hidden!important}
+  #consultorModernHome>*{box-sizing:border-box!important;min-width:0!important;max-width:100%!important}
   .cmHello{grid-column:1 / -1!important;padding:16px 20px!important}
   .cmAvatar{width:58px!important;height:58px!important;font-size:29px!important}
   .cmHello strong{font-size:25px!important}.cmHello small{font-size:14px!important}
-  .cmSearchHero{grid-column:1 / -1!important;padding:20px!important;border-radius:24px!important}
+  .cmSearchHero{box-sizing:border-box!important;grid-column:1 / -1!important;width:100%!important;max-width:100%!important;min-width:0!important;padding:20px!important;border-radius:24px!important;overflow:hidden!important}
   .cmSearchTitle b{font-size:30px!important}.cmSearchTitle small{font-size:13px!important}
   .cmSearchIcon{width:58px!important;height:58px!important;font-size:31px!important}
   .cmSearchRow input{padding:15px 16px!important;font-size:17px!important}
@@ -334,14 +349,14 @@ html,body{max-width:100%!important;overflow-x:hidden!important}
   .cmWeekDays{grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:8px!important}
   .cmWeekDay{height:44px!important;font-size:13px!important}
   .cmClientListBtn{padding:13px 14px!important;font-size:14px!important;margin-top:10px!important}
-  .cmHome>div:nth-of-type(3){grid-column:1 / -1!important;align-self:stretch!important}
+  .cmHome>div:nth-of-type(3){grid-column:1 / -1!important;align-self:stretch!important;min-width:0!important;width:100%!important}
   .cmHome>div:nth-of-type(3) .cmActions{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:12px!important}
   .cmAct{min-height:118px!important;padding:16px!important;font-size:16px!important;border-radius:19px!important}
   .cmAct .ic{width:46px!important;height:46px!important;font-size:23px!important}
-  .cmHome>div:nth-of-type(4){grid-column:1 / -1!important;min-width:0!important}
+  .cmHome>div:nth-of-type(4){grid-column:1 / -1!important;min-width:0!important;width:100%!important}
   .cmSectionTitle{margin:3px 4px 10px!important}
   .cmSectionTitle h3{font-size:24px!important}.cmSectionTitle small{font-size:12px!important}
-  .cmCarouselShell{padding:0 50px!important}
+  .cmCarouselShell{box-sizing:border-box!important;width:100%!important;max-width:100%!important;min-width:0!important;padding:0 46px!important;overflow:hidden!important}
   .cmCarouselViewport{overflow-x:auto!important;overflow-y:hidden!important;touch-action:auto!important;scroll-behavior:smooth!important;overscroll-behavior-x:contain!important}
   .cmCarousel{gap:14px!important;padding:4px 8px 14px!important;touch-action:auto!important}
   .cmCat{flex:0 0 190px!important;width:190px!important;min-width:190px!important;max-width:190px!important;height:292px!important;padding:0 14px 15px!important;border-radius:22px!important}
