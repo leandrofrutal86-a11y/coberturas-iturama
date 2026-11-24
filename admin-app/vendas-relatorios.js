@@ -51,5 +51,27 @@ function key(rt,pv){return String(rt||'').trim()+'|'+String(pv||'').trim()}
 async function generate(){const cat=$('asrCat').selectedOptions[0],rt=$('asrRoute').value,day=$('asrDay').value,type=$('asrType').value;if(!cat)return;$('asrGenerate').disabled=true;$('asrCsv').disabled=$('asrPrint').disabled=true;$('asrResults').innerHTML='';$('asrStatus').textContent='Conferindo base de visitas e vendas...';try{const scheduleRows=await schedule(),routes=rt==='TODAS'?[...new Set(scheduleRows.map(x=>String(x.Rota||'').trim()))]:[rt];const views=await Promise.all(routes.map(async rota=>({rota,data:await request({action:'consultor_view',token:auth(),rota})})));const sold=new Map();for(const v of views){const res=(v.data.resultados||[]).find(x=>N(x.nome)===N(cat.textContent));if(!res)continue;for(const c of res.clientes||[]){const pv=String(c.cliente||c.pv||'').trim();if(!pv)continue;const complete=c.completo!==false&&!(Number(c.faltam)>0);sold.set(key(v.rota,pv),{complete,missing:(c.grupos||[]).filter(g=>!g.vendido).map(g=>String(g.nome||g.descricao||'Grupo '+g.grupo)).join(', ')})}}rows=scheduleRows.filter(x=>(rt==='TODAS'||String(x.Rota).trim()===rt)&&(day==='TODOS'?visitDays(x).length:visitDays(x).includes(day))).map(x=>{const rota=String(x.Rota).trim(),pv=String(x.Cliente).trim(),s=sold.get(key(rota,pv)),complete=!!s?.complete;return{rota,pv,razao:String(x['Razão Social']||'').trim(),dias:visitDays(x).join(', '),situacao:complete?'REALIZADO':s?'PARCIAL':'NÃO COMPROU',falta:complete?'':s?.missing||cat.textContent.trim()}}).filter(x=>type==='TODOS'||(type==='REALIZADOS'?x.situacao==='REALIZADO':x.situacao!=='REALIZADO')).sort((a,b)=>a.rota.localeCompare(b.rota)||a.razao.localeCompare(b.razao,'pt-BR'));last=[...rows];const done=rows.filter(x=>x.situacao==='REALIZADO').length;$('asrSummary').textContent=rows.length+' cliente(s) • '+done+' realizado(s) • '+(rows.length-done)+' com falta';$('asrResults').innerHTML=rows.length?'<table><thead><tr><th>Rota</th><th>PV</th><th>Razão social</th><th>Dia de visita</th><th>Situação</th><th>O que falta</th></tr></thead><tbody>'+rows.map(x=>'<tr>'+[x.rota,x.pv,x.razao,x.dias,x.situacao,x.falta].map(v=>'<td>'+E(v)+'</td>').join('')+'</tr>').join('')+'</tbody></table>':'Nenhum cliente encontrado para os filtros.';$('asrCsv').disabled=$('asrPrint').disabled=!rows.length;$('asrStatus').textContent='Relatório gerado com a base de visitas e os resultados de cobertura disponíveis.'}catch(e){$('asrStatus').textContent='Não foi possível gerar: '+e.message}finally{$('asrGenerate').disabled=false}}
 $('asrGenerate').onclick=generate;['asrCat','asrRoute','asrDay','asrType'].forEach(id=>$(id).onchange=()=>{$('asrCsv').disabled=$('asrPrint').disabled=true;$('asrStatus').textContent='Filtros alterados. Gere o relatório novamente.'});
 $('asrCsv').onclick=()=>{const lines=[['Rota','PV','Razão social','Dia de visita','Situação','O que falta'],...last.map(x=>[x.rota,x.pv,x.razao,x.dias,x.situacao,x.falta])];const csv='\uFEFF'+lines.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(';')).join('\r\n');const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));const a=d.createElement('a');a.href=url;a.download='relatorio-vendas-'+$('asrDay').value.toLowerCase()+'.csv';d.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)};
-$('asrPrint').onclick=()=>window.print();
+$('asrPrint').onclick=()=>{
+ if(!last.length)return;
+ const cat=$('asrCat').selectedOptions[0]?.textContent||'';
+ const route=$('asrRoute').selectedOptions[0]?.textContent||'';
+ const day=$('asrDay').selectedOptions[0]?.textContent||'';
+ const type=$('asrType').selectedOptions[0]?.textContent||'';
+ const summary=$('asrSummary').textContent||'';
+ const table=$('asrResults').innerHTML||'';
+ const w=window.open('','_blank');
+ if(!w){$('asrStatus').textContent='Permita a abertura da janela de impressão para este site.';return}
+ w.document.open();
+ w.document.write('<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Relatório de Vendas</title><style>'+
+ 'body{font:13px Arial;color:#172534;margin:18mm 12mm;background:#fff}h1{margin:0 0 5px;font-size:22px}.meta{margin:0 0 14px;color:#526173}.filters{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:12px 0 14px}.f{border:1px solid #dce4eb;border-radius:7px;padding:8px}.f small{display:block;color:#667585;font-size:10px;font-weight:700}.f b{display:block;margin-top:3px}.summary{font-size:16px;font-weight:900;margin:14px 0}.asrTable{overflow:visible}table{width:100%;border-collapse:collapse}th{background:#172534;color:#fff}td,th{padding:7px;border:1px solid #dce4eb;text-align:left;font-size:11px}tr{break-inside:avoid}thead{display:table-header-group}.printBtn{margin:0 0 14px;padding:10px 16px;background:#c40017;color:#fff;border:0;border-radius:7px;font-weight:800}@media print{.printBtn{display:none}body{margin:8mm}}'+
+ '</style></head><body>'+
+ '<button class="printBtn" onclick="window.print()">IMPRIMIR / SALVAR PDF</button>'+
+ '<h1>📋 Relatório de Vendas</h1><p class="meta">Relatório gerado no ADM Equipe Iturama</p>'+
+ '<div class="filters"><div class="f"><small>Categoria</small><b>'+E(cat)+'</b></div><div class="f"><small>Rota / Consultor</small><b>'+E(route)+'</b></div><div class="f"><small>Dia de visita</small><b>'+E(day)+'</b></div><div class="f"><small>Situação</small><b>'+E(type)+'</b></div></div>'+
+ '<div class="summary">'+E(summary)+'</div><div class="asrTable">'+table+'</div>'+
+ '</body></html>');
+ w.document.close();
+ w.focus();
+ setTimeout(()=>{try{w.print()}catch{}},250);
+};
 })();
