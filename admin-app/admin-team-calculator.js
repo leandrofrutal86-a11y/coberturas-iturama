@@ -11,7 +11,7 @@ function css(){if($('admCalcTeamStyle'))return;const s=d.createElement('style');
 @media(max-width:700px){.atcGrid{grid-template-columns:1fr}.atcHistFilters{grid-template-columns:1fr}.atcActions button{flex:1 1 100%}.atcResult>strong{font-size:31px}}
 `;d.head.appendChild(s)}
 function ensure(){css();let p=$('admTeamCalc');if(p)return p;p=d.createElement('section');p.id='admTeamCalc';p.innerHTML=`
-<div class="atcWrap"><div class="atcHead"><div><h2>🧮 Caixa Unitária (CXU) (CXU) / Hectolitros (HEC) (HEC)</h2><small>Calculadora da equipe e acompanhamento de uso</small></div><button id="atcClose">✕ Fechar</button></div>
+<div class="atcWrap"><div class="atcHead"><div><h2>🧮 Caixa Unitária (CXU) / Hectolitros (HEC)</h2><small>Calculadora da equipe e acompanhamento de uso</small></div><button id="atcClose">✕ Fechar</button></div>
 <div class="atcBox"><div class="atcGrid">
 <label>Tipo de cálculo<select id="atcType"><option value="CU">Caixa Unitária (CXU)</option><option value="HL">Hectolitros (HEC)</option></select></label>
 <label>Referência<select id="atcRef"><option value="VENDEU">Quantidade vendida (Caixa Física)</option><option value="FALTA">Quantidade que falta (Caixa Unitária)</option></select></label>
