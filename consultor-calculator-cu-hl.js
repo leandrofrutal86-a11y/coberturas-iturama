@@ -33,10 +33,10 @@ function renderPacks(){
 function updateMode(){
  const ref=$('cchRef').value,type=$('cchType').value,label=$('cchQtyLabel'),input=$('cchQty');
  if(ref==='FALTA'){
-   label.childNodes[0].nodeValue=type==='HL'?'Quanto falta em Hectolitros (HEC)':'Quanto falta em Caixa Unitária (CXU) (CU)';
-   input.placeholder=type==='HL'?'Ex.: 5,00 hL':'Ex.: 20,00 CU';
+   label.childNodes[0].nodeValue=type==='HL'?'Quantidade Hectolitros (HEC)':'Quantidade Caixa Unitária (CXU)';
+   input.placeholder=type==='HL'?'Ex.: 5,00 HEC':'Ex.: 20,00 CXU';
  }else{
-   label.childNodes[0].nodeValue='Quantidade vendida (caixas/pacotes)';
+   label.childNodes[0].nodeValue='Quantidade de caixas/pacotes';
    input.placeholder='Ex.: 10';
  }
 }
