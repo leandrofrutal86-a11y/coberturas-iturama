@@ -25,7 +25,7 @@ function renderPacks(){
  const hlSizes=[330,350,355,473,600];
  const sizes=type==='HL'?hlSizes:cuSizes;
  size.innerHTML=sizes.map(v=>'<option value="'+v+'">'+fmtMl(v)+'</option>').join('');
- const unitOptions=type==='HL'?[6,12,24]:[6,12,18,24,48];
+ const unitOptions=type==='HL'?[6,12,24]:[4,6,12];
  units.innerHTML=unitOptions.map(v=>'<option value="'+v+'">'+v+' unidades</option>').join('');
 }
 function calc(){
