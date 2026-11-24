@@ -16,7 +16,7 @@ function ensure(){css();let p=$('calcCuHl');if(p)return p;p=document.createEleme
 <label id="cchQtyLabel">Quantidade vendida (caixas/pacotes)<input id="cchQty" type="number" min="0" step="0.01" inputmode="decimal" value="1"></label>
 </div><div class="cchActions"><button id="cchCalc" class="cchPrimary">CALCULAR</button><button id="cchClear" class="cchDark">LIMPAR</button></div><div id="cchStatus" class="cchNote"></div></div>
 <div class="cchBox"><div id="cchResult" class="cchResult"><small>RESULTADO</small><strong>0</strong><div class="cchFormula">Escolha a embalagem e informe a quantidade.</div></div></div></div>`;document.body.appendChild(p);
-$('cchClose').onclick=()=>p.classList.remove('show');$('cchType').onchange=()=>{renderPacks();updateMode()};$('cchRef').onchange=updateMode;$('cchCalc').onclick=calc;$('cchClear').onclick=()=>{$('cchQty').value='';$('cchResult').innerHTML='<small>RESULTADO</small><strong>0</strong><div class="cchFormula">Escolha a embalagem e informe a quantidade.</div>'};return p}
+$('cchClose').onclick=()=>p.classList.remove('show');$('cchType').onchange=()=>{renderPacks();updateReferenceLabels();updateMode()};$('cchRef').onchange=updateMode;$('cchCalc').onclick=calc;$('cchClear').onclick=()=>{$('cchQty').value='';$('cchResult').innerHTML='<small>RESULTADO</small><strong>0</strong><div class="cchFormula">Escolha a embalagem e informe a quantidade.</div>'};return p}
 async function loadPacks(){if(PACKS)return PACKS;const j=await api('calculator_packages');PACKS=j.packages||[];return PACKS}
 function trunc2(n){return Math.trunc(Number(n||0)*100)/100}
 function fmt2(n){return trunc2(n).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}
@@ -29,6 +29,11 @@ function renderPacks(){
  size.innerHTML=sizes.map(v=>'<option value="'+v+'">'+fmtMl(v)+'</option>').join('');
  const unitOptions=type==='HL'?[6,12,24]:[4,6,12];
  units.innerHTML=unitOptions.map(v=>'<option value="'+v+'">'+v+' unidades</option>').join('');
+}
+function updateReferenceLabels(){
+ const type=$('cchType').value,ref=$('cchRef'),current=ref.value;
+ ref.innerHTML='<option value="VENDEU">Quantidade vendida (Caixa Física)</option><option value="FALTA">'+(type==='HL'?'Quantidade que falta (Hectolitros)':'Quantidade que falta (Caixa Unitária)')+'</option>';
+ ref.value=current;
 }
 function updateMode(){
  const ref=$('cchRef').value,type=$('cchType').value,label=$('cchQtyLabel'),input=$('cchQty');
@@ -66,7 +71,7 @@ function calc(){
  $('cchStatus').textContent='';try{api('calculator_history_log',{evento:'CALCULOU',tipo_calculo:type,embalagem_ml:ml,unidades_caixa:units,quantidade:qty,referencia:ref,resultado:trunc2(total)}).catch(()=>{})}catch{}
 }
 async function open(){
- const p=ensure();p.classList.add('show');renderPacks();updateMode();try{api('calculator_history_log',{evento:'ABRIU'}).catch(()=>{})}catch{};
+ const p=ensure();p.classList.add('show');renderPacks();updateReferenceLabels();updateMode();try{api('calculator_history_log',{evento:'ABRIU'}).catch(()=>{})}catch{};
  $('cchStatus').textContent='Escolha o tipo, o tamanho da embalagem, a quantidade que vem na caixa e informe a venda em caixas/pacotes ou a falta em CXU/HEC.'
 }
 window.openCalculatorCuHl=open;
