@@ -517,7 +517,7 @@ function render(){
  '<button class="cmAct blue" data-act="contatos"><span class="ic">📞</span>Contato dos Clientes</button>'+
  '<button class="cmAct purple" data-act="coberturas-dia"><span class="ic">📈</span>Coberturas por Dia</button>'+
  '<button id="csrQuickBtn" class="cmAct green" data-act="relatorios-vendas"><span class="ic">📋</span>Relatórios de Vendas</button>'+
- '<button id="calcCuHlBtn" class="cmAct blue" data-act="calculadora-cu-hl"><span class="ic">🧮</span>Caixa Unitária (CXU) / Hectolitros (HEC)</button>'+
+ '<button id="calcCuHlBtn" class="cmAct blue" data-act="calculadora-cu-hl"><span class="ic">🧮</span>Calculadora Caixa Unitária / Hectolitros</button>'+
  '</div></div>'+
  '<div id="quickIncentiveSlot"></div>'+ '<div><div class="cmSectionTitle"><h3>Coberturas dos Incentivos</h3><small>↔ arraste para o lado</small></div><div class="cmCarouselShell"><button type="button" class="cmCarouselNav cmCarouselPrev" aria-label="Voltar incentivos">‹</button><div class="cmCarouselViewport"><div class="cmCarousel">'+cards+'</div></div><button type="button" class="cmCarouselNav cmCarouselNext" aria-label="Avançar incentivos">›</button></div></div>'+
  '<div class="cmOppSection"><button type="button" id="cmOppHomeBtn" class="cmOppBtn"><span class="ico">💡</span><span><b>Oportunidades</b><small>Clientes do dia ou toda a carteira que ainda faltam por categoria</small></span></button></div>';
