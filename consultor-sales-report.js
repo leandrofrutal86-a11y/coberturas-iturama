@@ -32,6 +32,7 @@ async function exportImage(share){
  const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='relatorio-vendas.png';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),4000);if(share)$('csrStatus').textContent='Compartilhamento direto não disponível; a imagem foi salva para você compartilhar.'
  }catch(e){$('csrStatus').textContent=e.message}
 }
+window.openConsultorSalesReport=open;
 function install(){const actions=document.querySelector('#consultorModernHome .cmActions');if(!actions)return false;if($('csrQuickBtn'))return true;const b=document.createElement('button');b.id='csrQuickBtn';b.type='button';b.className='cmAct green';b.innerHTML='<span class="ic">📋</span>Relatórios de Vendas';b.onclick=open;actions.appendChild(b);return true}
 let n=0;const t=setInterval(()=>{if(install()||++n>100)clearInterval(t)},250);window.addEventListener('iturama:dashboard-ready',()=>setTimeout(install,100));window.addEventListener('pageshow',()=>setTimeout(install,300));
 })();
