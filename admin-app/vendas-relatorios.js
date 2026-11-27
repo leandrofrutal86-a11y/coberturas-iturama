@@ -2,7 +2,7 @@
 const d=document,$=id=>d.getElementById(id),E=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),N=v=>String(v??'').trim().toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''),D=[['TODOS','Todos'],['SEG','Segunda'],['TER','Terça'],['QUA','Quarta'],['QUI','Quinta'],['SEX','Sexta']];
 let rows=[],last=[],loaded=false;
 const css=d.createElement('style');css.textContent='#admSalesReport{position:fixed;inset:0;z-index:16000;background:#f2f5f8;overflow:auto;padding:14px}#admSalesReport[hidden]{display:none!important}.asrWrap{max-width:1150px;margin:auto}.asrHead{background:linear-gradient(120deg,#111,#b50010);color:white;border-radius:14px;padding:15px;display:flex;justify-content:space-between;gap:12px;align-items:center}.asrHead h2{margin:0}.asrBox{background:white;border-radius:13px;padding:14px;margin-top:12px;box-shadow:0 2px 10px #0001}.asrGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}.asrGrid label{font-size:12px;font-weight:800}.asrGrid select{display:block;width:100%;margin-top:5px}.asrActions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.asrActions button{background:#df1017;color:white}.asrActions button:disabled{opacity:.5}.asrTable{overflow:auto}.asrTable table{min-width:790px;width:100%;border-collapse:collapse}.asrTable th,.asrTable td{padding:9px;border-bottom:1px solid #e2e8f0;text-align:left;font-size:12px}.asrTable th{background:#172534;color:white}.asrTable tr:nth-child(even){background:#f5f8fc}.asrSummary{font-weight:800;margin:12px 0;color:#263746}@media(max-width:700px){.asrGrid{grid-template-columns:1fr 1fr}.asrHead h2{font-size:17px}}@media print{body>*:not(#admSalesReport){display:none!important}#admSalesReport{position:static;padding:0;background:white}.asrHead button,.asrGrid,.asrActions,#asrStatus{display:none!important}.asrTable{overflow:visible}.asrTable table{min-width:0}.asrTable th,.asrTable td{font-size:9px;padding:5px}}';d.head.appendChild(css);
-const panel=d.createElement('section');panel.id='admSalesReport';panel.hidden=true;panel.innerHTML='<div class="asrWrap"><div class="asrHead"><h2>📋 Relatórios de Vendas</h2><button id="asrClose">✕ Fechar</button></div><div class="asrBox"><div class="asrGrid"><label>Categoria<select id="asrCat"></select></label><label>Rota / Consultor<select id="asrRoute"></select></label><label>Dia de visita<select id="asrDay"></select></label><label>Situação<select id="asrType"><option value="TODOS">Todos os clientes</option><option value="REALIZADOS">Clientes realizados</option><option value="FALTAS">Clientes que não compraram / faltas</option></select></label></div><div class="asrActions"><button id="asrGenerate">GERAR RELATÓRIO</button><button id="asrCsv" disabled>⬇ BAIXAR CSV</button><button id="asrPrint" disabled>🖨 IMPRIMIR / SALVAR PDF</button></div><p id="asrStatus" aria-live="polite">Selecione os filtros e gere o relatório.</p></div><div class="asrBox"><div id="asrSummary" class="asrSummary"></div><div class="asrTable" id="asrResults"></div></div></div>';d.body.appendChild(panel);
+const panel=d.createElement('section');panel.id='admSalesReport';panel.hidden=true;panel.innerHTML='<div class="asrWrap"><div class="asrHead"><h2>📋 Relatórios de Vendas</h2><button id="asrClose">✕ Fechar</button></div><div class="asrBox"><div class="asrGrid"><label>Categoria<select id="asrCat"></select></label><label>Rota / Consultor<select id="asrRoute"></select></label><label>Dia de visita<select id="asrDay"></select></label><label>Situação<select id="asrType"><option value="TODOS">Todos os clientes</option><option value="REALIZADOS">Clientes realizados</option><option value="FALTAS">Clientes que não compraram / faltas</option></select></label><label id="asrTrioRestaWrap" hidden>TRIO PÃO DE QUEIJO — Pendência<select id="asrTrioResta"><option value="TODOS">Todos</option><option value="1">Resta 1 produto</option><option value="2">Resta 2 produtos</option><option value="3">Resta 3 produtos</option></select></label></div><div class="asrActions"><button id="asrGenerate">GERAR RELATÓRIO</button><button id="asrCsv" disabled>⬇ BAIXAR CSV</button><button id="asrPrint" disabled>🖨 IMPRIMIR / SALVAR PDF</button></div><p id="asrStatus" aria-live="polite">Selecione os filtros e gere o relatório.</p></div><div class="asrBox"><div id="asrSummary" class="asrSummary"></div><div class="asrTable" id="asrResults"></div></div></div>';d.body.appendChild(panel);
 
 // Consulta individual: usa a mesma apuração por parâmetros da Pesquisa PV do ADM.
 const pvBox=d.createElement('div');pvBox.className='asrBox';pvBox.id='asrPvBox';pvBox.innerHTML='<hr style="border:0;border-top:3px solid #d6dce4;margin:7px 0 20px"><h2 style="margin:0 0 6px;color:#172534">🔎 Pesquisa por PV e categoria</h2><p style="margin:0 0 15px;color:#526173;font-size:13px">Consulta individual conforme os parâmetros de cobertura cadastrados no ADM.</p><div class="asrGrid" style="grid-template-columns:repeat(2,minmax(0,1fr))"><label>PV do cliente<input id="asrPvCode" inputmode="numeric" autocomplete="off" placeholder="Digite o código PV" style="display:block;width:100%;margin-top:5px"></label><label>Categoria<select id="asrPvCat"><option value="">Selecione após pesquisar o PV</option></select></label></div><div class="asrActions"><button id="asrPvSearch">PESQUISAR PV</button></div><p id="asrPvStatus" aria-live="polite"></p><div id="asrPvResult"></div>';panel.querySelector('.asrWrap').appendChild(pvBox);
@@ -49,8 +49,50 @@ let tries=0;const t=setInterval(()=>{if(install()||++tries>80)clearInterval(t)},
 async function schedule(){const files=[0,1,2,3,4].map(i=>'visitas_full_part'+i+'.csv');const parts=await Promise.all(files.map(async f=>{const r=await fetch(new URL(f,location.href),{cache:'no-store'});if(!r.ok)throw Error('Base de visitas indisponível: '+f);return r.text()}));const m=new Map();for(const txt of parts){const lines=txt.replace(/^\uFEFF/,'').trim().split(/\r?\n/),heads=lines.shift().split(';');for(const line of lines){if(!line)continue;const cells=line.split(';'),x={};heads.forEach((h,i)=>x[h]=cells[i]||'');const rt=String(x.Rota||'').trim(),pv=String(x.Cliente||'').trim();if(rt&&pv)m.set(rt+'|'+pv,x)}}return [...m.values()]}
 function visitDays(x){return D.slice(1).filter(([k])=>Number(x[k]||0)>0).map(([k])=>k)}
 function key(rt,pv){return String(rt||'').trim()+'|'+String(pv||'').trim()}
-async function generate(){const cat=$('asrCat').selectedOptions[0],rt=$('asrRoute').value,day=$('asrDay').value,type=$('asrType').value;if(!cat)return;$('asrGenerate').disabled=true;$('asrCsv').disabled=$('asrPrint').disabled=true;$('asrResults').innerHTML='';$('asrStatus').textContent='Conferindo base de visitas e vendas...';try{const scheduleRows=await schedule(),routes=rt==='TODAS'?[...new Set(scheduleRows.map(x=>String(x.Rota||'').trim()))]:[rt];const views=await Promise.all(routes.map(async rota=>({rota,data:await request({action:'consultor_view',token:auth(),rota})})));const sold=new Map();for(const v of views){const res=(v.data.resultados||[]).find(x=>N(x.nome)===N(cat.textContent));if(!res)continue;for(const c of res.clientes||[]){const pv=String(c.cliente||c.pv||'').trim();if(!pv)continue;const complete=c.completo!==false&&!(Number(c.faltam)>0);sold.set(key(v.rota,pv),{complete,missing:(c.grupos||[]).filter(g=>!g.vendido).map(g=>String(g.nome||g.descricao||'Grupo '+g.grupo)).join(', ')})}}rows=scheduleRows.filter(x=>(rt==='TODAS'||String(x.Rota).trim()===rt)&&(day==='TODOS'?visitDays(x).length:visitDays(x).includes(day))).map(x=>{const rota=String(x.Rota).trim(),pv=String(x.Cliente).trim(),s=sold.get(key(rota,pv)),complete=!!s?.complete;return{rota,pv,razao:String(x['Razão Social']||'').trim(),dias:visitDays(x).join(', '),situacao:complete?'REALIZADO':s?'PARCIAL':'NÃO COMPROU',falta:complete?'':s?.missing||cat.textContent.trim()}}).filter(x=>type==='TODOS'||(type==='REALIZADOS'?x.situacao==='REALIZADO':x.situacao!=='REALIZADO')).sort((a,b)=>a.rota.localeCompare(b.rota)||a.razao.localeCompare(b.razao,'pt-BR'));last=[...rows];const done=rows.filter(x=>x.situacao==='REALIZADO').length;$('asrSummary').textContent=rows.length+' cliente(s) • '+done+' realizado(s) • '+(rows.length-done)+' com falta';$('asrResults').innerHTML=rows.length?'<table><thead><tr><th>Rota</th><th>PV</th><th>Razão social</th><th>Dia de visita</th><th>Situação</th><th>O que falta</th></tr></thead><tbody>'+rows.map(x=>'<tr>'+[x.rota,x.pv,x.razao,x.dias,x.situacao,x.falta].map(v=>'<td>'+E(v)+'</td>').join('')+'</tr>').join('')+'</tbody></table>':'Nenhum cliente encontrado para os filtros.';$('asrCsv').disabled=$('asrPrint').disabled=!rows.length;$('asrStatus').textContent='Relatório gerado com a base de visitas e os resultados de cobertura disponíveis.'}catch(e){$('asrStatus').textContent='Não foi possível gerar: '+e.message}finally{$('asrGenerate').disabled=false}}
-$('asrGenerate').onclick=generate;['asrCat','asrRoute','asrDay','asrType'].forEach(id=>$(id).onchange=()=>{$('asrCsv').disabled=$('asrPrint').disabled=true;$('asrStatus').textContent='Filtros alterados. Gere o relatório novamente.'});
+function isTrioSelected(){return N($('asrCat').selectedOptions[0]?.textContent||'')===N('TRIO PÃO DE QUEIJO')}
+function syncTrioFilter(){
+ const show=isTrioSelected(),wrap=$('asrTrioRestaWrap');
+ if(wrap)wrap.hidden=!show;
+ if(!show&&$('asrTrioResta'))$('asrTrioResta').value='TODOS';
+}
+async function generateTrio(cat,rt,day,type){
+ const resta=$('asrTrioResta')?.value||'TODOS';
+ const data=await request({action:'trio_report',token:auth(),rota:rt,dia:day});
+ let out=(data.clientes||[]).map(x=>{
+  const faltam=Number(x.faltam||0),vendidos=Number(x.vendidos||0);
+  const missing=(x.grupos||[]).filter(g=>!g.vendido).map(g=>'Grupo '+g.grupo).join(', ');
+  return{
+   rota:String(x.rota||''),pv:String(x.pv||''),razao:String(x.razao||''),dias:(x.dias||[]).join(', '),
+   situacao:x.completo?'REALIZADO':(faltam===1?'RESTA 1':faltam===2?'RESTA 2':faltam===3?'RESTA 3':'PARCIAL'),
+   falta:x.completo?'':(faltam+' produto(s) • '+(missing||'pendente')),
+   faltam,vendidos
+  }
+ });
+ if(type==='REALIZADOS')out=out.filter(x=>x.faltam===0);
+ else if(type==='FALTAS')out=out.filter(x=>x.faltam>0);
+ if(resta!=='TODOS')out=out.filter(x=>x.faltam===Number(resta));
+ out.sort((a,b)=>a.rota.localeCompare(b.rota)||a.faltam-b.faltam||a.razao.localeCompare(b.razao,'pt-BR'));
+ return out;
+}
+async function generate(){const cat=$('asrCat').selectedOptions[0],rt=$('asrRoute').value,day=$('asrDay').value,type=$('asrType').value;if(!cat)return;$('asrGenerate').disabled=true;$('asrCsv').disabled=$('asrPrint').disabled=true;$('asrResults').innerHTML='';$('asrStatus').textContent='Conferindo base de visitas e vendas...';try{
+ if(isTrioSelected()){
+   rows=await generateTrio(cat,rt,day,type);
+ }else{
+   const scheduleRows=await schedule(),routes=rt==='TODAS'?[...new Set(scheduleRows.map(x=>String(x.Rota||'').trim()))]:[rt];
+   const views=await Promise.all(routes.map(async rota=>({rota,data:await request({action:'consultor_view',token:auth(),rota})})));
+   const sold=new Map();
+   for(const v of views){const res=(v.data.resultados||[]).find(x=>N(x.nome)===N(cat.textContent));if(!res)continue;for(const c of res.clientes||[]){const pv=String(c.cliente||c.pv||'').trim();if(!pv)continue;const complete=c.completo!==false&&!(Number(c.faltam)>0);sold.set(key(v.rota,pv),{complete,missing:(c.grupos||[]).filter(g=>!g.vendido).map(g=>String(g.nome||g.descricao||'Grupo '+g.grupo)).join(', ')})}}
+   rows=scheduleRows.filter(x=>(rt==='TODAS'||String(x.Rota).trim()===rt)&&(day==='TODOS'?visitDays(x).length:visitDays(x).includes(day))).map(x=>{const rota=String(x.Rota).trim(),pv=String(x.Cliente).trim(),ss=sold.get(key(rota,pv)),complete=!!ss?.complete;return{rota,pv,razao:String(x['Razão Social']||'').trim(),dias:visitDays(x).join(', '),situacao:complete?'REALIZADO':ss?'PARCIAL':'NÃO COMPROU',falta:complete?'':ss?.missing||cat.textContent.trim()}}).filter(x=>type==='TODOS'||(type==='REALIZADOS'?x.situacao==='REALIZADO':x.situacao!=='REALIZADO')).sort((a,b)=>a.rota.localeCompare(b.rota)||a.razao.localeCompare(b.razao,'pt-BR'));
+ }
+ last=[...rows];
+ const done=rows.filter(x=>x.situacao==='REALIZADO').length;
+ const restaTxt=isTrioSelected()&&$('asrTrioResta').value!=='TODOS'?' • '+$('asrTrioResta').selectedOptions[0].textContent:'';
+ $('asrSummary').textContent=rows.length+' cliente(s) • '+done+' realizado(s) • '+(rows.length-done)+' com falta'+restaTxt;
+ $('asrResults').innerHTML=rows.length?'<table><thead><tr><th>Rota</th><th>PV</th><th>Razão social</th><th>Dia de visita</th><th>Situação</th><th>O que falta</th></tr></thead><tbody>'+rows.map(x=>'<tr>'+[x.rota,x.pv,x.razao,x.dias,x.situacao,x.falta].map(v=>'<td>'+E(v)+'</td>').join('')+'</tr>').join('')+'</tbody></table>':'Nenhum cliente encontrado para os filtros.';
+ $('asrCsv').disabled=$('asrPrint').disabled=!rows.length;
+ $('asrStatus').textContent=isTrioSelected()?'Relatório do TRIO PÃO DE QUEIJO gerado pela apuração dos 3 grupos de produtos.':'Relatório gerado com a base de visitas e os resultados de cobertura disponíveis.';
+}catch(e){$('asrStatus').textContent='Não foi possível gerar: '+e.message}finally{$('asrGenerate').disabled=false}}
+$('asrGenerate').onclick=generate;syncTrioFilter();['asrCat','asrRoute','asrDay','asrType','asrTrioResta'].forEach(id=>$(id).onchange=()=>{if(id==='asrCat')syncTrioFilter();$('asrCsv').disabled=$('asrPrint').disabled=true;$('asrStatus').textContent='Filtros alterados. Gere o relatório novamente.'});
 $('asrCsv').onclick=()=>{const lines=[['Rota','PV','Razão social','Dia de visita','Situação','O que falta'],...last.map(x=>[x.rota,x.pv,x.razao,x.dias,x.situacao,x.falta])];const csv='\uFEFF'+lines.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(';')).join('\r\n');const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));const a=d.createElement('a');a.href=url;a.download='relatorio-vendas-'+$('asrDay').value.toLowerCase()+'.csv';d.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)};
 $('asrPrint').onclick=()=>{
  if(!last.length)return;
@@ -58,6 +100,7 @@ $('asrPrint').onclick=()=>{
  const route=$('asrRoute').selectedOptions[0]?.textContent||'';
  const day=$('asrDay').selectedOptions[0]?.textContent||'';
  const type=$('asrType').selectedOptions[0]?.textContent||'';
+ const trioResta=isTrioSelected()?($('asrTrioResta').selectedOptions[0]?.textContent||'Todos'):'';
  const summary=$('asrSummary').textContent||'';
  const table=$('asrResults').innerHTML||'';
  const w=window.open('','_blank');
@@ -68,7 +111,7 @@ $('asrPrint').onclick=()=>{
  '</style></head><body>'+
  '<button class="printBtn" onclick="window.print()">IMPRIMIR / SALVAR PDF</button>'+
  '<h1>📋 Relatório de Vendas</h1><p class="meta">Relatório gerado no ADM Equipe Iturama</p>'+
- '<div class="filters"><div class="f"><small>Categoria</small><b>'+E(cat)+'</b></div><div class="f"><small>Rota / Consultor</small><b>'+E(route)+'</b></div><div class="f"><small>Dia de visita</small><b>'+E(day)+'</b></div><div class="f"><small>Situação</small><b>'+E(type)+'</b></div></div>'+
+ '<div class="filters"><div class="f"><small>Categoria</small><b>'+E(cat)+'</b></div><div class="f"><small>Rota / Consultor</small><b>'+E(route)+'</b></div><div class="f"><small>Dia de visita</small><b>'+E(day)+'</b></div><div class="f"><small>Situação</small><b>'+E(type)+'</b></div>'+(trioResta?'<div class="f"><small>Pendência TRIO</small><b>'+E(trioResta)+'</b></div>':'')+'</div>'+
  '<div class="summary">'+E(summary)+'</div><div class="asrTable">'+table+'</div>'+
  '</body></html>');
  w.document.close();
